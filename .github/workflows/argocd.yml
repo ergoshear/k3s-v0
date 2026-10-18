@@ -1,0 +1,31 @@
+name: Apply Argo CD
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: k3s-argocd
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    name: Apply Argo CD manifests
+    runs-on: [self-hosted, k3s-control-plane-01]
+    timeout-minutes: 30
+    env:
+      KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Apply Argo CD
+        run: |
+          sudo -n kubectl --kubeconfig="$KUBECONFIG" \
+            apply --server-side --force-conflicts -k argocd
