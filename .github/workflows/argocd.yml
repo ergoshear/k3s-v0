@@ -25,6 +25,17 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Apply Argo CD CRDs
+        run: |
+          sudo -n kubectl --kubeconfig="$KUBECONFIG" \
+            apply --server-side --force-conflicts \
+            -k 'https://github.com/argoproj/argo-cd/manifests/crds?ref=stable'
+
+      - name: Create Argo CD namespace
+        run: |
+          sudo -n kubectl --kubeconfig="$KUBECONFIG" \
+            apply --server-side --force-conflicts -f argocd/namespace.yaml
+
       - name: Apply Argo CD
         run: |
           sudo -n kubectl --kubeconfig="$KUBECONFIG" \
