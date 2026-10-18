@@ -11,7 +11,11 @@ waited on before its ClusterIssuer and Certificate resources are applied.
 
 ExternalDNS publishes `argocd.ergoshear.dev` as a CNAME to
 `k3s.ergoshear.dev`; cert-manager obtains a publicly trusted Let's Encrypt
-certificate using Route 53 DNS-01. This requires the `ergoshear.dev` Route 53
+certificate using Route 53 DNS-01. The ingress uses the
+`external-dns.kubernetes.io/target` annotation supported by ExternalDNS v0.23.
+ExternalDNS uses `sync` with its TXT ownership registry to remove obsolete
+owned records, including when a record changes from A to CNAME; it does not
+manage Terraform-owned records. This requires the `ergoshear.dev` Route 53
 zone, AWS Route 53 permissions on the k3s instance role, IMDSv2 access from
 pods, and inbound TCP ports 80 and 443 on the k3s instance. Apply the AWS
 Terraform changes before expecting DNS updates or certificate issuance.

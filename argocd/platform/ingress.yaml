@@ -4,7 +4,7 @@ metadata:
   name: argocd-server
   namespace: argocd
   annotations:
-    external-dns.alpha.kubernetes.io/target: k3s.ergoshear.dev
+    external-dns.kubernetes.io/target: k3s.ergoshear.dev
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
 spec:
   ingressClassName: traefik
