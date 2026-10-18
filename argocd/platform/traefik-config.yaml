@@ -1,0 +1,17 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
+    service:
+      annotations:
+        svccontroller.k3s.cattle.io/tolerations: |-
+          - key: node-role.kubernetes.io/control-plane
+            operator: Exists
+            effect: NoSchedule

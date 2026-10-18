@@ -34,7 +34,21 @@ jobs:
       - name: Create Argo CD namespace
         run: |
           sudo -n kubectl --kubeconfig="$KUBECONFIG" \
-            apply --server-side --force-conflicts -f argocd/namespace.yaml
+            apply --server-side --force-conflicts -f argocd/argo-cd/namespace.yaml
+
+      - name: Install cert-manager
+        run: |
+          sudo -n kubectl --kubeconfig="$KUBECONFIG" \
+            apply --server-side --force-conflicts -k argocd/cert-manager
+
+      - name: Wait for cert-manager
+        run: |
+          sudo -n kubectl --kubeconfig="$KUBECONFIG" \
+            -n cert-manager rollout status deployment/cert-manager --timeout=5m
+          sudo -n kubectl --kubeconfig="$KUBECONFIG" \
+            -n cert-manager rollout status deployment/cert-manager-cainjector --timeout=5m
+          sudo -n kubectl --kubeconfig="$KUBECONFIG" \
+            -n cert-manager rollout status deployment/cert-manager-webhook --timeout=5m
 
       - name: Apply Argo CD
         run: |
