@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   configuration-tests:
-    name: Validate Argo CD SSO configuration
+    name: Validate Argo CD configuration
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

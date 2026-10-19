@@ -3,5 +3,6 @@ kind: Kustomization
 
 resources:
   - argo-cd
+  - applications
   - cert-manager
   - platform

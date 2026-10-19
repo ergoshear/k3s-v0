@@ -1,0 +1,21 @@
+targetNamespaces: ""
+
+operator:
+  scanJobsConcurrentLimit: 2
+
+trivyOperator:
+  scanJobTolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
+
+tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule
+
+nodeCollector:
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule

@@ -9,7 +9,17 @@ separately, creates the local namespace, installs Argo CD and cert-manager, and
 waits for cert-manager before applying [the Argo CD Application](argocd/application.yaml).
 That Application syncs `argocd/` from this repository with pruning and self-healing
 enabled, managing the platform resources as well as the checked-in install
-manifests.
+manifests. Child applications are declared in `argocd/applications/`.
+
+## Trivy Operator
+
+The `trivy-operator` Argo CD application installs Aqua's official Helm chart,
+pinned to chart version `0.37.0`. Its values are kept in
+[`apps/trivy-operator/values.yaml`](apps/trivy-operator/values.yaml). It scans
+all namespaces and creates Kubernetes security report resources; it does not
+provide a web dashboard. Scan jobs are limited to two concurrent jobs, and the
+operator, scanner jobs, and node collector tolerate the control-plane taint so
+that control-plane workloads and the node can be scanned as well.
 
 ExternalDNS publishes `argocd.ergoshear.dev` as a CNAME to
 `k3s.ergoshear.dev`; cert-manager obtains a publicly trusted Let's Encrypt
