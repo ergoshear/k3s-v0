@@ -50,9 +50,12 @@ jobs:
           sudo -n kubectl --kubeconfig="$KUBECONFIG" \
             -n cert-manager rollout status deployment/cert-manager-webhook --timeout=5m
 
-      - name: Apply Argo CD
+      - name: Install Argo CD
         run: |
           sudo -n kubectl --kubeconfig="$KUBECONFIG" \
             --namespace=argocd apply --server-side --force-conflicts -k argocd/argo-cd
+
+      - name: Apply Argo CD Application
+        run: |
           sudo -n kubectl --kubeconfig="$KUBECONFIG" \
-            apply --server-side --force-conflicts -k argocd/platform
+            apply --server-side --force-conflicts -f argocd/application.yaml
