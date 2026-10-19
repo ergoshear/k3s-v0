@@ -82,7 +82,7 @@ class HermesWorkspaceTests(unittest.TestCase):
             {
                 "default": "Qwen3-Coder-30B-A3B",
                 "provider": "custom",
-                "base_url": "http://mlops-node-7.tailb11f97.ts.net:8080/v1",
+                "base_url": "http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1",
             },
         )
         init_container = self.deployment["spec"]["template"]["spec"][
@@ -90,6 +90,14 @@ class HermesWorkspaceTests(unittest.TestCase):
         ][0]
         self.assertEqual(init_container["name"], "initialize-agent-config")
         self.assertIn("if [ ! -e /opt/data/config.yaml ]", init_container["args"][0])
+        self.assertIn(
+            "http://mlops-node-7.tailb11f97.ts.net:8080/v1",
+            init_container["args"][0],
+        )
+        self.assertIn(
+            "http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1",
+            init_container["args"][0],
+        )
         self.assertIn(
             {"name": "hermes-agent-config", "mountPath": "/config", "readOnly": True},
             init_container["volumeMounts"],

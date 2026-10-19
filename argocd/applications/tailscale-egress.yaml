@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tailscale-egress
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:ergoshear/k3s.git
+    targetRevision: HEAD
+    path: apps/tailscale-egress
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: hermes-workspace
+  ignoreDifferences:
+    - group: ""
+      kind: Service
+      name: mlops-node-7
+      namespace: hermes-workspace
+      jsonPointers:
+        - /spec/externalName
+  syncPolicy:
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - RespectIgnoreDifferences=true

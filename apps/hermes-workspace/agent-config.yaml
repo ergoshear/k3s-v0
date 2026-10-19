@@ -8,4 +8,4 @@ data:
     model:
       default: Qwen3-Coder-30B-A3B
       provider: custom
-      base_url: http://mlops-node-7.tailb11f97.ts.net:8080/v1
+      base_url: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1

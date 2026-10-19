@@ -34,6 +34,9 @@ spec:
               if [ ! -e /opt/data/config.yaml ]; then
                 cp /config/config.yaml /opt/data/config.yaml
                 chown 10010:10010 /opt/data/config.yaml
+              elif grep -Fq 'http://mlops-node-7.tailb11f97.ts.net:8080/v1' /opt/data/config.yaml; then
+                sed -i 's#http://mlops-node-7.tailb11f97.ts.net:8080/v1#http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1#g' /opt/data/config.yaml
+                chown 10010:10010 /opt/data/config.yaml
               fi
           securityContext:
             runAsUser: 0

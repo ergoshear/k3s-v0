@@ -28,8 +28,8 @@ Hermes Agent gateway in the same pod. The UI is available at
 `https://hermes.ergoshear.dev`; only the UI port is exposed through the
 Traefik ingress. The dashboard binds to loopback and is reachable by the
 workspace UI proxy within the pod; the agent API and dashboard are not exposed
-through ingress. The
-UI and agent share a persistent 10 GiB claim for agent configuration, sessions,
+through ingress. The UI and agent share a persistent 10 GiB claim for agent
+configuration, sessions,
 and memory; workspace files use a separate 10 GiB claim. Both use the
 cluster's `local-path` storage class.
 
@@ -48,13 +48,41 @@ requires restarting the Deployment.
 
 The initial Hermes config is copied into the agent data claim only when no
 config exists. It selects `Qwen3-Coder-30B-A3B` using the custom provider at
-`http://mlops-node-7.tailb11f97.ts.net:8080/v1`; the model-list endpoint is
-`http://mlops-node-7.tailb11f97.ts.net:8080/v1/models`. If the endpoint
+`http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1`; the
+model-list endpoint is
+`http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1/models`. This
+Service routes through the Tailscale Kubernetes Operator egress proxy to
+`mlops-node-7.tailb11f97.ts.net:8080`. Existing configs using the previous
+direct Tailscale URL are migrated during pod initialization. If the endpoint
 requires authentication, add an `OPENAI_API_KEY` entry to the Secret. Other
 optional provider keys are
 `ANTHROPIC_API_KEY`, `NOUS_API_KEY`, `OPENROUTER_API_KEY`, `GOOGLE_API_KEY`,
 `GOOGLE_AI_STUDIO_API_KEY`, `GROQ_API_KEY`, `MISTRAL_API_KEY`, and
 `MINIMAX_API_KEY`.
+
+### Tailscale egress
+
+The `tailscale-operator` Argo CD application installs the pinned Tailscale
+Kubernetes Operator chart, and `tailscale-egress` creates a two-replica egress
+ProxyGroup and the Hermes model endpoint Service. Before syncing these
+applications:
+
+1. In Tailscale access controls, configure `tag:k8s-operator` as an owner of
+   `tag:k8s`.
+2. Create an OAuth client with write access to `General/Services`,
+   `Devices/Core`, and `Keys/Auth Keys`, scoped to `tag:k8s-operator`.
+3. Allow `tag:k8s` to reach `mlops-node-7` on TCP port 8080 in the tailnet
+   access policy.
+4. Run `python3 scripts/create_tailscale_operator_secret.py` to securely
+   prompt for the OAuth client ID and secret and store them in the
+   `tailscale/operator-oauth` Kubernetes Secret. The script creates the
+   namespace if needed and never prints the credentials. Use `--rotate` to
+   replace credentials already stored in the Secret.
+5. Sync the Argo CD applications. The operator chart creates the CRDs used by
+   the egress application.
+
+The endpoint uses an in-cluster Service name, so cluster DNS does not need
+MagicDNS forwarding or a `DNSConfig` resource.
 
 The workspace image is pinned to upstream commit `c631425` and the agent to
 `v0.22.2`. The Deployment uses `Recreate` to avoid attaching local-path claims
