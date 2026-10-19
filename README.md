@@ -26,7 +26,9 @@ that control-plane workloads and the node can be scanned as well.
 The `hermes-workspace` Argo CD application deploys Hermes Workspace with its
 Hermes Agent gateway in the same pod. The UI is available at
 `https://hermes.ergoshear.dev`; only the UI port is exposed through the
-Traefik ingress. The agent API and dashboard remain internal to the pod. The
+Traefik ingress. The dashboard binds to loopback and is reachable by the
+workspace UI proxy within the pod; the agent API and dashboard are not exposed
+through ingress. The
 UI and agent share a persistent 10 GiB claim for agent configuration, sessions,
 and memory; workspace files use a separate 10 GiB claim. Both use the
 cluster's `local-path` storage class.

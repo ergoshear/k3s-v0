@@ -124,6 +124,7 @@ class HermesWorkspaceTests(unittest.TestCase):
             {"name": SECRET_NAME, "key": "API_SERVER_KEY"},
         )
         self.assertEqual(agent_env["API_SERVER_ENABLED"]["value"], "true")
+        self.assertEqual(agent_env["HERMES_DASHBOARD_HOST"]["value"], "127.0.0.1")
         self.assertEqual(workspace_env["COOKIE_SECURE"]["value"], "1")
         self.assertNotIn(("Secret", SECRET_NAME), self.resources)
 
