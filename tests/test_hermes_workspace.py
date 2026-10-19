@@ -43,6 +43,7 @@ class HermesWorkspaceTests(unittest.TestCase):
         self.assertTrue(spec["syncPolicy"]["automated"]["prune"])
         self.assertTrue(spec["syncPolicy"]["automated"]["selfHeal"])
         self.assertIn("CreateNamespace=true", spec["syncPolicy"]["syncOptions"])
+        self.assertNotIn("ServerSideApply=true", spec["syncPolicy"]["syncOptions"])
 
     def test_deployment_pins_both_images_and_shares_persistent_state(self):
         self.assertEqual(
