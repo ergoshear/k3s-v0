@@ -114,8 +114,14 @@ class HermesWorkspaceTests(unittest.TestCase):
             "http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1",
             init_container["args"][0],
         )
-        self.assertIn("hermes config set model.provider custom:mlops-node-7", init_container["args"][0])
-        self.assertIn("providers.mlops-node-9.api", init_container["args"][0])
+        self.assertIn(
+            'set_config_value("model.provider", "custom:mlops-node-7")',
+            init_container["args"][0],
+        )
+        self.assertIn(
+            'set_config_value("providers.mlops-node-9.api"',
+            init_container["args"][0],
+        )
         self.assertIn(
             {"name": "hermes-agent-config", "mountPath": "/config", "readOnly": True},
             init_container["volumeMounts"],
