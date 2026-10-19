@@ -46,9 +46,10 @@ requires restarting the Deployment.
 
 The initial Hermes config is copied into the agent data claim only when no
 config exists. It selects `Qwen3-Coder-30B-A3B` using the custom provider at
-`http://mlops-node-9.tailb11f97.ts.net:8080/v1`; the model-list endpoint is
-`http://mlops-node-9.tailb11f97.ts.net:8080/v1/models`. If the endpoint requires
-authentication, add an `OPENAI_API_KEY` entry to the Secret. Other optional provider keys are
+`http://mlops-node-7.tailb11f97.ts.net:8080/v1`; the model-list endpoint is
+`http://mlops-node-7.tailb11f97.ts.net:8080/v1/models`. If the endpoint
+requires authentication, add an `OPENAI_API_KEY` entry to the Secret. Other
+optional provider keys are
 `ANTHROPIC_API_KEY`, `NOUS_API_KEY`, `OPENROUTER_API_KEY`, `GOOGLE_API_KEY`,
 `GOOGLE_AI_STUDIO_API_KEY`, `GROQ_API_KEY`, `MISTRAL_API_KEY`, and
 `MINIMAX_API_KEY`.
