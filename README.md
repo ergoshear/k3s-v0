@@ -30,3 +30,56 @@ The cert-manager release is pinned in `argocd/cert-manager/kustomization.yaml`.
 The runner must have `kubectl` installed and passwordless `sudo` permission to
 run it. The Argo CD, cert-manager, ExternalDNS, and Traefik workloads tolerate
 the control-plane `NoSchedule` taint.
+
+## AWS IAM Identity Center SSO
+
+Argo CD uses Dex's SAML connector with the customer-managed Identity Center
+application in `us-east-2`. Select **Log in via AWS IAM Identity Center** at
+`https://argocd.ergoshear.dev` to start login. Start from Argo CD rather than
+an unsolicited Identity Center application launch: Dex requires a matching
+authentication request.
+
+The AWS application's ACS URL and audience must both be
+`https://argocd.ergoshear.dev/api/dex/callback`. Attribute mappings are:
+
+| Attribute | Identity Center value | Format |
+|-----------|-----------------------|--------|
+| `Subject` | `${user:email}` | `emailAddress` |
+| `email` | `${user:email}` | `unspecified` |
+
+The user must be assigned to the application in Identity Center.
+`christopher@agilityqa.com` receives Argo CD's built-in administrator role.
+Other SSO users receive no permissions unless explicitly added to
+[the RBAC patch](argocd/argo-cd/rbac-patch.yaml). Group claims are not assumed.
+Anonymous access is disabled; local administrator login remains enabled
+as a break-glass option until an actual SSO login and permissions are verified.
+
+The public signing certificate was obtained from the application's
+[AWS metadata endpoint](https://portal.sso.us-east-2.amazonaws.com/saml/metadata/MjA0NDU5MDM4Njc2X2lucy02Njg0ZDFkYTU5MDBhYmNj).
+It expires on **2031-10-19 at 15:19:43 UTC**. Kustomize generates a hashed
+ConfigMap and mounts the certificate read-only into Dex; changing
+[the certificate](argocd/argo-cd/identity-center-signing.pem) rolls the Dex pod.
+Signature checking, IdP issuer, callback URL, audience, and email NameID format
+are explicitly configured. No AWS API credentials or private signing keys
+are needed in the cluster or repository.
+
+Argo CD logout does not terminate the IAM Identity Center browser session.
+Dex does not provide SAML single logout, so the supplied Identity Center
+logout URL is intentionally not wired into an unsupported connector setting.
+
+**Maintenance warning:** [Dex documents its SAML connector as unmaintained
+and potentially vulnerable](https://dexidp.io/docs/connectors/saml/).
+This direct integration follows Argo CD's Identity Center guide but retains
+that upstream limitation. A maintained SAML-to-OIDC broker, or a direct
+OIDC identity provider, is preferable for a higher-assurance deployment.
+
+Run the rendered-manifest and certificate tests with Python 3, PyYAML,
+`kubectl`, and OpenSSL:
+
+```sh
+python3 -m unittest discover -s tests -v
+```
+
+Pull requests run these tests on a GitHub-hosted runner. Only pushes to
+`main` deploy, and deployment waits for the Argo CD server and Dex rollouts.
+An actual user login still needs to be tested interactively.
