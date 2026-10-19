@@ -93,7 +93,11 @@ class LiteLLMTests(unittest.TestCase):
                 f"http://{node}.hermes-workspace.svc.cluster.local:8080/v1",
             )
             self.assertEqual(entry["litellm_params"]["api_key"], "not-required")
-            self.assertTrue(entry["litellm_settings"]["check_provider_endpoint"])
+        self.assertTrue(
+            self.values["proxy_config"]["litellm_settings"][
+                "check_provider_endpoint"
+            ]
+        )
         self.assertEqual(
             self.values["proxy_config"]["general_settings"]["master_key"],
             "os.environ/PROXY_MASTER_KEY",
