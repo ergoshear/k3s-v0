@@ -7,5 +7,12 @@ data:
   config.yaml: |
     model:
       default: Qwen3-Coder-30B-A3B
-      provider: custom
+      provider: custom:mlops-node-7
       base_url: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
+    providers:
+      mlops-node-7:
+        api: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
+        discover_models: true
+      mlops-node-9:
+        api: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
+        discover_models: true

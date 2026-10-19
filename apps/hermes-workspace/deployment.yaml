@@ -24,6 +24,11 @@ spec:
         - name: initialize-agent-config
           image: nousresearch/hermes-agent:v0.22.2
           imagePullPolicy: IfNotPresent
+          env:
+            - name: HERMES_HOME
+              value: /opt/data
+            - name: HERMES_UID
+              value: "10010"
           command:
             - /bin/sh
             - -ec
@@ -36,6 +41,14 @@ spec:
                 chown 10010:10010 /opt/data/config.yaml
               elif grep -Fq 'http://mlops-node-7.tailb11f97.ts.net:8080/v1' /opt/data/config.yaml; then
                 sed -i 's#http://mlops-node-7.tailb11f97.ts.net:8080/v1#http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1#g' /opt/data/config.yaml
+                chown 10010:10010 /opt/data/config.yaml
+              fi
+              if grep -Eq '^[[:space:]]*provider:[[:space:]]*custom[[:space:]]*$' /opt/data/config.yaml && grep -Fq 'http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1' /opt/data/config.yaml; then
+                hermes config set --force providers.mlops-node-7.api http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
+                hermes config set --force providers.mlops-node-7.discover_models true
+                hermes config set --force providers.mlops-node-9.api http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
+                hermes config set --force providers.mlops-node-9.discover_models true
+                hermes config set model.provider custom:mlops-node-7
                 chown 10010:10010 /opt/data/config.yaml
               fi
           securityContext:

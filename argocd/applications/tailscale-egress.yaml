@@ -19,6 +19,12 @@ spec:
       namespace: hermes-workspace
       jsonPointers:
         - /spec/externalName
+    - group: ""
+      kind: Service
+      name: mlops-node-9
+      namespace: hermes-workspace
+      jsonPointers:
+        - /spec/externalName
   syncPolicy:
     automated:
       enabled: true

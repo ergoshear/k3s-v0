@@ -58,6 +58,13 @@ class TailscaleOperatorTests(unittest.TestCase):
             },
         )
         self.assertEqual(service["spec"]["ports"][0]["port"], 8080)
+        node9 = self.egress[("Service", "mlops-node-9")]
+        self.assertEqual(
+            node9["metadata"]["annotations"]["tailscale.com/tailnet-fqdn"],
+            "mlops-node-9.tailb11f97.ts.net",
+        )
+        self.assertEqual(node9["spec"]["ports"][0]["port"], 8080)
+        self.assertEqual(len(app["ignoreDifferences"]), 2)
 
 
 if __name__ == "__main__":

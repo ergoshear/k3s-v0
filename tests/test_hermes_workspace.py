@@ -81,8 +81,21 @@ class HermesWorkspaceTests(unittest.TestCase):
             config["model"],
             {
                 "default": "Qwen3-Coder-30B-A3B",
-                "provider": "custom",
+                "provider": "custom:mlops-node-7",
                 "base_url": "http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1",
+            },
+        )
+        self.assertEqual(
+            config["providers"],
+            {
+                "mlops-node-7": {
+                    "api": "http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1",
+                    "discover_models": True,
+                },
+                "mlops-node-9": {
+                    "api": "http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1",
+                    "discover_models": True,
+                },
             },
         )
         init_container = self.deployment["spec"]["template"]["spec"][
@@ -90,6 +103,9 @@ class HermesWorkspaceTests(unittest.TestCase):
         ][0]
         self.assertEqual(init_container["name"], "initialize-agent-config")
         self.assertIn("if [ ! -e /opt/data/config.yaml ]", init_container["args"][0])
+        init_env = {item["name"]: item["value"] for item in init_container["env"]}
+        self.assertEqual(init_env["HERMES_HOME"], "/opt/data")
+        self.assertEqual(init_env["HERMES_UID"], "10010")
         self.assertIn(
             "http://mlops-node-7.tailb11f97.ts.net:8080/v1",
             init_container["args"][0],
@@ -98,6 +114,8 @@ class HermesWorkspaceTests(unittest.TestCase):
             "http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1",
             init_container["args"][0],
         )
+        self.assertIn("hermes config set model.provider custom:mlops-node-7", init_container["args"][0])
+        self.assertIn("providers.mlops-node-9.api", init_container["args"][0])
         self.assertIn(
             {"name": "hermes-agent-config", "mountPath": "/config", "readOnly": True},
             init_container["volumeMounts"],

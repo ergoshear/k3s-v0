@@ -47,15 +47,21 @@ gateway API token. It refuses to overwrite an existing Secret unless run with
 requires restarting the Deployment.
 
 The initial Hermes config is copied into the agent data claim only when no
-config exists. It selects `Qwen3-Coder-30B-A3B` using the custom provider at
-`http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1`; the
-model-list endpoint is
-`http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1/models`. This
-Service routes through the Tailscale Kubernetes Operator egress proxy to
-`mlops-node-7.tailb11f97.ts.net:8080`. Existing configs using the previous
-direct Tailscale URL are migrated during pod initialization. If the endpoint
-requires authentication, add an `OPENAI_API_KEY` entry to the Secret. Other
-optional provider keys are
+config exists. It selects `Qwen3-Coder-30B-A3B` from the named
+`mlops-node-7` provider by default. Hermes discovers available model IDs from
+both endpoints' `/v1/models` catalogs:
+
+| Provider | In-cluster API | Tailscale target |
+|----------|----------------|------------------|
+| `mlops-node-7` | `http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1` | `mlops-node-7.tailb11f97.ts.net:8080` |
+| `mlops-node-9` | `http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1` | `mlops-node-9.tailb11f97.ts.net:8080` |
+
+Use `/model custom:mlops-node-7:<model-id>` or
+`/model custom:mlops-node-9:<model-id>` in a chat to select a discovered model.
+Existing configs using the direct Tailscale URL are migrated and registered as
+named providers during pod initialization. If either endpoint requires
+authentication, add an `OPENAI_API_KEY` entry to the Secret. Other optional
+provider keys are
 `ANTHROPIC_API_KEY`, `NOUS_API_KEY`, `OPENROUTER_API_KEY`, `GOOGLE_API_KEY`,
 `GOOGLE_AI_STUDIO_API_KEY`, `GROQ_API_KEY`, `MISTRAL_API_KEY`, and
 `MINIMAX_API_KEY`.
@@ -71,8 +77,8 @@ applications:
    `tag:k8s`.
 2. Create an OAuth client with write access to `General/Services`,
    `Devices/Core`, and `Keys/Auth Keys`, scoped to `tag:k8s-operator`.
-3. Allow `tag:k8s` to reach `mlops-node-7` on TCP port 8080 in the tailnet
-   access policy.
+3. Allow `tag:k8s` to reach both `mlops-node-7` and `mlops-node-9` on TCP
+   port 8080 in the tailnet access policy.
 4. Run `python3 scripts/create_tailscale_operator_secret.py` to securely
    prompt for the OAuth client ID and secret and store them in the
    `tailscale/operator-oauth` Kubernetes Secret. The script creates the

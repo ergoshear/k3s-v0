@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - proxy-group.yaml
   - mlops-node-7.yaml
+  - mlops-node-9.yaml
