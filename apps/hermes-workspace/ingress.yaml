@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hermes-workspace
+  namespace: hermes-workspace
+  annotations:
+    external-dns.kubernetes.io/target: k3s.ergoshear.dev
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - hermes.ergoshear.dev
+      secretName: hermes-workspace-tls
+  rules:
+    - host: hermes.ergoshear.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: hermes-workspace
+                port:
+                  name: http

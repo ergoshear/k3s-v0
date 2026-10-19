@@ -1,0 +1,183 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hermes-workspace
+  namespace: hermes-workspace
+  labels:
+    app.kubernetes.io/name: hermes-workspace
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: hermes-workspace
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: hermes-workspace
+    spec:
+      securityContext:
+        fsGroup: 10010
+        fsGroupChangePolicy: OnRootMismatch
+      containers:
+        - name: hermes-agent
+          image: nousresearch/hermes-agent:v0.22.2
+          imagePullPolicy: IfNotPresent
+          args:
+            - gateway
+            - run
+          ports:
+            - name: gateway
+              containerPort: 8642
+              protocol: TCP
+            - name: dashboard
+              containerPort: 9119
+              protocol: TCP
+          env:
+            - name: HERMES_UID
+              value: "10010"
+            - name: HERMES_DASHBOARD
+              value: "1"
+            - name: HERMES_DASHBOARD_HOST
+              value: 0.0.0.0
+            - name: HERMES_DASHBOARD_PORT
+              value: "9119"
+            - name: API_SERVER_ENABLED
+              value: "true"
+            - name: API_SERVER_HOST
+              value: 0.0.0.0
+            - name: API_SERVER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-workspace-secrets
+                  key: API_SERVER_KEY
+            - name: ANTHROPIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-workspace-secrets
+                  key: ANTHROPIC_API_KEY
+                  optional: true
+            - name: NOUS_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-workspace-secrets
+                  key: NOUS_API_KEY
+                  optional: true
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-workspace-secrets
+                  key: OPENAI_API_KEY
+                  optional: true
+            - name: OPENROUTER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-workspace-secrets
+                  key: OPENROUTER_API_KEY
+                  optional: true
+            - name: GOOGLE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-workspace-secrets
+                  key: GOOGLE_API_KEY
+                  optional: true
+            - name: GOOGLE_AI_STUDIO_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-workspace-secrets
+                  key: GOOGLE_AI_STUDIO_API_KEY
+                  optional: true
+            - name: GROQ_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-workspace-secrets
+                  key: GROQ_API_KEY
+                  optional: true
+            - name: MISTRAL_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-workspace-secrets
+                  key: MISTRAL_API_KEY
+                  optional: true
+            - name: MINIMAX_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-workspace-secrets
+                  key: MINIMAX_API_KEY
+                  optional: true
+          startupProbe:
+            httpGet:
+              path: /health
+              port: gateway
+            periodSeconds: 5
+            failureThreshold: 36
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: gateway
+            periodSeconds: 10
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: hermes-agent-data
+              mountPath: /opt/data
+        - name: hermes-workspace
+          image: ghcr.io/outsourc-e/hermes-workspace:main-c631425
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          env:
+            - name: HERMES_HOME
+              value: /home/workspace/.hermes
+            - name: HERMES_WORKSPACE_DIR
+              value: /workspace
+            - name: HERMES_API_URL
+              value: http://127.0.0.1:8642
+            - name: HERMES_DASHBOARD_URL
+              value: http://127.0.0.1:9119
+            - name: HERMES_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-workspace-secrets
+                  key: API_SERVER_KEY
+            - name: HERMES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-workspace-secrets
+                  key: HERMES_PASSWORD
+            - name: COOKIE_SECURE
+              value: "1"
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10010
+            runAsGroup: 10010
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          startupProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 5
+            failureThreshold: 36
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: hermes-agent-data
+              mountPath: /home/workspace/.hermes
+            - name: hermes-workspace-files
+              mountPath: /workspace
+      volumes:
+        - name: hermes-agent-data
+          persistentVolumeClaim:
+            claimName: hermes-agent-data
+        - name: hermes-workspace-files
+          persistentVolumeClaim:
+            claimName: hermes-workspace-files

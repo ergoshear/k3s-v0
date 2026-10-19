@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: hermes-workspace-tls
+  namespace: hermes-workspace
+spec:
+  secretName: hermes-workspace-tls
+  dnsNames:
+    - hermes.ergoshear.dev
+  issuerRef:
+    name: letsencrypt-route53
+    kind: ClusterIssuer

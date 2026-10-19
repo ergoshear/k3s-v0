@@ -21,6 +21,40 @@ provide a web dashboard. Scan jobs are limited to two concurrent jobs, and the
 operator, scanner jobs, and node collector tolerate the control-plane taint so
 that control-plane workloads and the node can be scanned as well.
 
+## Hermes Workspace
+
+The `hermes-workspace` Argo CD application deploys Hermes Workspace with its
+Hermes Agent gateway in the same pod. The UI is available at
+`https://hermes.ergoshear.dev`; only the UI port is exposed through the
+Traefik ingress. The agent API and dashboard remain internal to the pod. The
+UI and agent share a persistent 10 GiB claim for agent configuration, sessions,
+and memory; workspace files use a separate 10 GiB claim. Both use the
+cluster's `local-path` storage class.
+
+Before syncing the application, create the `hermes-workspace-secrets` Secret
+in the `hermes-workspace` namespace using your secret-management workflow. It
+must contain `HERMES_PASSWORD` (a strong password of at least 32 characters)
+and `API_SERVER_KEY` (a strong token of at least 8 characters). Do not commit
+the Secret or its values. Provider credentials are optional until configured;
+the agent accepts `ANTHROPIC_API_KEY`, `NOUS_API_KEY`, `OPENAI_API_KEY`,
+`OPENROUTER_API_KEY`, `GOOGLE_API_KEY`, `GOOGLE_AI_STUDIO_API_KEY`,
+`GROQ_API_KEY`, `MISTRAL_API_KEY`, and `MINIMAX_API_KEY` from that Secret.
+
+After adding a provider key, restart the Deployment so the agent receives it,
+then run the interactive Hermes setup in the agent container to select the
+provider and model:
+
+```sh
+kubectl -n hermes-workspace exec -it deploy/hermes-workspace \
+  -c hermes-agent -- hermes setup
+kubectl -n hermes-workspace rollout restart deploy/hermes-workspace
+```
+
+The workspace image is pinned to upstream commit `c631425` and the agent to
+`v0.22.2`. The Deployment uses `Recreate` to avoid attaching local-path claims
+to overlapping pods during updates. Deleting either PVC deletes its
+corresponding persistent data.
+
 The Argo CD install overlay pins Dex to `v2.46.0` and Redis to
 `8.2.10-alpine`, replacing images with critical findings in the upstream
 manifest.
