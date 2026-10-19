@@ -70,15 +70,14 @@ provider keys are
 
 The `tailscale-operator` Argo CD application installs the pinned Tailscale
 Kubernetes Operator chart, and `tailscale-egress` creates a two-replica egress
-ProxyGroup and the Hermes model endpoint Service. Before syncing these
-applications:
+ProxyGroup and model endpoint Services. Before syncing these applications:
 
 1. In Tailscale access controls, configure `tag:k8s-operator` as an owner of
    `tag:k8s`.
 2. Create an OAuth client with write access to `General/Services`,
    `Devices/Core`, and `Keys/Auth Keys`, scoped to `tag:k8s-operator`.
-3. Allow `tag:k8s` to reach both `mlops-node-7` and `mlops-node-9` on TCP
-   port 8080 in the tailnet access policy.
+3. Allow `tag:k8s` to reach `mlops-node-4`, `mlops-node-6`, `mlops-node-7`,
+   and `mlops-node-9` on TCP port 8080 in the tailnet access policy.
 4. Run `python3 scripts/create_tailscale_operator_secret.py` to securely
    prompt for the OAuth client ID and secret and store them in the
    `tailscale/operator-oauth` Kubernetes Secret. The script creates the
@@ -89,6 +88,13 @@ applications:
 
 The endpoint uses an in-cluster Service name, so cluster DNS does not need
 MagicDNS forwarding or a `DNSConfig` resource.
+
+## LiteLLM model discovery
+
+LiteLLM queries each model server's OpenAI-compatible `/v1/models` endpoint
+through the Tailscale egress Services. Its `/v1/models` list uses the server
+prefixes `mlops-node-4/`, `mlops-node-6/`, `mlops-node-7/`, and `mlops-node-9/`;
+model IDs are discovered from the servers rather than maintained in Git.
 
 The workspace image is pinned to upstream commit `c631425` and the agent to
 `v0.22.2`. The Deployment uses `Recreate` to avoid attaching local-path claims

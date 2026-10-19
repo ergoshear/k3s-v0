@@ -15,6 +15,18 @@ spec:
   ignoreDifferences:
     - group: ""
       kind: Service
+      name: mlops-node-4
+      namespace: hermes-workspace
+      jsonPointers:
+        - /spec/externalName
+    - group: ""
+      kind: Service
+      name: mlops-node-6
+      namespace: hermes-workspace
+      jsonPointers:
+        - /spec/externalName
+    - group: ""
+      kind: Service
       name: mlops-node-7
       namespace: hermes-workspace
       jsonPointers:

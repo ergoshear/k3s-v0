@@ -35,36 +35,38 @@ class TailscaleOperatorTests(unittest.TestCase):
         self.assertIn("CreateNamespace=true", app["syncPolicy"]["syncOptions"])
         self.assertIn("ServerSideApply=true", app["syncPolicy"]["syncOptions"])
 
-    def test_egress_app_installs_proxy_group_and_model_service(self):
+    def test_egress_app_installs_proxy_group_and_model_services(self):
         app = self.applications[("Application", "tailscale-egress")]["spec"]
         self.assertEqual(app["source"]["path"], "apps/tailscale-egress")
         self.assertEqual(app["destination"]["namespace"], "hermes-workspace")
-        self.assertEqual(
-            app["ignoreDifferences"][0]["jsonPointers"], ["/spec/externalName"]
-        )
         self.assertIn(
             "RespectIgnoreDifferences=true", app["syncPolicy"]["syncOptions"]
         )
         proxy_group = self.egress[("ProxyGroup", "egress-proxies")]
         self.assertEqual(proxy_group["spec"], {"type": "egress", "replicas": 2})
-        service = self.egress[("Service", "mlops-node-7")]
-        self.assertEqual(service["metadata"]["namespace"], "hermes-workspace")
-        self.assertEqual(service["spec"]["type"], "ExternalName")
+        nodes = ("mlops-node-4", "mlops-node-6", "mlops-node-7", "mlops-node-9")
+        for node in nodes:
+            service = self.egress[("Service", node)]
+            self.assertEqual(service["metadata"]["namespace"], "hermes-workspace")
+            self.assertEqual(service["spec"]["type"], "ExternalName")
+            self.assertEqual(
+                service["metadata"]["annotations"],
+                {
+                    "tailscale.com/tailnet-fqdn": f"{node}.tailb11f97.ts.net",
+                    "tailscale.com/proxy-group": "egress-proxies",
+                },
+            )
+            self.assertEqual(service["spec"]["ports"][0]["port"], 8080)
         self.assertEqual(
-            service["metadata"]["annotations"],
-            {
-                "tailscale.com/tailnet-fqdn": "mlops-node-7.tailb11f97.ts.net",
-                "tailscale.com/proxy-group": "egress-proxies",
-            },
+            {item["name"] for item in app["ignoreDifferences"]},
+            set(nodes),
         )
-        self.assertEqual(service["spec"]["ports"][0]["port"], 8080)
-        node9 = self.egress[("Service", "mlops-node-9")]
-        self.assertEqual(
-            node9["metadata"]["annotations"]["tailscale.com/tailnet-fqdn"],
-            "mlops-node-9.tailb11f97.ts.net",
+        self.assertTrue(
+            all(
+                item["jsonPointers"] == ["/spec/externalName"]
+                for item in app["ignoreDifferences"]
+            )
         )
-        self.assertEqual(node9["spec"]["ports"][0]["port"], 8080)
-        self.assertEqual(len(app["ignoreDifferences"]), 2)
 
 
 if __name__ == "__main__":

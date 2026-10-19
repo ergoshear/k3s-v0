@@ -77,6 +77,28 @@ class LiteLLMTests(unittest.TestCase):
             },
         )
 
+    def test_proxy_discovers_models_from_all_tailscale_backends(self):
+        model_list = self.values["proxy_config"]["model_list"]
+        nodes = ("mlops-node-4", "mlops-node-6", "mlops-node-7", "mlops-node-9")
+
+        self.assertEqual(
+            {entry["model_name"] for entry in model_list},
+            {f"{node}/*" for node in nodes},
+        )
+        for entry in model_list:
+            node = entry["model_name"].split("/")[0]
+            self.assertEqual(entry["litellm_params"]["model"], "openai/*")
+            self.assertEqual(
+                entry["litellm_params"]["api_base"],
+                f"http://{node}.hermes-workspace.svc.cluster.local:8080/v1",
+            )
+            self.assertEqual(entry["litellm_params"]["api_key"], "not-required")
+            self.assertTrue(entry["litellm_settings"]["check_provider_endpoint"])
+        self.assertEqual(
+            self.values["proxy_config"]["general_settings"]["master_key"],
+            "os.environ/PROXY_MASTER_KEY",
+        )
+
     def test_database_and_migrations_run_before_litellm_resources(self):
         self.assertEqual(
             self.values["postgresql"]["commonAnnotations"][

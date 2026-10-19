@@ -32,3 +32,36 @@ envVars:
   DOCS_URL: /docs
   ROOT_REDIRECT_URL: /ui/
   STORE_MODEL_IN_DB: "True"
+
+proxy_config:
+  model_list:
+    - model_name: mlops-node-4/*
+      litellm_params:
+        model: openai/*
+        api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: not-required
+      litellm_settings:
+        check_provider_endpoint: true
+    - model_name: mlops-node-6/*
+      litellm_params:
+        model: openai/*
+        api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: not-required
+      litellm_settings:
+        check_provider_endpoint: true
+    - model_name: mlops-node-7/*
+      litellm_params:
+        model: openai/*
+        api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: not-required
+      litellm_settings:
+        check_provider_endpoint: true
+    - model_name: mlops-node-9/*
+      litellm_params:
+        model: openai/*
+        api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: not-required
+      litellm_settings:
+        check_provider_endpoint: true
+  general_settings:
+    master_key: os.environ/PROXY_MASTER_KEY
