@@ -67,6 +67,27 @@ class LiteLLMTests(unittest.TestCase):
             "websecure",
         )
 
+    def test_database_and_migrations_run_before_litellm_resources(self):
+        self.assertEqual(
+            self.values["postgresql"]["commonAnnotations"][
+                "argocd.argoproj.io/sync-wave"
+            ],
+            "-2",
+        )
+        migration_job = self.values["migrationJob"]
+        self.assertFalse(migration_job["hooks"]["argocd"]["enabled"])
+        self.assertEqual(
+            migration_job["jobAnnotations"]["argocd.argoproj.io/sync-wave"],
+            "-1",
+        )
+        self.assertEqual(
+            migration_job["jobAnnotations"][
+                "argocd.argoproj.io/sync-options"
+            ],
+            "Force=true,Replace=true",
+        )
+        self.assertIsNone(migration_job["ttlSecondsAfterFinished"])
+
 
 if __name__ == "__main__":
     unittest.main()

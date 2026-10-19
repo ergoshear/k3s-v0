@@ -14,3 +14,16 @@ ingress:
     - secretName: litellm-tls
       hosts:
         - litellm.ergoshear.dev
+
+postgresql:
+  commonAnnotations:
+    argocd.argoproj.io/sync-wave: "-2"
+
+migrationJob:
+  hooks:
+    argocd:
+      enabled: false
+  jobAnnotations:
+    argocd.argoproj.io/sync-options: Force=true,Replace=true
+    argocd.argoproj.io/sync-wave: "-1"
+  ttlSecondsAfterFinished: null
