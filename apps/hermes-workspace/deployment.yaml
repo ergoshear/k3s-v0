@@ -43,17 +43,27 @@ spec:
                 sed -i 's#http://mlops-node-7.tailb11f97.ts.net:8080/v1#http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1#g' /opt/data/config.yaml
                 chown 10010:10010 /opt/data/config.yaml
               fi
-              if grep -Eq '^[[:space:]]*provider:[[:space:]]*custom[[:space:]]*$' /opt/data/config.yaml && grep -Fq 'http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1' /opt/data/config.yaml; then
-                HERMES_HOME=/opt/data /opt/hermes/.venv/bin/python -c '
-              from hermes_cli.config import set_config_value
-              set_config_value("providers.mlops-node-7.api", "http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1", force=True)
-              set_config_value("providers.mlops-node-7.discover_models", "true", force=True)
-              set_config_value("providers.mlops-node-9.api", "http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1", force=True)
-              set_config_value("providers.mlops-node-9.discover_models", "true", force=True)
-              set_config_value("model.provider", "custom:mlops-node-7")
+              HERMES_HOME=/opt/data /opt/hermes/.venv/bin/python -c '
+              from hermes_cli.config import load_config, set_config_value
+              config = load_config()
+              endpoints = {
+                  "mlops-node-7": "http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1",
+                  "mlops-node-9": "http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1",
+              }
+              providers = config.get("providers")
+              if not isinstance(providers, dict):
+                  providers = {}
+              for name, url in endpoints.items():
+                  entry = providers.get(name)
+                  if not isinstance(entry, dict) or entry.get("base_url") != url:
+                      set_config_value(f"providers.{name}.base_url", url, force=True)
+                  if not isinstance(entry, dict) or entry.get("discover_models") is not True:
+                      set_config_value(f"providers.{name}.discover_models", "true", force=True)
+              model = config.get("model")
+              if isinstance(model, dict) and model.get("provider") == "custom":
+                  set_config_value("model.provider", "custom:mlops-node-7")
               '
-                chown 10010:10010 /opt/data/config.yaml
-              fi
+              chown 10010:10010 /opt/data/config.yaml
           securityContext:
             runAsUser: 0
             runAsGroup: 0

@@ -89,11 +89,11 @@ class HermesWorkspaceTests(unittest.TestCase):
             config["providers"],
             {
                 "mlops-node-7": {
-                    "api": "http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1",
+                    "base_url": "http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1",
                     "discover_models": True,
                 },
                 "mlops-node-9": {
-                    "api": "http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1",
+                    "base_url": "http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1",
                     "discover_models": True,
                 },
             },
@@ -119,7 +119,7 @@ class HermesWorkspaceTests(unittest.TestCase):
             init_container["args"][0],
         )
         self.assertIn(
-            'set_config_value("providers.mlops-node-9.api"',
+            'set_config_value(f"providers.{name}.base_url"',
             init_container["args"][0],
         )
         self.assertIn(
