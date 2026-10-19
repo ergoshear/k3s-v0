@@ -34,6 +34,12 @@ patches:
       version: v1
       kind: Deployment
       name: argocd-dex-server
+  - path: redis-image-patch.yaml
+    target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: argocd-redis
   - path: cmd-params-patch.yaml
     target:
       group: ""

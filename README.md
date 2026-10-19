@@ -21,6 +21,10 @@ provide a web dashboard. Scan jobs are limited to two concurrent jobs, and the
 operator, scanner jobs, and node collector tolerate the control-plane taint so
 that control-plane workloads and the node can be scanned as well.
 
+The Argo CD install overlay pins Dex to `v2.46.0` and Redis to
+`8.2.10-alpine`, replacing images with critical findings in the upstream
+manifest.
+
 ExternalDNS publishes `argocd.ergoshear.dev` as a CNAME to
 `k3s.ergoshear.dev`; cert-manager obtains a publicly trusted Let's Encrypt
 certificate using Route 53 DNS-01. The ingress uses the

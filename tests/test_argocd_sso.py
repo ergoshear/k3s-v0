@@ -55,6 +55,24 @@ class SSOTests(unittest.TestCase):
         self.assertEqual(self.config["admin.enabled"], "true")
         self.assertEqual(self.config["users.anonymous.enabled"], "false")
 
+    def test_dex_and_redis_use_patched_images(self):
+        dex = self.resources[("Deployment", "argocd-dex-server")]
+        dex_container = next(
+            container for container in dex["spec"]["template"]["spec"]["containers"]
+            if container["name"] == "dex"
+        )
+        self.assertEqual(dex_container["image"], "ghcr.io/dexidp/dex:v2.46.0")
+
+        redis = self.resources[("Deployment", "argocd-redis")]
+        redis_container = next(
+            container for container in redis["spec"]["template"]["spec"]["containers"]
+            if container["name"] == "redis"
+        )
+        self.assertEqual(
+            redis_container["image"],
+            "public.ecr.aws/docker/library/redis:8.2.10-alpine",
+        )
+
     def test_generated_public_certificate_is_mounted_read_only(self):
         deployment = self.resources[("Deployment", "argocd-dex-server")]
         spec = deployment["spec"]["template"]["spec"]
