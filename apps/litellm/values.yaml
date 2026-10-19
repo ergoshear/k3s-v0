@@ -1,0 +1,16 @@
+ingress:
+  enabled: true
+  className: traefik
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-route53
+    external-dns.kubernetes.io/target: k3s.ergoshear.dev
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+  hosts:
+    - host: litellm.ergoshear.dev
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: litellm-tls
+      hosts:
+        - litellm.ergoshear.dev

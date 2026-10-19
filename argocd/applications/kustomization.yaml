@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - hermes-workspace.yaml
   - kube-prometheus-stack.yaml
+  - litellm.yaml
   - tailscale-egress.yaml
   - tailscale-operator.yaml
   - trivy-operator.yaml
