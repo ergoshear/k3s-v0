@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cm
+data:
+  url: https://argocd.ergoshear.dev
+  admin.enabled: "true"
+  users.anonymous.enabled: "false"
+  dex.config: |
+    connectors:
+      - type: saml
+        id: aws
+        name: AWS IAM Identity Center
+        config:
+          ssoURL: https://portal.sso.us-east-2.amazonaws.com/saml/assertion/MjA0NDU5MDM4Njc2X2lucy02Njg0ZDFkYTU5MDBhYmNj
+          ssoIssuer: https://portal.sso.us-east-2.amazonaws.com/saml/assertion/MjA0NDU5MDM4Njc2X2lucy02Njg0ZDFkYTU5MDBhYmNj
+          ca: /etc/dex/identity-center/signing.pem
+          entityIssuer: https://argocd.ergoshear.dev/api/dex/callback
+          redirectURI: https://argocd.ergoshear.dev/api/dex/callback
+          nameIDPolicyFormat: emailAddress
+          usernameAttr: email
+          emailAttr: email

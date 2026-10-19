@@ -1,6 +1,9 @@
 name: Apply Argo CD
 
 on:
+  pull_request:
+    branches:
+      - main
   push:
     branches:
       - main
@@ -13,7 +16,20 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  configuration-tests:
+    name: Validate Argo CD SSO configuration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install PyYAML
+      - run: python -m unittest discover -s tests -v
+
   apply:
+    needs: configuration-tests
+    if: github.event_name != 'pull_request'
     name: Apply Argo CD manifests
     runs-on: [self-hosted, k3s-control-plane-01]
     timeout-minutes: 30
@@ -59,3 +75,27 @@ jobs:
         run: |
           sudo -n kubectl --kubeconfig="$KUBECONFIG" \
             apply --server-side --force-conflicts -f argocd/application.yaml
+
+      - name: Wait for Argo CD authentication services
+        run: |
+          sudo -n kubectl --kubeconfig="$KUBECONFIG" -n argocd \
+            rollout status deployment/argocd-dex-server --timeout=5m
+          sudo -n kubectl --kubeconfig="$KUBECONFIG" -n argocd \
+            rollout status deployment/argocd-server --timeout=5m
+
+      - name: Verify SSO administrator and default-deny RBAC
+        run: |
+          can() {
+            sudo -n kubectl --kubeconfig="$KUBECONFIG" -n argocd \
+              exec deployment/argocd-server -c argocd-server -- \
+              argocd admin settings rbac can "$@" --namespace argocd
+          }
+          test "$(can christopher@agilityqa.com get applications 'default/sso-validation')" = Yes
+          test "$(can christopher@agilityqa.com sync applications 'default/sso-validation')" = Yes
+          test "$(can admin get applications 'default/sso-validation')" = Yes
+          set +e
+          result="$(can unassigned@example.invalid get applications 'default/sso-validation')"
+          status=$?
+          set -e
+          test "$status" -eq 1
+          test "$result" = No

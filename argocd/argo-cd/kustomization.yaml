@@ -7,7 +7,33 @@ resources:
   - install.yaml
   - namespace.yaml
 
+configMapGenerator:
+  - name: argocd-identity-center
+    files:
+      - signing.pem=identity-center-signing.pem
+    options:
+      labels:
+        app.kubernetes.io/part-of: argocd
+
 patches:
+  - path: sso-patch.yaml
+    target:
+      group: ""
+      version: v1
+      kind: ConfigMap
+      name: argocd-cm
+  - path: rbac-patch.yaml
+    target:
+      group: ""
+      version: v1
+      kind: ConfigMap
+      name: argocd-rbac-cm
+  - path: dex-certificate-patch.yaml
+    target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: argocd-dex-server
   - path: cmd-params-patch.yaml
     target:
       group: ""
