@@ -98,6 +98,7 @@ class HermesWorkspaceTests(unittest.TestCase):
                 },
             },
         )
+        self.assertTrue(config["platforms"]["api_server"]["enabled"])
         init_container = self.deployment["spec"]["template"]["spec"][
             "initContainers"
         ][0]
@@ -122,6 +123,11 @@ class HermesWorkspaceTests(unittest.TestCase):
             'set_config_value(f"providers.{name}.base_url"',
             init_container["args"][0],
         )
+        self.assertIn(
+            'set_config_value("platforms.api_server.enabled", "true", force=True)',
+            init_container["args"][0],
+        )
+        self.assertIn("chown -R 10010:10000 /opt/data/backups/config", init_container["args"][0])
         self.assertIn(
             {"name": "hermes-agent-config", "mountPath": "/config", "readOnly": True},
             init_container["volumeMounts"],

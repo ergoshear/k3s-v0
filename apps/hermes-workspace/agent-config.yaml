@@ -16,3 +16,6 @@ data:
       mlops-node-9:
         base_url: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
         discover_models: true
+    platforms:
+      api_server:
+        enabled: true
