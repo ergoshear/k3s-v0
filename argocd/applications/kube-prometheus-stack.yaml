@@ -5,10 +5,10 @@ metadata:
   namespace: monitoring
 spec:
   project: default
-  source:
-    repoURL: 'https://prometheus-community.github.io/helm-charts'
-    chart: kube-prometheus-stack
-    targetRevision: 92.10.1
+  sources:
+    - repoURL: 'https://prometheus-community.github.io/helm-charts'
+      chart: kube-prometheus-stack
+      targetRevision: 92.10.1
       helm:
         valueFiles:
           - $values/apps/kube-prometheus-stack/values.yaml
