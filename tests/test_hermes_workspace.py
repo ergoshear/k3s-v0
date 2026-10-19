@@ -82,7 +82,7 @@ class HermesWorkspaceTests(unittest.TestCase):
             {
                 "default": "Qwen3-Coder-30B-A3B",
                 "provider": "custom",
-                "base_url": "http://mlops-node-7:8080/v1",
+                "base_url": "http://mlops-node-9.tailb11f97.ts.net:8080/v1",
             },
         )
         init_container = self.deployment["spec"]["template"]["spec"][
