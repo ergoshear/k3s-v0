@@ -73,6 +73,7 @@ class LiteLLMTests(unittest.TestCase):
             {
                 "DOCS_URL": "/docs",
                 "ROOT_REDIRECT_URL": "/ui/",
+                "STORE_MODEL_IN_DB": "True",
             },
         )
 
