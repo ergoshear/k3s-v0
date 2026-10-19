@@ -31,6 +31,9 @@ class TrivyOperatorTests(unittest.TestCase):
     def test_parent_application_includes_child_applications(self):
         parent = yaml.safe_load((ROOT / "argocd/kustomization.yaml").read_text())
         self.assertIn("applications", parent["resources"])
+        self.assertIn(
+            ("Application", "kube-prometheus-stack"), self.applications
+        )
 
     def test_chart_is_pinned_and_reads_values_from_this_repository(self):
         chart, values = self.application["spec"]["sources"]

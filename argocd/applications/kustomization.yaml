@@ -3,4 +3,5 @@ kind: Kustomization
 
 resources:
   - hermes-workspace.yaml
+  - kube-prometheus-stack.yaml
   - trivy-operator.yaml
