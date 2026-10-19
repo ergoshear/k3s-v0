@@ -4,10 +4,12 @@
 
 The `Apply Argo CD` GitHub Actions workflow runs on pushes to `main` (including
 merges) on the self-hosted runner labeled `k3s-control-plane-01`. It uses the
-host's `/etc/rancher/k3s/k3s.yaml` kubeconfig and applies `argocd/` with
-server-side apply and conflict forcing. It applies the upstream CRDs separately
-before the local namespace and install manifests. cert-manager is installed and
-waited on before its ClusterIssuer and Certificate resources are applied.
+host's `/etc/rancher/k3s/k3s.yaml` kubeconfig. It applies the upstream CRDs
+separately, creates the local namespace, installs Argo CD and cert-manager, and
+waits for cert-manager before applying [the Argo CD Application](argocd/application.yaml).
+That Application syncs `argocd/` from this repository with pruning and self-healing
+enabled, managing the platform resources as well as the checked-in install
+manifests.
 
 ExternalDNS publishes `argocd.ergoshear.dev` as a CNAME to
 `k3s.ergoshear.dev`; cert-manager obtains a publicly trusted Let's Encrypt
