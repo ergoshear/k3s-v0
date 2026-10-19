@@ -20,6 +20,39 @@ spec:
       securityContext:
         fsGroup: 10010
         fsGroupChangePolicy: OnRootMismatch
+      initContainers:
+        - name: initialize-agent-config
+          image: nousresearch/hermes-agent:v0.22.2
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -ec
+          args:
+            - |
+              mkdir -p /opt/data /workspace
+              chown 10010:10010 /opt/data /workspace
+              if [ ! -e /opt/data/config.yaml ]; then
+                cp /config/config.yaml /opt/data/config.yaml
+                chown 10010:10010 /opt/data/config.yaml
+              fi
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+              add:
+                - CHOWN
+                - DAC_OVERRIDE
+          volumeMounts:
+            - name: hermes-agent-data
+              mountPath: /opt/data
+            - name: hermes-agent-config
+              mountPath: /config
+              readOnly: true
+            - name: hermes-workspace-files
+              mountPath: /workspace
       containers:
         - name: hermes-agent
           image: nousresearch/hermes-agent:v0.22.2
@@ -175,6 +208,9 @@ spec:
             - name: hermes-workspace-files
               mountPath: /workspace
       volumes:
+        - name: hermes-agent-config
+          configMap:
+            name: hermes-agent-config
         - name: hermes-agent-data
           persistentVolumeClaim:
             claimName: hermes-agent-data

@@ -31,24 +31,27 @@ UI and agent share a persistent 10 GiB claim for agent configuration, sessions,
 and memory; workspace files use a separate 10 GiB claim. Both use the
 cluster's `local-path` storage class.
 
-Before syncing the application, create the `hermes-workspace-secrets` Secret
-in the `hermes-workspace` namespace using your secret-management workflow. It
-must contain `HERMES_PASSWORD` (a strong password of at least 32 characters)
-and `API_SERVER_KEY` (a strong token of at least 8 characters). Do not commit
-the Secret or its values. Provider credentials are optional until configured;
-the agent accepts `ANTHROPIC_API_KEY`, `NOUS_API_KEY`, `OPENAI_API_KEY`,
-`OPENROUTER_API_KEY`, `GOOGLE_API_KEY`, `GOOGLE_AI_STUDIO_API_KEY`,
-`GROQ_API_KEY`, `MISTRAL_API_KEY`, and `MINIMAX_API_KEY` from that Secret.
-
-After adding a provider key, restart the Deployment so the agent receives it,
-then run the interactive Hermes setup in the agent container to select the
-provider and model:
+Before syncing the application, generate the required credentials and load the
+`hermes-workspace-secrets` Secret into the cluster:
 
 ```sh
-kubectl -n hermes-workspace exec -it deploy/hermes-workspace \
-  -c hermes-agent -- hermes setup
-kubectl -n hermes-workspace rollout restart deploy/hermes-workspace
+python3 scripts/create_hermes_workspace_secret.py
 ```
+
+The script uses `~/.kube/k3s.yaml` by default; pass `--kubeconfig` to use
+another file. It prints the generated UI password once and does not print the
+gateway API token. It refuses to overwrite an existing Secret unless run with
+`--rotate`; rotation preserves any provider keys already in the Secret and
+requires restarting the Deployment.
+
+The initial Hermes config is copied into the agent data claim only when no
+config exists. It selects `Qwen3-Coder-30B-A3B` using the custom provider at
+`http://mlops-node-7:8080/v1`; the model-list endpoint is
+`http://mlops-node-7:8080/v1/models`. If the endpoint requires authentication,
+add an `OPENAI_API_KEY` entry to the Secret. Other optional provider keys are
+`ANTHROPIC_API_KEY`, `NOUS_API_KEY`, `OPENROUTER_API_KEY`, `GOOGLE_API_KEY`,
+`GOOGLE_AI_STUDIO_API_KEY`, `GROQ_API_KEY`, `MISTRAL_API_KEY`, and
+`MINIMAX_API_KEY`.
 
 The workspace image is pinned to upstream commit `c631425` and the agent to
 `v0.22.2`. The Deployment uses `Recreate` to avoid attaching local-path claims

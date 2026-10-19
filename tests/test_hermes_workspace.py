@@ -73,6 +73,27 @@ class HermesWorkspaceTests(unittest.TestCase):
             mounts["hermes-workspace"],
         )
 
+    def test_initial_agent_config_uses_the_mlop_endpoint_and_model(self):
+        config_map = self.resources[("ConfigMap", "hermes-agent-config")]
+        config = yaml.safe_load(config_map["data"]["config.yaml"])
+        self.assertEqual(
+            config["model"],
+            {
+                "default": "Qwen3-Coder-30B-A3B",
+                "provider": "custom",
+                "base_url": "http://mlops-node-7:8080/v1",
+            },
+        )
+        init_container = self.deployment["spec"]["template"]["spec"][
+            "initContainers"
+        ][0]
+        self.assertEqual(init_container["name"], "initialize-agent-config")
+        self.assertIn("if [ ! -e /opt/data/config.yaml ]", init_container["args"][0])
+        self.assertIn(
+            {"name": "hermes-agent-config", "mountPath": "/config", "readOnly": True},
+            init_container["volumeMounts"],
+        )
+
     def test_public_ui_requires_secret_and_uses_internal_gateway(self):
         workspace_env = {
             item["name"]: item
