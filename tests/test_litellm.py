@@ -67,6 +67,15 @@ class LiteLLMTests(unittest.TestCase):
             "websecure",
         )
 
+    def test_root_redirects_to_dashboard_and_keeps_api_docs(self):
+        self.assertEqual(
+            self.values["envVars"],
+            {
+                "DOCS_URL": "/docs",
+                "ROOT_REDIRECT_URL": "/ui/",
+            },
+        )
+
     def test_database_and_migrations_run_before_litellm_resources(self):
         self.assertEqual(
             self.values["postgresql"]["commonAnnotations"][

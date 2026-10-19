@@ -27,3 +27,7 @@ migrationJob:
     argocd.argoproj.io/sync-options: Force=true,Replace=true
     argocd.argoproj.io/sync-wave: "-1"
   ttlSecondsAfterFinished: null
+
+envVars:
+  DOCS_URL: /docs
+  ROOT_REDIRECT_URL: /ui/
