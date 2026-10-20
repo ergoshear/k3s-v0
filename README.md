@@ -263,6 +263,11 @@ middleware. LiteLLM deliberately does not; its public API still requires
 its existing master/virtual-key authentication. Management DNS targets the
 control-plane tailnet IPv4 address, preserving original TLS and SSO names.
 DNS-01 certificate renewal stays independent of HTTP management restrictions.
+Argo CD also fetches Dex signing keys through its issuer hostname when
+validating SSO sessions. Only the exact `/api/dex/keys` path additionally
+allows the cluster pod CIDR `10.42.0.0/16`; the UI, callbacks and other Dex
+paths remain tailnet-only. Public requests to the keys endpoint remain
+blocked. Update this dedicated allowlist if the cluster pod CIDR changes.
 If recursive DNS still caches the former public CNAME, test with
 `curl --resolve argocd.ergoshear.dev:443:100.126.105.69 https://argocd.ergoshear.dev/`
 and repeat for Hermes/Lens. Update these DNS targets if the tailnet node is

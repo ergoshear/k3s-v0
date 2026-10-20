@@ -24,3 +24,29 @@ spec:
                 name: argocd-server
                 port:
                   name: http
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argocd-dex-keys
+  namespace: argocd
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.middlewares: argocd-dex-keys-internal@kubernetescrd
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - argocd.ergoshear.dev
+      secretName: argocd-server-tls
+  rules:
+    - host: argocd.ergoshear.dev
+      http:
+        paths:
+          - path: /api/dex/keys
+            pathType: Exact
+            backend:
+              service:
+                name: argocd-server
+                port:
+                  name: http
