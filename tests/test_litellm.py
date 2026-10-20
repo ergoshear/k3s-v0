@@ -69,7 +69,9 @@ class LiteLLMTests(unittest.TestCase):
 
     def test_root_redirects_to_dashboard_and_keeps_api_docs(self):
         self.assertEqual(
-            self.values["envVars"],
+            {key: self.values["envVars"][key] for key in (
+                "DOCS_URL", "ROOT_REDIRECT_URL", "STORE_MODEL_IN_DB"
+            )},
             {
                 "DOCS_URL": "/docs",
                 "ROOT_REDIRECT_URL": "/ui/",
@@ -77,27 +79,64 @@ class LiteLLMTests(unittest.TestCase):
             },
         )
 
-    def test_proxy_discovers_models_from_all_tailscale_backends(self):
-        model_list = self.values["proxy_config"]["model_list"]
-        nodes = ("mlops-node-4", "mlops-node-6", "mlops-node-7", "mlops-node-9")
+    def test_saml_sso_persists_with_explicit_admin_identity(self):
+        env = self.values["envVars"]
+        self.assertEqual(
+            env["SAML_IDP_METADATA_URL"],
+            "https://portal.sso.us-east-2.amazonaws.com/saml/metadata/"
+            "MjA0NDU5MDM4Njc2X2lucy02Njg0ZTBmZGY2OTFiNjMx",
+        )
+        self.assertEqual(env["PROXY_BASE_URL"], "https://litellm.ergoshear.dev")
+        self.assertEqual(
+            env["SAML_SP_ENTITY_ID"],
+            "https://litellm.ergoshear.dev/sso/saml/metadata",
+        )
+        self.assertEqual(env["SAML_ATTRIBUTE_USER_ID"], "email")
+        self.assertEqual(env["PROXY_ADMIN_ID"], "christopher@agilityqa.com")
 
+    def test_proxy_registers_concrete_models_from_all_tailscale_backends(self):
+        model_list = self.values["proxy_config"]["model_list"]
+        presets = {
+            "mlops-node-4": (
+                "Gemma-4-31B-QAT-Vision",
+                "Gemma-4-31B-QAT-NoThink",
+                "Qwen3.6-35B-A3B-DFlash-Low",
+                "Qwen3.6-35B-A3B-DFlash-NoThink",
+            ),
+            "mlops-node-6": (
+                "Muse-Glimmer-30B-128K",
+                "Muse-Glimmer-30B-256K-VRAM",
+                "Muse-Glimmer-30B-512K-Hybrid",
+                "Muse-Glimmer-30B-Vision",
+            ),
+            "mlops-node-7": (
+                "Qwen3-Coder-30B-A3B",
+                "Qwen3.8-Flash-Next-Low",
+                "Qwen3.8-Flash-Next-Medium",
+                "Qwen3.8-Flash-Next-NoThink",
+            ),
+            "mlops-node-9": (
+                "GLM-5.3-Flash",
+                "Qwen3.8-27B-Low",
+                "Qwen3.8-27B-Medium",
+                "Qwen3.8-27B-NoThink",
+            ),
+        }
+
+        self.assertEqual(len(model_list), 16)
         self.assertEqual(
             {entry["model_name"] for entry in model_list},
-            {f"{node}/*" for node in nodes},
+            {f"{node}/{model}" for node, models in presets.items() for model in models},
         )
         for entry in model_list:
-            node = entry["model_name"].split("/")[0]
-            self.assertEqual(entry["litellm_params"]["model"], "openai/*")
+            node, model = entry["model_name"].split("/", 1)
+            self.assertEqual(entry["litellm_params"]["model"], f"openai/{model}")
             self.assertEqual(
                 entry["litellm_params"]["api_base"],
                 f"http://{node}.hermes-workspace.svc.cluster.local:8080/v1",
             )
             self.assertEqual(entry["litellm_params"]["api_key"], "not-required")
-        self.assertTrue(
-            self.values["proxy_config"]["litellm_settings"][
-                "check_provider_endpoint"
-            ]
-        )
+        self.assertNotIn("litellm_settings", self.values["proxy_config"])
         self.assertEqual(
             self.values["proxy_config"]["general_settings"]["master_key"],
             "os.environ/PROXY_MASTER_KEY",

@@ -89,12 +89,29 @@ ProxyGroup and model endpoint Services. Before syncing these applications:
 The endpoint uses an in-cluster Service name, so cluster DNS does not need
 MagicDNS forwarding or a `DNSConfig` resource.
 
+## LiteLLM SSO
+
+The [Helm values](apps/litellm/values.yaml) persist AWS IAM Identity Center
+SAML settings as environment variables, independent of settings saved in the
+LiteLLM admin UI. The application uses
+`https://litellm.ergoshear.dev/sso/saml/metadata` as its SP entity ID and
+`https://litellm.ergoshear.dev/sso/saml/callback` as its ACS URL. Configure the
+Identity Center application to send the user's email as the SAML `email`
+attribute (and preferably the subject/NameID). LiteLLM uses that email as the
+user ID and grants explicit proxy-admin access to `christopher@agilityqa.com`
+through `PROXY_ADMIN_ID`; other users are not granted admin by this setting.
+The running LiteLLM image must include SAML support.
+
 ## LiteLLM model discovery
 
-LiteLLM queries each model server's OpenAI-compatible `/v1/models` endpoint
-through the Tailscale egress Services. Its `/v1/models` list uses the server
-prefixes `mlops-node-4/`, `mlops-node-6/`, `mlops-node-7/`, and `mlops-node-9/`;
-model IDs are discovered from the servers rather than maintained in Git.
+LiteLLM explicitly registers the 16 llama.cpp router presets managed by Salt
+in [the Helm values](apps/litellm/values.yaml), routing requests through the
+Tailscale egress Services. Its `/v1/models` list and admin UI use concrete IDs
+with the server prefixes `mlops-node-4/`, `mlops-node-6/`, `mlops-node-7/`, and
+`mlops-node-9/`, rather than wildcard entries. The prefix selects the server;
+the remaining ID exactly matches its Salt `models.ini` preset. Update these
+entries and their tests whenever Salt adds or renames a preset. Listing models
+does not load them; llama.cpp loads the selected preset when it is requested.
 
 The workspace image is pinned to upstream commit `c631425` and the agent to
 `v0.22.2`. The Deployment uses `Recreate` to avoid attaching local-path claims

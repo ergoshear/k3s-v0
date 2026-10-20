@@ -32,30 +32,93 @@ envVars:
   DOCS_URL: /docs
   ROOT_REDIRECT_URL: /ui/
   STORE_MODEL_IN_DB: "True"
+  SAML_IDP_METADATA_URL: https://portal.sso.us-east-2.amazonaws.com/saml/metadata/MjA0NDU5MDM4Njc2X2lucy02Njg0ZTBmZGY2OTFiNjMx
+  PROXY_BASE_URL: https://litellm.ergoshear.dev
+  SAML_SP_ENTITY_ID: https://litellm.ergoshear.dev/sso/saml/metadata
+  SAML_ATTRIBUTE_USER_ID: email
+  PROXY_ADMIN_ID: christopher@agilityqa.com
 
 proxy_config:
   model_list:
-    - model_name: mlops-node-4/*
+    - model_name: mlops-node-4/Gemma-4-31B-QAT-Vision
       litellm_params:
-        model: openai/*
+        model: openai/Gemma-4-31B-QAT-Vision
         api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
         api_key: not-required
-    - model_name: mlops-node-6/*
+    - model_name: mlops-node-4/Gemma-4-31B-QAT-NoThink
       litellm_params:
-        model: openai/*
+        model: openai/Gemma-4-31B-QAT-NoThink
+        api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: not-required
+    - model_name: mlops-node-4/Qwen3.6-35B-A3B-DFlash-Low
+      litellm_params:
+        model: openai/Qwen3.6-35B-A3B-DFlash-Low
+        api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: not-required
+    - model_name: mlops-node-4/Qwen3.6-35B-A3B-DFlash-NoThink
+      litellm_params:
+        model: openai/Qwen3.6-35B-A3B-DFlash-NoThink
+        api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: not-required
+    - model_name: mlops-node-6/Muse-Glimmer-30B-128K
+      litellm_params:
+        model: openai/Muse-Glimmer-30B-128K
         api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
         api_key: not-required
-    - model_name: mlops-node-7/*
+    - model_name: mlops-node-6/Muse-Glimmer-30B-256K-VRAM
       litellm_params:
-        model: openai/*
+        model: openai/Muse-Glimmer-30B-256K-VRAM
+        api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: not-required
+    - model_name: mlops-node-6/Muse-Glimmer-30B-512K-Hybrid
+      litellm_params:
+        model: openai/Muse-Glimmer-30B-512K-Hybrid
+        api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: not-required
+    - model_name: mlops-node-6/Muse-Glimmer-30B-Vision
+      litellm_params:
+        model: openai/Muse-Glimmer-30B-Vision
+        api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: not-required
+    - model_name: mlops-node-7/Qwen3-Coder-30B-A3B
+      litellm_params:
+        model: openai/Qwen3-Coder-30B-A3B
         api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
         api_key: not-required
-    - model_name: mlops-node-9/*
+    - model_name: mlops-node-7/Qwen3.8-Flash-Next-Low
       litellm_params:
-        model: openai/*
+        model: openai/Qwen3.8-Flash-Next-Low
+        api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: not-required
+    - model_name: mlops-node-7/Qwen3.8-Flash-Next-Medium
+      litellm_params:
+        model: openai/Qwen3.8-Flash-Next-Medium
+        api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: not-required
+    - model_name: mlops-node-7/Qwen3.8-Flash-Next-NoThink
+      litellm_params:
+        model: openai/Qwen3.8-Flash-Next-NoThink
+        api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: not-required
+    - model_name: mlops-node-9/GLM-5.3-Flash
+      litellm_params:
+        model: openai/GLM-5.3-Flash
         api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
         api_key: not-required
-  litellm_settings:
-    check_provider_endpoint: true
+    - model_name: mlops-node-9/Qwen3.8-27B-Low
+      litellm_params:
+        model: openai/Qwen3.8-27B-Low
+        api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: not-required
+    - model_name: mlops-node-9/Qwen3.8-27B-Medium
+      litellm_params:
+        model: openai/Qwen3.8-27B-Medium
+        api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: not-required
+    - model_name: mlops-node-9/Qwen3.8-27B-NoThink
+      litellm_params:
+        model: openai/Qwen3.8-27B-NoThink
+        api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: not-required
   general_settings:
     master_key: os.environ/PROXY_MASTER_KEY
