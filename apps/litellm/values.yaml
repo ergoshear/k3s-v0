@@ -400,6 +400,10 @@ proxy_config:
   litellm_settings:
     drop_params: true
     modify_params: true
+    allowed_openai_params:
+      - chat_template_kwargs
+      - reasoning_format
+      - reasoning_budget
     set_verbose: false
     request_timeout: 300
   general_settings:
