@@ -255,3 +255,42 @@ python3 -m unittest discover -s tests -v
 Pull requests run these tests on a GitHub-hosted runner. Only pushes to
 `main` deploy, and deployment waits for the Argo CD server and Dex rollouts.
 An actual user login still needs to be tested interactively.
+
+## Private management and inference boundaries
+
+Argo CD, Hermes and Lens attach a same-namespace `tailscale-only` Traefik
+middleware. LiteLLM deliberately does not; its public API still requires
+its existing master/virtual-key authentication. Management DNS targets the
+control-plane tailnet IPv4 address, preserving original TLS and SSO names.
+DNS-01 certificate renewal stays independent of HTTP management restrictions.
+If recursive DNS still caches the former public CNAME, test with
+`curl --resolve argocd.ergoshear.dev:443:100.126.105.69 https://argocd.ergoshear.dev/`
+and repeat for Hermes/Lens. Update these DNS targets if the tailnet node is
+replaced.
+
+The installed ServiceLB path source-NATs clients to a pod gateway, even with
+`externalTrafficPolicy: Local`; accepting that address would expose management
+publicly. Traefik therefore runs host-networked on the existing control-plane
+node, binds 80/443 directly and uses a ClusterIP Service (no ingress NodePorts
+or ServiceLB). Recreate updates briefly interrupt ingress. It runs UID 0
+with **only** `NET_BIND_SERVICE`, all other capabilities dropped, no privilege
+escalation and a read-only root filesystem; the verified nonroot variant
+could not bind low host ports on this Fedora/k3s host. Metrics uses 19100
+to avoid the node-exporter host port. Keep the control-plane host/cloud
+firewalls limited to the existing public 80/443 and home-only 6443 rules.
+
+The two authorized inference clients use `inference-backend` Secrets with
+`INFERENCE_BACKEND_KEY` in their respective namespaces. LiteLLM model keys
+reference that environment variable. Hermes migrates its existing private
+configuration during initialization; it does not change unrelated providers.
+GPU hosts require the same key file and a persistent dual-stack nftables
+boundary managed by Salt. The egress-proxy ingress NetworkPolicy allows only
+the actual LiteLLM/Hermes pod labels and monitoring health traffic. Its client
+rule intentionally has no fixed port: the operator maps backend port 8080 to
+dynamically allocated proxy targetPorts.
+
+For the approved live rollout, automated sync was paused for `argocd`,
+`hermes-workspace`, `lens`, `litellm` and `tailscale-egress`, because deployment
+from uncommitted local files would otherwise be reverted. No commit was made.
+Review and publish these files before re-enabling those Applications.
+Secrets stay in Kubernetes/private GPU files; preserve them during rollback.

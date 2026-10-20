@@ -104,7 +104,7 @@ class HermesWorkspaceTests(unittest.TestCase):
         ][0]
         self.assertEqual(init_container["name"], "initialize-agent-config")
         self.assertIn("if [ ! -e /opt/data/config.yaml ]", init_container["args"][0])
-        init_env = {item["name"]: item["value"] for item in init_container["env"]}
+        init_env = {item["name"]: item["value"] for item in init_container["env"] if "value" in item}
         self.assertEqual(init_env["HERMES_HOME"], "/opt/data")
         self.assertEqual(init_env["HERMES_UID"], "10010")
         self.assertIn(
@@ -176,7 +176,7 @@ class HermesWorkspaceTests(unittest.TestCase):
             ingress["metadata"]["annotations"][
                 "external-dns.kubernetes.io/target"
             ],
-            "k3s.ergoshear.dev",
+            "100.126.105.69",
         )
         self.assertEqual(
             self.resources[("Certificate", "hermes-workspace-tls")]["spec"][

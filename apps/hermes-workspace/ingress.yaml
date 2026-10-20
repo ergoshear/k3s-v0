@@ -4,8 +4,9 @@ metadata:
   name: hermes-workspace
   namespace: hermes-workspace
   annotations:
-    external-dns.kubernetes.io/target: k3s.ergoshear.dev
+    external-dns.kubernetes.io/target: 100.126.105.69
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.middlewares: hermes-workspace-tailscale-only@kubernetescrd
 spec:
   ingressClassName: traefik
   tls:

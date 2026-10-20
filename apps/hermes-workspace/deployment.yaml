@@ -25,6 +25,11 @@ spec:
           image: nousresearch/hermes-agent:v0.22.2
           imagePullPolicy: IfNotPresent
           env:
+            - name: INFERENCE_BACKEND_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: inference-backend
+                  key: INFERENCE_BACKEND_KEY
             - name: HERMES_HOME
               value: /opt/data
             - name: HERMES_UID
@@ -37,6 +42,8 @@ spec:
               mkdir -p /opt/data /workspace
               chown 10010:10010 /opt/data /workspace
               mkdir -p /opt/data/backups/config
+              chown 0:0 /opt/data/backups/config
+              chmod 700 /opt/data/backups/config
               chown -R 10010:10000 /opt/data/backups/config
               if [ ! -e /opt/data/config.yaml ]; then
                 cp /config/config.yaml /opt/data/config.yaml
@@ -47,6 +54,7 @@ spec:
               fi
               HERMES_HOME=/opt/data /opt/hermes/.venv/bin/python -c '
               from hermes_cli.config import load_config, set_config_value
+              import os
               config = load_config()
               endpoints = {
                   "mlops-node-7": "http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1",
@@ -56,6 +64,7 @@ spec:
               if not isinstance(providers, dict):
                   providers = {}
               for name, url in endpoints.items():
+                  set_config_value(f"providers.{name}.api_key", os.environ["INFERENCE_BACKEND_KEY"], force=True)
                   entry = providers.get(name)
                   if not isinstance(entry, dict) or entry.get("base_url") != url:
                       set_config_value(f"providers.{name}.base_url", url, force=True)
@@ -66,9 +75,12 @@ spec:
               if not isinstance(api_server, dict) or api_server.get("enabled") is not True:
                   set_config_value("platforms.api_server.enabled", "true", force=True)
               model = config.get("model")
+              set_config_value("model.api_key", os.environ["INFERENCE_BACKEND_KEY"], force=True)
               if isinstance(model, dict) and model.get("provider") == "custom":
                   set_config_value("model.provider", "custom:mlops-node-7")
               '
+              chown 0:0 /opt/data/config.yaml
+              chmod 600 /opt/data/config.yaml
               chown 10010:10010 /opt/data/config.yaml
               chown -R 10010:10000 /opt/data/backups/config
           securityContext:

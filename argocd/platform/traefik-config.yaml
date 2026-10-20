@@ -5,11 +5,34 @@ metadata:
   namespace: kube-system
 spec:
   valuesContent: |-
+    hostNetwork: true
+    updateStrategy:
+      type: Recreate
+      rollingUpdate: null
+    ports:
+      web:
+        port: 80
+      websecure:
+        port: 443
+      metrics:
+        port: 19100
+    securityContext:
+      capabilities:
+        drop: [ALL]
+        add: [NET_BIND_SERVICE]
+    podSecurityContext:
+      runAsUser: 0
+      runAsGroup: 0
+      runAsNonRoot: false
+    nodeSelector:
+      node-role.kubernetes.io/control-plane: "true"
     tolerations:
       - key: node-role.kubernetes.io/control-plane
         operator: Exists
         effect: NoSchedule
     service:
+      spec:
+        type: ClusterIP
       annotations:
         svccontroller.k3s.cattle.io/tolerations: |-
           - key: node-role.kubernetes.io/control-plane

@@ -28,6 +28,9 @@ migrationJob:
     argocd.argoproj.io/sync-wave: "-1"
   ttlSecondsAfterFinished: null
 
+environmentSecrets:
+  - inference-backend
+
 envVars:
   DOCS_URL: /docs
   ROOT_REDIRECT_URL: /ui/
@@ -44,7 +47,7 @@ proxy_config:
       litellm_params:
         model: openai/Gemma-4-31B-QAT-Vision
         api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: not-required
+        api_key: os.environ/INFERENCE_BACKEND_KEY
       model_info:
         id: node4-gemma4-31b-vision
         max_tokens: 32768
@@ -57,7 +60,7 @@ proxy_config:
       litellm_params:
         model: openai/Gemma-4-31B-QAT-NoThink
         api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: not-required
+        api_key: os.environ/INFERENCE_BACKEND_KEY
       model_info:
         id: node4-gemma4-31b-nothink
         max_tokens: 32768
@@ -69,7 +72,7 @@ proxy_config:
       litellm_params:
         model: openai/Qwen3.6-35B-A3B-DFlash-Low
         api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: not-required
+        api_key: os.environ/INFERENCE_BACKEND_KEY
       model_info:
         id: node4-qwen36-dflash-low
         max_tokens: 32768
@@ -81,7 +84,7 @@ proxy_config:
       litellm_params:
         model: openai/Qwen3.6-35B-A3B-DFlash-NoThink
         api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: not-required
+        api_key: os.environ/INFERENCE_BACKEND_KEY
       model_info:
         id: node4-qwen36-dflash-nothink
         max_tokens: 32768
@@ -92,7 +95,7 @@ proxy_config:
       litellm_params:
         model: openai/Muse-Glimmer-30B-128K
         api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: not-required
+        api_key: os.environ/INFERENCE_BACKEND_KEY
       model_info:
         id: node6-muse-glimmer-128k
         max_tokens: 16384
@@ -104,7 +107,7 @@ proxy_config:
       litellm_params:
         model: openai/Muse-Glimmer-30B-256K-VRAM
         api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: not-required
+        api_key: os.environ/INFERENCE_BACKEND_KEY
       model_info:
         id: node6-muse-glimmer-256k-vram
         max_tokens: 32768
@@ -116,7 +119,7 @@ proxy_config:
       litellm_params:
         model: openai/Muse-Glimmer-30B-512K-Hybrid
         api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: not-required
+        api_key: os.environ/INFERENCE_BACKEND_KEY
       model_info:
         id: node6-muse-glimmer-512k-hybrid
         max_tokens: 32768
@@ -128,7 +131,7 @@ proxy_config:
       litellm_params:
         model: openai/Muse-Glimmer-30B-Vision
         api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: not-required
+        api_key: os.environ/INFERENCE_BACKEND_KEY
       model_info:
         id: node6-muse-glimmer-vision
         max_tokens: 16384
@@ -141,7 +144,7 @@ proxy_config:
       litellm_params:
         model: openai/Qwen3-Coder-30B-A3B
         api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: not-required
+        api_key: os.environ/INFERENCE_BACKEND_KEY
       model_info:
         id: node7-qwen3-coder-30b
         max_tokens: 16384
@@ -152,7 +155,7 @@ proxy_config:
       litellm_params:
         model: openai/Qwen3.8-Flash-Next-Low
         api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: not-required
+        api_key: os.environ/INFERENCE_BACKEND_KEY
       model_info:
         id: node7-qwen38-flash-low
         max_tokens: 16384
@@ -164,7 +167,7 @@ proxy_config:
       litellm_params:
         model: openai/Qwen3.8-Flash-Next-Medium
         api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: not-required
+        api_key: os.environ/INFERENCE_BACKEND_KEY
       model_info:
         id: node7-qwen38-flash-medium
         max_tokens: 16384
@@ -176,7 +179,7 @@ proxy_config:
       litellm_params:
         model: openai/Qwen3.8-Flash-Next-NoThink
         api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: not-required
+        api_key: os.environ/INFERENCE_BACKEND_KEY
       model_info:
         id: node7-qwen38-flash-nothink
         max_tokens: 16384
@@ -187,7 +190,7 @@ proxy_config:
       litellm_params:
         model: openai/GLM-5.3-Flash
         api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: not-required
+        api_key: os.environ/INFERENCE_BACKEND_KEY
       model_info:
         id: node9-glm53-flash
         max_tokens: 16384
@@ -199,7 +202,7 @@ proxy_config:
       litellm_params:
         model: openai/Qwen3.8-27B-Low
         api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: not-required
+        api_key: os.environ/INFERENCE_BACKEND_KEY
       model_info:
         id: node9-qwen38-27b-low
         max_tokens: 32768
@@ -211,7 +214,7 @@ proxy_config:
       litellm_params:
         model: openai/Qwen3.8-27B-Medium
         api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: not-required
+        api_key: os.environ/INFERENCE_BACKEND_KEY
       model_info:
         id: node9-qwen38-27b-medium
         max_tokens: 32768
@@ -223,7 +226,7 @@ proxy_config:
       litellm_params:
         model: openai/Qwen3.8-27B-NoThink
         api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: not-required
+        api_key: os.environ/INFERENCE_BACKEND_KEY
       model_info:
         id: node9-qwen38-27b-nothink
         max_tokens: 32768
@@ -234,7 +237,7 @@ proxy_config:
       litellm_params:
         model: openai/Qwen3.6-35B-A3B-DFlash-NoThink
         api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: not-required
+        api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
         weight: 2
       model_info:
@@ -246,7 +249,7 @@ proxy_config:
       litellm_params:
         model: openai/Qwen3-Coder-30B-A3B
         api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: not-required
+        api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
         weight: 1
       model_info:
@@ -258,7 +261,7 @@ proxy_config:
       litellm_params:
         model: openai/Qwen3.6-35B-A3B-DFlash-Low
         api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: not-required
+        api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
       model_info:
         max_tokens: 32768
@@ -270,7 +273,7 @@ proxy_config:
       litellm_params:
         model: openai/Muse-Glimmer-30B-128K
         api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: not-required
+        api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 2
       model_info:
         max_tokens: 16384
@@ -282,7 +285,7 @@ proxy_config:
       litellm_params:
         model: openai/Qwen3.8-Flash-Next-Medium
         api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: not-required
+        api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
       model_info:
         max_tokens: 16384
@@ -294,7 +297,7 @@ proxy_config:
       litellm_params:
         model: openai/Qwen3.8-27B-Medium
         api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: not-required
+        api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 2
       model_info:
         max_tokens: 32768
@@ -306,7 +309,7 @@ proxy_config:
       litellm_params:
         model: openai/Muse-Glimmer-30B-Vision
         api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: not-required
+        api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
       model_info:
         max_tokens: 16384
@@ -319,7 +322,7 @@ proxy_config:
       litellm_params:
         model: openai/Gemma-4-31B-QAT-Vision
         api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: not-required
+        api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 2
       model_info:
         max_tokens: 32768
@@ -332,7 +335,7 @@ proxy_config:
       litellm_params:
         model: openai/Qwen3.6-35B-A3B-DFlash-Low
         api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: not-required
+        api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
       model_info:
         max_tokens: 32768
@@ -344,7 +347,7 @@ proxy_config:
       litellm_params:
         model: openai/Muse-Glimmer-30B-256K-VRAM
         api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: not-required
+        api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 2
       model_info:
         max_tokens: 32768
@@ -356,7 +359,7 @@ proxy_config:
       litellm_params:
         model: openai/Muse-Glimmer-30B-512K-Hybrid
         api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: not-required
+        api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 3
       model_info:
         max_tokens: 32768

@@ -89,7 +89,7 @@ class LensTests(unittest.TestCase):
         )
         self.assertEqual(
             ingress["annotations"]["external-dns.kubernetes.io/target"],
-            "k3s.ergoshear.dev",
+            "100.126.105.69",
         )
         self.assertEqual(
             ingress["tls"],
