@@ -1,4 +1,5 @@
 from pathlib import Path
+import subprocess
 import unittest
 
 import yaml
@@ -8,6 +9,87 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class SecurityBoundaryTests(unittest.TestCase):
+    def policies(self, app):
+        rendered = subprocess.check_output(
+            ["kubectl", "kustomize", str(ROOT / "apps" / app)], text=True
+        )
+        return {x["metadata"]["name"]: x for x in yaml.safe_load_all(rendered)
+                if x and x["kind"] == "NetworkPolicy"}
+
+    def test_private_namespaces_default_deny_ingress_without_blocking_egress(self):
+        for app, namespace in (("hermes-workspace", "hermes-workspace"),
+                               ("lens", "lens"),
+                               ("kube-prometheus-stack", "monitoring")):
+            with self.subTest(app=app):
+                policies = self.policies(app)
+                deny = policies["default-deny-ingress"]["spec"]
+                self.assertEqual(deny["podSelector"], {})
+                self.assertNotIn("ingress", deny)
+                for policy in policies.values():
+                    self.assertEqual(policy["metadata"]["namespace"], namespace)
+                    self.assertEqual(policy["spec"]["policyTypes"], ["Ingress"])
+                    self.assertNotIn("egress", policy["spec"])
+        for app in ("lens", "kube-prometheus-stack"):
+            application = yaml.safe_load(
+                (ROOT / "argocd/applications" / (app + ".yaml")).read_text()
+            )
+            source = application["spec"]["sources"][1]
+            self.assertEqual(source["ref"], "values")
+            self.assertEqual(source["path"], "apps/" + app)
+
+    def test_hermes_exposes_only_workspace_port_to_ingress_host(self):
+        policies = self.policies("hermes-workspace")
+        self.assertEqual(set(policies), {"default-deny-ingress", "workspace-ingress"})
+        spec = policies["workspace-ingress"]["spec"]
+        self.assertEqual(spec["podSelector"]["matchLabels"],
+                         {"app.kubernetes.io/name": "hermes-workspace"})
+        self.assertEqual(spec["ingress"], [{
+            "from": [{"ipBlock": {"cidr": "100.126.105.69/32"}}],
+            "ports": [{"protocol": "TCP", "port": 3000}],
+        }])
+
+    def test_lens_isolates_clickhouse_and_limits_telemetry_clients(self):
+        policies = self.policies("lens")
+        self.assertEqual(set(policies),
+                         {"default-deny-ingress", "lens-ingress", "clickhouse-ingress"})
+        web = policies["lens-ingress"]["spec"]
+        self.assertEqual(web["podSelector"]["matchLabels"],
+                         {"app.kubernetes.io/component": "lens",
+                          "app.kubernetes.io/instance": "lens"})
+        rule = web["ingress"][0]
+        self.assertEqual(rule["ports"], [{"protocol": "TCP", "port": 4318}])
+        self.assertEqual(rule["from"][0], {"ipBlock": {"cidr": "100.126.105.69/32"}})
+        self.assertEqual(rule["from"][1:], [
+            {"namespaceSelector": {"matchLabels": {"kubernetes.io/metadata.name": app}},
+             "podSelector": {"matchLabels": {"app.kubernetes.io/name": app}}}
+            for app in ("litellm", "hermes-workspace")
+        ])
+        database = policies["clickhouse-ingress"]["spec"]
+        self.assertEqual(database["podSelector"]["matchLabels"],
+                         {"app.kubernetes.io/component": "lens-clickhouse",
+                          "app.kubernetes.io/instance": "lens"})
+        self.assertEqual(database["ingress"], [{
+            "from": [{"podSelector": web["podSelector"]}],
+            "ports": [{"protocol": "TCP", "port": 8123}],
+        }])
+
+    def test_monitoring_preserves_internal_traffic_and_api_admission(self):
+        policies = self.policies("kube-prometheus-stack")
+        self.assertEqual(set(policies),
+                         {"default-deny-ingress", "monitoring-internal",
+                          "operator-admission"})
+        internal = policies["monitoring-internal"]["spec"]
+        self.assertEqual(internal["podSelector"], {})
+        self.assertEqual(internal["ingress"], [{"from": [{"podSelector": {}}]}])
+        admission = policies["operator-admission"]["spec"]
+        self.assertEqual(admission["podSelector"]["matchLabels"], {
+            "app.kubernetes.io/name": "kube-prometheus-stack-prometheus-operator",
+        })
+        self.assertEqual(admission["ingress"], [{
+            "from": [{"ipBlock": {"cidr": "100.126.105.69/32"}}],
+            "ports": [{"protocol": "TCP", "port": 10250}],
+        }])
+
     def test_management_is_tailnet_only_but_litellm_is_public(self):
         middleware = list(yaml.safe_load_all(
             (ROOT / "argocd/platform/management-access.yaml").read_text()
@@ -24,6 +106,9 @@ class SecurityBoundaryTests(unittest.TestCase):
         self.assertTrue(values["hostNetwork"])
         self.assertEqual(values["service"]["spec"]["type"], "ClusterIP")
         self.assertEqual(values["ports"]["websecure"]["port"], 443)
+        provider = values["providers"]["kubernetesIngress"]
+        self.assertFalse(provider["publishedService"]["enabled"])
+        self.assertEqual(provider["ingressEndpoint"]["ip"], "100.126.105.69")
         public = yaml.safe_load((ROOT / "apps/litellm/values.yaml").read_text())
         self.assertNotIn("traefik.ingress.kubernetes.io/router.middlewares",
                          public["ingress"]["annotations"])

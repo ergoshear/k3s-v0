@@ -1,0 +1,63 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: lens
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: lens-ingress
+  namespace: lens
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: lens
+      app.kubernetes.io/instance: lens
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - ipBlock:
+            cidr: 100.126.105.69/32
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: litellm
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: litellm
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: hermes-workspace
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: hermes-workspace
+      ports:
+        - protocol: TCP
+          port: 4318
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: clickhouse-ingress
+  namespace: lens
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: lens-clickhouse
+      app.kubernetes.io/instance: lens
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: lens
+              app.kubernetes.io/instance: lens
+      ports:
+        - protocol: TCP
+          port: 8123

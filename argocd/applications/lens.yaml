@@ -15,6 +15,7 @@ spec:
     - repoURL: git@github.com:ergoshear/k3s.git
       targetRevision: HEAD
       ref: values
+      path: apps/lens
   destination:
     server: https://kubernetes.default.svc
     namespace: lens

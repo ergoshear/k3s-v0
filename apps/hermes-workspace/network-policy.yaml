@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: hermes-workspace
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: workspace-ingress
+  namespace: hermes-workspace
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: hermes-workspace
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        # Host-networked Traefik reaches remote pods from the control-plane IP.
+        - ipBlock:
+            cidr: 100.126.105.69/32
+      ports:
+        - protocol: TCP
+          port: 3000

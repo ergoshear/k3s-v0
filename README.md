@@ -273,6 +273,18 @@ If recursive DNS still caches the former public CNAME, test with
 and repeat for Hermes/Lens. Update these DNS targets if the tailnet node is
 replaced.
 
+Hermes, Lens and monitoring default-deny pod ingress. Host-networked Traefik
+is allowed from control-plane address `100.126.105.69/32` to Hermes port 3000
+and Lens port 4318 only; update those policy peers if that address changes.
+Lens also accepts telemetry from the LiteLLM and Hermes workload selectors.
+Only Lens pods can reach ClickHouse on port 8123. Monitoring permits
+intra-namespace traffic and control-plane admission requests to the operator
+on port 10250. Its host-networked node exporters still depend on host
+firewall rules, not pod NetworkPolicy enforcement. Egress remains unrestricted
+to preserve DNS, metrics scraping and external agent integrations.
+The Lens and monitoring values sources also render their policy Kustomizations,
+so the policies are reconciled by their existing Argo CD Applications.
+
 The installed ServiceLB path source-NATs clients to a pod gateway, even with
 `externalTrafficPolicy: Local`; accepting that address would expose management
 publicly. Traefik therefore runs host-networked on the existing control-plane
@@ -283,6 +295,9 @@ escalation and a read-only root filesystem; the verified nonroot variant
 could not bind low host ports on this Fedora/k3s host. Metrics uses 19100
 to avoid the node-exporter host port. Keep the control-plane host/cloud
 firewalls limited to the existing public 80/443 and home-only 6443 rules.
+Ingress status explicitly publishes the control-plane tailnet IP rather than
+copying an empty ClusterIP Service status. Explicit ExternalDNS target
+annotations retain private management DNS and public LiteLLM DNS.
 
 The two authorized inference clients use `inference-backend` Secrets with
 `INFERENCE_BACKEND_KEY` in their respective namespaces. LiteLLM model keys
@@ -294,8 +309,6 @@ the actual LiteLLM/Hermes pod labels and monitoring health traffic. Its client
 rule intentionally has no fixed port: the operator maps backend port 8080 to
 dynamically allocated proxy targetPorts.
 
-For the approved live rollout, automated sync was paused for `argocd`,
-`hermes-workspace`, `lens`, `litellm` and `tailscale-egress`, because deployment
-from uncommitted local files would otherwise be reverted. No commit was made.
-Review and publish these files before re-enabling those Applications.
-Secrets stay in Kubernetes/private GPU files; preserve them during rollback.
+Publish changes before reconciling the root `argocd` Application and restoring
+automatic sync. Secrets stay in Kubernetes/private GPU files; preserve them
+during rollback.

@@ -38,3 +38,9 @@ spec:
           - key: node-role.kubernetes.io/control-plane
             operator: Exists
             effect: NoSchedule
+    providers:
+      kubernetesIngress:
+        publishedService:
+          enabled: false
+        ingressEndpoint:
+          ip: 100.126.105.69
