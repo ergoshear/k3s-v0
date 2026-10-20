@@ -140,65 +140,18 @@ proxy_config:
       supports_function_calling: true
       supports_reasoning: true
       max_output_tokens: 32768
-  - model_name: mlops-node-7/Qwen3-Coder-30B-A3B
+  # ----------------------------------------------------------------------------
+  # 3. Direct Node Preset: mlops-node-7 (Strix Halo 128GB - PR #24423 Diffusion)
+  # ----------------------------------------------------------------------------
+  - model_name: mlops-node-7/DiffusionGemma-26B-A4B
     litellm_params:
-      model: openai/Qwen3-Coder-30B-A3B
-      api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
+      model: openai/DiffusionGemma-26B-A4B
+      api_base: http://192.168.202.17:8080/v1
+      api_key: os.environ/LLAMA_BACKEND_KEY
     model_info:
-      id: node7-qwen3-coder-30b
-      max_tokens: 16384
-      max_input_tokens: 114688
-      supports_function_calling: true
-      max_output_tokens: 16384
-  - model_name: mlops-node-7/Qwen3.8-Flash-Next-Low
-    litellm_params:
-      model: openai/Qwen3.8-Flash-Next
-      api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
-      extra_body:
-        chat_template_kwargs:
-          reasoning_effort: low
-    model_info:
-      id: node7-qwen38-flash-low
-      max_tokens: 16384
-      max_input_tokens: 114688
-      supports_function_calling: true
-      supports_reasoning: true
-      max_output_tokens: 16384
-  - model_name: mlops-node-7/Qwen3.8-Flash-Next-Medium
-    litellm_params:
-      model: openai/Qwen3.8-Flash-Next
-      api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
-      extra_body:
-        chat_template_kwargs:
-          reasoning_effort: medium
-    model_info:
-      id: node7-qwen38-flash-medium
-      max_tokens: 16384
-      max_input_tokens: 114688
-      supports_function_calling: true
-      supports_reasoning: true
-      max_output_tokens: 16384
-  - model_name: mlops-node-7/Qwen3.8-Flash-Next-NoThink
-    litellm_params:
-      model: openai/Qwen3.8-Flash-Next
-      api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
-      temperature: 0.7
-      top_p: 0.8
-      extra_body:
-        reasoning_format: none
-        chat_template_kwargs:
-          enable_thinking: false
-          reasoning_effort: none
-    model_info:
-      id: node7-qwen38-flash-nothink
-      max_tokens: 16384
-      max_input_tokens: 114688
-      supports_function_calling: true
-      max_output_tokens: 16384
+      id: node7-diffusiongemma-26b-a4b
+      max_tokens: 8192
+      max_input_tokens: 57344
   - model_name: mlops-node-9/Qwen3.6-35B-A3B-DFlash-512K-Low
     litellm_params:
       model: openai/Qwen3.6-35B-A3B-DFlash-512K
@@ -292,18 +245,6 @@ proxy_config:
       max_input_tokens: 229376
       supports_function_calling: true
       max_output_tokens: 32768
-  - model_name: ergoshear-fast-edit
-    litellm_params:
-      model: openai/Qwen3-Coder-30B-A3B
-      api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
-      order: 1
-      weight: 1
-    model_info:
-      max_tokens: 16384
-      max_input_tokens: 114688
-      supports_function_calling: true
-      max_output_tokens: 16384
   - model_name: ergoshear-coder
     litellm_params:
       model: openai/Qwen3.6-35B-A3B-DFlash-Low
@@ -343,21 +284,6 @@ proxy_config:
       supports_function_calling: true
       supports_reasoning: true
       max_output_tokens: 32768
-  - model_name: ergoshear-architect
-    litellm_params:
-      model: openai/Qwen3.8-Flash-Next
-      api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
-      order: 1
-      extra_body:
-        chat_template_kwargs:
-          reasoning_effort: medium
-    model_info:
-      max_tokens: 16384
-      max_input_tokens: 114688
-      supports_function_calling: true
-      supports_reasoning: true
-      max_output_tokens: 16384
   - model_name: ergoshear-architect
     litellm_params:
       model: openai/Qwen3.8-27B
