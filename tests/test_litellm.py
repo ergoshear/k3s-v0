@@ -111,7 +111,10 @@ class LiteLLMTests(unittest.TestCase):
         self.assertEqual(env["PROXY_ADMIN_ID"], "christopher@agilityqa.com")
 
     def test_proxy_registers_concrete_models_from_all_tailscale_backends(self):
-        model_list = self.values["proxy_config"]["model_list"]
+        model_list = [
+            entry for entry in self.values["proxy_config"]["model_list"]
+            if entry["model_name"].startswith("mlops-node-")
+        ]
         presets = {
             "mlops-node-4": (
                 "Gemma-4-31B-QAT-Vision",
@@ -152,10 +155,127 @@ class LiteLLMTests(unittest.TestCase):
                 f"http://{node}.hermes-workspace.svc.cluster.local:8080/v1",
             )
             self.assertEqual(entry["litellm_params"]["api_key"], "not-required")
-        self.assertNotIn("litellm_settings", self.values["proxy_config"])
         self.assertEqual(
             self.values["proxy_config"]["general_settings"]["master_key"],
             "os.environ/PROXY_MASTER_KEY",
+        )
+
+    def test_direct_model_metadata_matches_context_budgets_and_capabilities(self):
+        direct = {
+            entry["model_name"]: entry["model_info"]
+            for entry in self.values["proxy_config"]["model_list"]
+            if entry["model_name"].startswith("mlops-node-")
+        }
+        self.assertEqual(len({info["id"] for info in direct.values()}), 16)
+        for name, info in direct.items():
+            node, model = name.split("/", 1)
+            output, context = (32768, 262144)
+            if node == "mlops-node-7" or model == "GLM-5.3-Flash":
+                output, context = (16384, 131072)
+            elif model == "Muse-Glimmer-30B-128K":
+                output, context = (16384, 131072)
+            elif model == "Muse-Glimmer-30B-Vision":
+                output, context = (16384, 98304)
+            elif model == "Muse-Glimmer-30B-512K-Hybrid":
+                output, context = (32768, 524288)
+            self.assertEqual(info["max_tokens"], output, name)
+            self.assertEqual(info["max_output_tokens"], output, name)
+            self.assertEqual(info["max_input_tokens"], context - output, name)
+            self.assertTrue(info["supports_function_calling"], name)
+            vision = "Vision" in model or model == "Gemma-4-31B-QAT-NoThink"
+            self.assertEqual(info.get("supports_vision", False), vision, name)
+            reasoning = "NoThink" not in model and model != "Qwen3-Coder-30B-A3B"
+            self.assertEqual(info.get("supports_reasoning", False), reasoning, name)
+
+    def test_semantic_groups_reuse_backend_routes_and_metadata(self):
+        entries = self.values["proxy_config"]["model_list"]
+        direct = {
+            (entry["litellm_params"]["api_base"], entry["litellm_params"]["model"]):
+                entry
+            for entry in entries if entry["model_name"].startswith("mlops-node-")
+        }
+        expected = {
+            "ergoshear-fast-edit": [
+                ("mlops-node-4/Qwen3.6-35B-A3B-DFlash-NoThink", 1, 2),
+                ("mlops-node-7/Qwen3-Coder-30B-A3B", 1, 1),
+            ],
+            "ergoshear-coder": [
+                ("mlops-node-4/Qwen3.6-35B-A3B-DFlash-Low", 1, None),
+                ("mlops-node-6/Muse-Glimmer-30B-128K", 2, None),
+            ],
+            "ergoshear-architect": [
+                ("mlops-node-7/Qwen3.8-Flash-Next-Medium", 1, None),
+                ("mlops-node-9/Qwen3.8-27B-Medium", 2, None),
+            ],
+            "ergoshear-vision": [
+                ("mlops-node-6/Muse-Glimmer-30B-Vision", 1, None),
+                ("mlops-node-4/Gemma-4-31B-QAT-Vision", 2, None),
+            ],
+            "ergoshear-long-context": [
+                ("mlops-node-4/Qwen3.6-35B-A3B-DFlash-Low", 1, None),
+                ("mlops-node-6/Muse-Glimmer-30B-256K-VRAM", 2, None),
+                ("mlops-node-6/Muse-Glimmer-30B-512K-Hybrid", 3, None),
+            ],
+        }
+        self.assertEqual(len(entries), 27)
+        for group, deployments in expected.items():
+            actual = []
+            for entry in entries:
+                if entry["model_name"] != group:
+                    continue
+                params = entry["litellm_params"]
+                backend = direct[(params["api_base"], params["model"])]
+                self.assertEqual(params["api_key"], backend["litellm_params"]["api_key"])
+                self.assertEqual(
+                    entry["model_info"],
+                    {key: value for key, value in backend["model_info"].items()
+                     if key != "id"},
+                )
+                actual.append(
+                    (backend["model_name"], params["order"], params.get("weight"))
+                )
+            self.assertEqual(actual, deployments, group)
+
+    def test_router_aliases_retries_and_fallbacks(self):
+        router = self.values["proxy_config"]["router_settings"]
+        self.assertEqual(router["routing_strategy"], "simple-shuffle")
+        self.assertTrue(router["enable_pre_call_checks"])
+        self.assertEqual(router["num_retries"], 2)
+        self.assertEqual(router["timeout"], 300)
+        self.assertEqual(router["cooldown_time"], 15)
+        self.assertEqual(
+            router["model_group_alias"],
+            {
+                "fast": "ergoshear-fast-edit",
+                "coder": "ergoshear-coder",
+                "architect": "ergoshear-architect",
+                "vision": "ergoshear-vision",
+                "long-context": "ergoshear-long-context",
+                "default": "ergoshear-coder",
+                "gpt-4o": {"model": "ergoshear-coder", "hidden": True},
+                "gpt-4o-mini": {"model": "ergoshear-fast-edit", "hidden": True},
+                "o3-mini": {"model": "ergoshear-architect", "hidden": True},
+                "claude-3-7-sonnet-latest": {
+                    "model": "ergoshear-coder", "hidden": True,
+                },
+            },
+        )
+        self.assertEqual(
+            router["fallbacks"],
+            [
+                {"ergoshear-fast-edit": ["ergoshear-coder"]},
+                {"ergoshear-coder": ["ergoshear-fast-edit", "ergoshear-architect"]},
+                {"ergoshear-vision": ["mlops-node-4/Gemma-4-31B-QAT-NoThink"]},
+            ],
+        )
+        self.assertEqual(
+            self.values["proxy_config"]["litellm_settings"],
+            {
+                "drop_params": True,
+                "modify_params": True,
+                "set_verbose": False,
+                "request_timeout": 300,
+            },
         )
 
     def test_database_and_migrations_run_before_litellm_resources(self):

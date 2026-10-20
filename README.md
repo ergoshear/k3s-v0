@@ -152,6 +152,28 @@ the remaining ID exactly matches its Salt `models.ini` preset. Update these
 entries and their tests whenever Salt adds or renames a preset. Listing models
 does not load them; llama.cpp loads the selected preset when it is requested.
 
+The same configuration adds five semantic groups: `ergoshear-fast-edit`,
+`ergoshear-coder`, `ergoshear-architect`, `ergoshear-vision`, and
+`ergoshear-long-context`. Fast-edit uses weighted random routing (`simple-shuffle`)
+with a 2:1 node-4/node-7 ratio over many requests, not a guaranteed sequence.
+Other groups prefer their lowest eligible `order`, with secondary/tertiary
+deployments available when higher-priority deployments are unavailable or fail
+pre-call checks. Group deployments carry the same capability and token metadata
+as their direct presets. These limits describe the supplied configuration, not
+independently measured model capabilities.
+
+Short aliases are `fast`, `coder`, `architect`, `vision`, `long-context`, and
+`default` (coder). Hidden compatibility aliases `gpt-4o`, `gpt-4o-mini`, `o3-mini`,
+and `claude-3-7-sonnet-latest` select local groups, not the named hosted models.
+The router enables pre-call checks, two retries, 300-second timeouts,
+15-second cooldowns, and the configured cross-group fallbacks. Parameter
+dropping/modification is enabled for compatibility; unsupported options may be
+removed rather than rejected. Model metadata declares output budgets explicitly
+with `max_output_tokens`, alongside the supplied `max_tokens` and input limits.
+All routes retain the Tailscale Service addresses and existing master key;
+LAN-only addresses and the attachment's alternate master-key variable are not
+used.
+
 The workspace image is pinned to upstream commit `c631425` and the agent to
 `v0.22.2`. The Deployment uses `Recreate` to avoid attaching local-path claims
 to overlapping pods during updates. Deleting either PVC deletes its
