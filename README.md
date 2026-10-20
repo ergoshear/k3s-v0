@@ -143,7 +143,7 @@ do not delete this Secret or rotate it without a recovery/migration plan.
 
 ## LiteLLM model discovery
 
-LiteLLM explicitly registers the 16 llama.cpp router presets managed by Salt
+LiteLLM explicitly registers the 17 llama.cpp router presets managed by Salt
 in [the Helm values](apps/litellm/values.yaml), routing requests through the
 Tailscale egress Services. Its `/v1/models` list and admin UI use concrete IDs
 with the server prefixes `mlops-node-4/`, `mlops-node-6/`, `mlops-node-7/`, and
@@ -154,13 +154,13 @@ does not load them; llama.cpp loads the selected preset when it is requested.
 
 The same configuration adds five semantic groups: `ergoshear-fast-edit`,
 `ergoshear-coder`, `ergoshear-architect`, `ergoshear-vision`, and
-`ergoshear-long-context`. Fast-edit uses weighted random routing (`simple-shuffle`)
-with a 2:1 node-4/node-7 ratio over many requests, not a guaranteed sequence.
-Other groups prefer their lowest eligible `order`, with secondary/tertiary
-deployments available when higher-priority deployments are unavailable or fail
-pre-call checks. Group deployments carry the same capability and token metadata
-as their direct presets. These limits describe the supplied configuration, not
-independently measured model capabilities.
+`ergoshear-long-context`. The router uses the `least-busy` strategy. Fast-edit
+assigns a 2:1 weight to node 4 versus node 7; other groups prefer the lowest
+eligible `order`. Group deployments carry the same capability and token
+metadata as their direct presets. These limits describe the supplied
+configuration, not independently measured model capabilities. The gateway
+routes through in-cluster `hermes-workspace` Services and authenticates with
+`INFERENCE_BACKEND_KEY`.
 
 Short aliases are `fast`, `coder`, `architect`, `vision`, `long-context`, and
 `default` (coder). Hidden compatibility aliases `gpt-4o`, `gpt-4o-mini`, `o3-mini`,

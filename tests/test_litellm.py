@@ -135,21 +135,31 @@ class LiteLLMTests(unittest.TestCase):
                 "Qwen3.8-Flash-Next-NoThink",
             ),
             "mlops-node-9": (
-                "GLM-5.3-Flash",
+                "Qwen3.6-35B-A3B-DFlash-512K-Low",
+                "Qwen3.6-35B-A3B-DFlash-512K-NoThink",
                 "Qwen3.8-27B-Low",
                 "Qwen3.8-27B-Medium",
                 "Qwen3.8-27B-NoThink",
             ),
         }
 
-        self.assertEqual(len(model_list), 16)
+        self.assertEqual(len(model_list), 17)
         self.assertEqual(
             {entry["model_name"] for entry in model_list},
             {f"{node}/{model}" for node, models in presets.items() for model in models},
         )
         for entry in model_list:
             node, model = entry["model_name"].split("/", 1)
-            self.assertEqual(entry["litellm_params"]["model"], f"openai/{model}")
+            expected_model = model
+            if node == "mlops-node-7" and model.startswith("Qwen3.8-"):
+                expected_model = "Qwen3.8-Flash-Next"
+            elif node == "mlops-node-9" and model.startswith("Qwen3.6-"):
+                expected_model = "Qwen3.6-35B-A3B-DFlash-512K"
+            elif node == "mlops-node-9" and model.startswith("Qwen3.8-"):
+                expected_model = "Qwen3.8-27B"
+            self.assertEqual(
+                entry["litellm_params"]["model"], f"openai/{expected_model}"
+            )
             self.assertEqual(
                 entry["litellm_params"]["api_base"],
                 f"http://{node}.hermes-workspace.svc.cluster.local:8080/v1",
@@ -166,17 +176,19 @@ class LiteLLMTests(unittest.TestCase):
             for entry in self.values["proxy_config"]["model_list"]
             if entry["model_name"].startswith("mlops-node-")
         }
-        self.assertEqual(len({info["id"] for info in direct.values()}), 16)
+        self.assertEqual(len({info["id"] for info in direct.values()}), 17)
         for name, info in direct.items():
             node, model = name.split("/", 1)
             output, context = (32768, 262144)
-            if node == "mlops-node-7" or model == "GLM-5.3-Flash":
+            if node == "mlops-node-7":
                 output, context = (16384, 131072)
             elif model == "Muse-Glimmer-30B-128K":
                 output, context = (16384, 131072)
             elif model == "Muse-Glimmer-30B-Vision":
                 output, context = (16384, 98304)
-            elif model == "Muse-Glimmer-30B-512K-Hybrid":
+            elif model == "Muse-Glimmer-30B-512K-Hybrid" or model.startswith(
+                "Qwen3.6-35B-A3B-DFlash-512K-"
+            ):
                 output, context = (32768, 524288)
             self.assertEqual(info["max_tokens"], output, name)
             self.assertEqual(info["max_output_tokens"], output, name)
@@ -189,11 +201,6 @@ class LiteLLMTests(unittest.TestCase):
 
     def test_semantic_groups_reuse_backend_routes_and_metadata(self):
         entries = self.values["proxy_config"]["model_list"]
-        direct = {
-            (entry["litellm_params"]["api_base"], entry["litellm_params"]["model"]):
-                entry
-            for entry in entries if entry["model_name"].startswith("mlops-node-")
-        }
         expected = {
             "ergoshear-fast-edit": [
                 ("mlops-node-4/Qwen3.6-35B-A3B-DFlash-NoThink", 1, 2),
@@ -202,6 +209,7 @@ class LiteLLMTests(unittest.TestCase):
             "ergoshear-coder": [
                 ("mlops-node-4/Qwen3.6-35B-A3B-DFlash-Low", 1, None),
                 ("mlops-node-6/Muse-Glimmer-30B-128K", 2, None),
+                ("mlops-node-9/Qwen3.6-35B-A3B-DFlash-512K-Low", 2, None),
             ],
             "ergoshear-architect": [
                 ("mlops-node-7/Qwen3.8-Flash-Next-Medium", 1, None),
@@ -212,33 +220,39 @@ class LiteLLMTests(unittest.TestCase):
                 ("mlops-node-4/Gemma-4-31B-QAT-Vision", 2, None),
             ],
             "ergoshear-long-context": [
-                ("mlops-node-4/Qwen3.6-35B-A3B-DFlash-Low", 1, None),
-                ("mlops-node-6/Muse-Glimmer-30B-256K-VRAM", 2, None),
-                ("mlops-node-6/Muse-Glimmer-30B-512K-Hybrid", 3, None),
+                ("mlops-node-9/Qwen3.6-35B-A3B-DFlash-512K-Low", 1, None),
+                ("mlops-node-4/Qwen3.6-35B-A3B-DFlash-Low", 2, None),
+                ("mlops-node-6/Muse-Glimmer-30B-256K-VRAM", 3, None),
             ],
         }
-        self.assertEqual(len(entries), 27)
+        self.assertEqual(len(entries), 29)
+        direct_by_name = {
+            entry["model_name"]: entry for entry in entries
+            if entry["model_name"].startswith("mlops-node-")
+        }
         for group, deployments in expected.items():
-            actual = []
-            for entry in entries:
-                if entry["model_name"] != group:
-                    continue
+            actual = [entry for entry in entries if entry["model_name"] == group]
+            self.assertEqual(len(actual), len(deployments), group)
+            for entry, (backend_name, order, weight) in zip(actual, deployments):
                 params = entry["litellm_params"]
-                backend = direct[(params["api_base"], params["model"])]
-                self.assertEqual(params["api_key"], backend["litellm_params"]["api_key"])
+                backend_params = direct_by_name[backend_name]["litellm_params"]
+                self.assertEqual(params["order"], order)
+                self.assertEqual(params.get("weight"), weight)
+                self.assertEqual(params["api_key"], "os.environ/INFERENCE_BACKEND_KEY")
+                self.assertEqual(params["api_base"], backend_params["api_base"])
+                self.assertEqual(params["model"], backend_params["model"])
+                self.assertEqual(params.get("extra_body"), backend_params.get("extra_body"))
+                self.assertEqual(params.get("temperature"), backend_params.get("temperature"))
+                self.assertEqual(params.get("top_p"), backend_params.get("top_p"))
                 self.assertEqual(
                     entry["model_info"],
-                    {key: value for key, value in backend["model_info"].items()
+                    {key: value for key, value in direct_by_name[backend_name]["model_info"].items()
                      if key != "id"},
                 )
-                actual.append(
-                    (backend["model_name"], params["order"], params.get("weight"))
-                )
-            self.assertEqual(actual, deployments, group)
 
     def test_router_aliases_retries_and_fallbacks(self):
         router = self.values["proxy_config"]["router_settings"]
-        self.assertEqual(router["routing_strategy"], "simple-shuffle")
+        self.assertEqual(router["routing_strategy"], "least-busy")
         self.assertTrue(router["enable_pre_call_checks"])
         self.assertEqual(router["num_retries"], 2)
         self.assertEqual(router["timeout"], 300)
@@ -273,6 +287,9 @@ class LiteLLMTests(unittest.TestCase):
             {
                 "drop_params": True,
                 "modify_params": True,
+                "allowed_openai_params": [
+                    "chat_template_kwargs", "reasoning_format", "reasoning_budget",
+                ],
                 "set_verbose": False,
                 "request_timeout": 300,
             },
