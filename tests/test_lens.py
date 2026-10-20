@@ -50,7 +50,7 @@ class LensTests(unittest.TestCase):
             "RespectIgnoreDifferences=true", spec["syncPolicy"]["syncOptions"]
         )
         self.assertEqual(
-            spec["ignoreDifferences"],
+            [rule for rule in spec["ignoreDifferences"] if rule["kind"] == "Secret"],
             [
                 {
                     "group": "",
@@ -60,6 +60,20 @@ class LensTests(unittest.TestCase):
                     "jsonPointers": ["/data"],
                 }
                 for name in ("lens-admin", "lens-clickhouse")
+            ],
+        )
+        statefulset_rule = next(
+            rule for rule in spec["ignoreDifferences"]
+            if rule["kind"] == "StatefulSet"
+        )
+        self.assertEqual(statefulset_rule["name"], "lens-clickhouse")
+        self.assertEqual(
+            statefulset_rule["jsonPointers"],
+            [
+                "/spec/volumeClaimTemplates/0/apiVersion",
+                "/spec/volumeClaimTemplates/0/kind",
+                "/spec/volumeClaimTemplates/0/status",
+                "/spec/volumeClaimTemplates/0/spec/volumeMode",
             ],
         )
 
