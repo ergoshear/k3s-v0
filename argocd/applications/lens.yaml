@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: lens
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/BerriAI/lens.git
+      targetRevision: e320cabdf0a67aa52cafe2ede1b4d10ad66dafad
+      path: helm/lens
+      helm:
+        valueFiles:
+          - $values/apps/lens/values.yaml
+    - repoURL: git@github.com:ergoshear/k3s.git
+      targetRevision: HEAD
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: lens
+  ignoreDifferences:
+    - group: ""
+      kind: Secret
+      name: lens-admin
+      namespace: lens
+      jsonPointers:
+        - /data
+    - group: ""
+      kind: Secret
+      name: lens-clickhouse
+      namespace: lens
+      jsonPointers:
+        - /data
+  syncPolicy:
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - RespectIgnoreDifferences=true

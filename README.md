@@ -89,6 +89,38 @@ ProxyGroup and model endpoint Services. Before syncing these applications:
 The endpoint uses an in-cluster Service name, so cluster DNS does not need
 MagicDNS forwarding or a `DNSConfig` resource.
 
+## Lens
+
+The [Lens Application](argocd/applications/lens.yaml) deploys the standalone
+Lens UI and API at `https://lens.ergoshear.dev/ui/`, with ClickHouse and Keeper
+sharing a retained 20Gi local-path volume. The upstream chart and custom image
+are pinned to the same source commit in [the values](apps/lens/values.yaml);
+the deployed image additionally uses its immutable registry digest.
+The custom Lens image targets amd64 nodes. ClickHouse is not publicly exposed.
+The private GHCR image requires the separately provisioned `lens-ghcr`
+image-pull Secret in the `lens` namespace. Keep it outside Git and refresh it
+when its GitHub credential expires or is rotated; prefer a dedicated credential
+with only `read:packages` access for routine pulls.
+
+Argo CD preserves the chart-generated `lens-admin` and `lens-clickhouse`
+credentials during syncs. Retrieve the `admin-token` key from the `lens-admin`
+Secret in the `lens` namespace using a private terminal to sign in; never
+commit or share it. Back up both these credentials and the entire ClickHouse
+volume, including Keeper state, together. Local-path storage does not provide
+automatic cross-node failover.
+
+The pinned LiteLLM 1.106.0 image exposes the older Lens connection contract.
+This independent Lens deployment remains standalone until a compatible gateway
+release is selected and tested. It does not change LiteLLM's SSO, model routing,
+or automatically instrument agents. Create a Lens tracing key and configure an
+agent exporter to send a first trace to the public Lens endpoint.
+
+To rebuild the image, check out the exact Lens source revision from the
+Application, build `deploy/runtime/Dockerfile` with `LENS_VERSION` set to that
+revision, and publish it to the configured image repository. Do not substitute
+a moving development tag or upgrade the chart without checking storage and
+protocol compatibility.
+
 ## LiteLLM SSO
 
 The [Helm values](apps/litellm/values.yaml) persist AWS IAM Identity Center

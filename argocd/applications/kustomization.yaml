@@ -5,6 +5,7 @@ resources:
   - hermes-workspace.yaml
   - kube-prometheus-stack.yaml
   - litellm.yaml
+  - lens.yaml
   - tailscale-egress.yaml
   - tailscale-operator.yaml
   - trivy-operator.yaml

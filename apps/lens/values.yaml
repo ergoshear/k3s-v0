@@ -1,0 +1,29 @@
+image:
+  repository: ghcr.io/ergoshear/lens
+  tag: e320cabdf0a67aa52cafe2ede1b4d10ad66dafad
+  digest: sha256:b1b65752db13cc2f3dc4ef5aa2c9be090e053ce906866d7ecd29e2cd51396298
+
+imagePullSecrets:
+  - name: lens-ghcr
+
+publicUrl: https://lens.ergoshear.dev
+
+nodeSelector:
+  kubernetes.io/arch: amd64
+
+clickhouse:
+  storage: 20Gi
+  storageClassName: local-path
+
+ingress:
+  enabled: true
+  className: traefik
+  host: lens.ergoshear.dev
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-route53
+    external-dns.kubernetes.io/target: k3s.ergoshear.dev
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+  tls:
+    - secretName: lens-tls
+      hosts:
+        - lens.ergoshear.dev
