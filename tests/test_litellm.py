@@ -67,6 +67,22 @@ class LiteLLMTests(unittest.TestCase):
             "websecure",
         )
 
+    def test_argocd_preserves_existing_encryption_key_during_sync(self):
+        spec = self.application["spec"]
+        self.assertIn(
+            {
+                "group": "",
+                "kind": "Secret",
+                "name": "litellm-masterkey",
+                "namespace": "litellm",
+                "jsonPointers": ["/data/masterkey"],
+            },
+            spec["ignoreDifferences"],
+        )
+        self.assertIn(
+            "RespectIgnoreDifferences=true", spec["syncPolicy"]["syncOptions"]
+        )
+
     def test_root_redirects_to_dashboard_and_keeps_api_docs(self):
         self.assertEqual(
             {key: self.values["envVars"][key] for key in (

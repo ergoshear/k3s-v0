@@ -18,6 +18,13 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: litellm
+  ignoreDifferences:
+    - group: ""
+      kind: Secret
+      name: litellm-masterkey
+      namespace: litellm
+      jsonPointers:
+        - /data/masterkey
   syncPolicy:
     automated:
       enabled: true
@@ -26,3 +33,4 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+      - RespectIgnoreDifferences=true

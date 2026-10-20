@@ -102,6 +102,13 @@ user ID and grants explicit proxy-admin access to `christopher@agilityqa.com`
 through `PROXY_ADMIN_ID`; other users are not granted admin by this setting.
 The running LiteLLM image must include SAML support.
 
+The [Argo CD Application](argocd/applications/litellm.yaml) preserves the existing
+`litellm-masterkey` Secret's `data.masterkey` during sync. Helm's offline rendering
+cannot look up the existing Secret and otherwise generates a new random key.
+Changing that key makes previously encrypted database settings unreadable,
+including UI-saved SSO settings. Back up the key securely alongside the database;
+do not delete this Secret or rotate it without a recovery/migration plan.
+
 ## LiteLLM model discovery
 
 LiteLLM explicitly registers the 16 llama.cpp router presets managed by Salt
