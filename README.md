@@ -274,12 +274,13 @@ and repeat for Hermes/Lens. Update these DNS targets if the tailnet node is
 replaced.
 
 Hermes, Lens and monitoring default-deny pod ingress. Host-networked Traefik
-is allowed from control-plane address `100.126.105.69/32` to Hermes port 3000
-and Lens port 4318 only; update those policy peers if that address changes.
+is allowed from control-plane addresses `100.126.105.69/32` (Tailscale) and
+`10.42.0.0/32` (Flannel, the actual cross-node source) to Hermes port 3000
+and Lens port 4318 only; update those policy peers if those addresses change.
 Lens also accepts telemetry from the LiteLLM and Hermes workload selectors.
 Only Lens pods can reach ClickHouse on port 8123. Monitoring permits
-intra-namespace traffic and control-plane admission requests to the operator
-on port 10250. Its host-networked node exporters still depend on host
+intra-namespace traffic and those control-plane addresses for admission
+requests to the operator on port 10250. Its host-networked node exporters still depend on host
 firewall rules, not pod NetworkPolicy enforcement. Egress remains unrestricted
 to preserve DNS, metrics scraping and external agent integrations.
 The Lens and monitoring values sources also render their policy Kustomizations,

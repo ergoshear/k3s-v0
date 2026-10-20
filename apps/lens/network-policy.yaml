@@ -24,6 +24,8 @@ spec:
     - from:
         - ipBlock:
             cidr: 100.126.105.69/32
+        - ipBlock:
+            cidr: 10.42.0.0/32
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: litellm

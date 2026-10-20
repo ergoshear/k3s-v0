@@ -44,7 +44,8 @@ class SecurityBoundaryTests(unittest.TestCase):
         self.assertEqual(spec["podSelector"]["matchLabels"],
                          {"app.kubernetes.io/name": "hermes-workspace"})
         self.assertEqual(spec["ingress"], [{
-            "from": [{"ipBlock": {"cidr": "100.126.105.69/32"}}],
+            "from": [{"ipBlock": {"cidr": "100.126.105.69/32"}},
+                     {"ipBlock": {"cidr": "10.42.0.0/32"}}],
             "ports": [{"protocol": "TCP", "port": 3000}],
         }])
 
@@ -59,7 +60,8 @@ class SecurityBoundaryTests(unittest.TestCase):
         rule = web["ingress"][0]
         self.assertEqual(rule["ports"], [{"protocol": "TCP", "port": 4318}])
         self.assertEqual(rule["from"][0], {"ipBlock": {"cidr": "100.126.105.69/32"}})
-        self.assertEqual(rule["from"][1:], [
+        self.assertEqual(rule["from"][1], {"ipBlock": {"cidr": "10.42.0.0/32"}})
+        self.assertEqual(rule["from"][2:], [
             {"namespaceSelector": {"matchLabels": {"kubernetes.io/metadata.name": app}},
              "podSelector": {"matchLabels": {"app.kubernetes.io/name": app}}}
             for app in ("litellm", "hermes-workspace")
@@ -86,7 +88,8 @@ class SecurityBoundaryTests(unittest.TestCase):
             "app.kubernetes.io/name": "kube-prometheus-stack-prometheus-operator",
         })
         self.assertEqual(admission["ingress"], [{
-            "from": [{"ipBlock": {"cidr": "100.126.105.69/32"}}],
+            "from": [{"ipBlock": {"cidr": "100.126.105.69/32"}},
+                     {"ipBlock": {"cidr": "10.42.0.0/32"}}],
             "ports": [{"protocol": "TCP", "port": 10250}],
         }])
 
