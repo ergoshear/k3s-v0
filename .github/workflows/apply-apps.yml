@@ -49,8 +49,9 @@ jobs:
 
       - name: Ensure Argo CD is available
         run: |
+          # The application controller is a StatefulSet in this Argo CD version.
           sudo -n kubectl --kubeconfig="$KUBECONFIG" -n argocd \
-            rollout status deployment/argocd-application-controller --timeout=5m
+            rollout status statefulset/argocd-application-controller --timeout=5m
           sudo -n kubectl --kubeconfig="$KUBECONFIG" -n argocd \
             rollout status deployment/argocd-server --timeout=5m
 
