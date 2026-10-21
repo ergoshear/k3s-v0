@@ -190,36 +190,62 @@ proxy_config:
         supports_reasoning: true
 
     # ==========================================================================
-    # 3. Direct Node Presets: mlops-node-7 (Strix Halo EVO-X2 128GB - Resident Diffusion)
+    # 3. Direct Node Presets: mlops-node-7 (Strix Halo EVO-X2 128GB - Resident Ornith-1.5)
+    #    Single Resident 256K Preset serves Low, NoThink & Vision (0s Swap!)
     # ==========================================================================
-    - model_name: mlops-node-7/DiffusionGemma-26B-A4B-Think
+    - model_name: mlops-node-7/Ornith-1.5-35B-A3B-DFlash-Low
       litellm_params:
-        model: openai/DiffusionGemma-26B-A4B
+        model: openai/Ornith-1.5-35B-A3B-DFlash
         api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         extra_body:
-          enable_thinking: true
+          chat_template_kwargs:
+            reasoning_effort: low
       model_info:
-        id: node7-diffusiongemma-26b-a4b-think
+        id: node7-ornith15-35b-a3b-dflash-low
         max_tokens: 32768
-        max_input_tokens: 98304
+        max_input_tokens: 229376
         max_output_tokens: 32768
+        supports_vision: true
         supports_function_calling: true
         supports_reasoning: true
 
-    - model_name: mlops-node-7/DiffusionGemma-26B-A4B-NoThink
+    - model_name: mlops-node-7/Ornith-1.5-35B-A3B-DFlash-NoThink
       litellm_params:
-        model: openai/DiffusionGemma-26B-A4B
+        model: openai/Ornith-1.5-35B-A3B-DFlash
+        api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        temperature: 0.6
+        top_p: 0.95
+        extra_body:
+          reasoning_format: none
+          chat_template_kwargs:
+            enable_thinking: false
+            reasoning_effort: none
+      model_info:
+        id: node7-ornith15-35b-a3b-dflash-nothink
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_vision: true
+        supports_function_calling: true
+
+    - model_name: mlops-node-7/Ornith-1.5-35B-A3B-DFlash-Vision
+      litellm_params:
+        model: openai/Ornith-1.5-35B-A3B-DFlash
         api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         extra_body:
-          enable_thinking: false
+          chat_template_kwargs:
+            reasoning_effort: low
       model_info:
-        id: node7-diffusiongemma-26b-a4b-nothink
+        id: node7-ornith15-35b-a3b-dflash-vision
         max_tokens: 32768
-        max_input_tokens: 98304
+        max_input_tokens: 229376
         max_output_tokens: 32768
+        supports_vision: true
         supports_function_calling: true
+        supports_reasoning: true
 
     # ==========================================================================
     # 4. Direct Node Presets: mlops-node-9 (Strix Halo 192GB - 2 Resident Slots)
@@ -336,6 +362,26 @@ proxy_config:
 
     - model_name: fast
       litellm_params:
+        model: openai/Ornith-1.5-35B-A3B-DFlash
+        api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        order: 1
+        weight: 3
+        temperature: 0.6
+        top_p: 0.95
+        extra_body:
+          reasoning_format: none
+          chat_template_kwargs:
+            enable_thinking: false
+            reasoning_effort: none
+      model_info:
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_function_calling: true
+
+    - model_name: fast
+      litellm_params:
         model: openai/Qwen3.6-35B-A3B-DFlash-512K
         api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
@@ -366,7 +412,7 @@ proxy_config:
         max_output_tokens: 32768
         supports_function_calling: true
 
-    # --- coder: Top-Tier Agentic Coding (Qwen3.8-27B @ 145 tok/s + Qwen3.6-DFlash) ---
+    # --- coder: Top-Tier Agentic Coding (Qwen3.8-27B + Ornith-1.5-35B-A3B + Qwen3.6-DFlash) ---
     - model_name: coder
       litellm_params:
         model: openai/Qwen3.8-27B-GSQ-RCO-IQ3_S-128K
@@ -380,6 +426,24 @@ proxy_config:
       model_info:
         max_tokens: 32768
         max_input_tokens: 98304
+        max_output_tokens: 32768
+        supports_vision: true
+        supports_function_calling: true
+        supports_reasoning: true
+
+    - model_name: coder
+      litellm_params:
+        model: openai/Ornith-1.5-35B-A3B-DFlash
+        api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        order: 1
+        weight: 3
+        extra_body:
+          chat_template_kwargs:
+            reasoning_effort: low
+      model_info:
+        max_tokens: 32768
+        max_input_tokens: 229376
         max_output_tokens: 32768
         supports_vision: true
         supports_function_calling: true
@@ -415,7 +479,7 @@ proxy_config:
         supports_function_calling: true
         supports_reasoning: true
 
-    # --- architect: Deep System Design & Hard Bugs (Qwen3.8-27B Medium on node-6 & node-9) ---
+    # --- architect: Deep System Design & Hard Bugs (Qwen3.8-27B Medium + Ornith-1.5) ---
     - model_name: architect
       litellm_params:
         model: openai/Qwen3.8-27B-GSQ-RCO-IQ3_S-128K
@@ -450,19 +514,38 @@ proxy_config:
         supports_function_calling: true
         supports_reasoning: true
 
-    # --- vision: Multimodal (node-6 Qwen3.8-27B resident primary, node-4 Gemma-4 secondary) ---
+    # --- vision: Multimodal (Resident node-6 Qwen3.8 + Resident node-7 Ornith-1.5 primary) ---
     - model_name: vision
       litellm_params:
         model: openai/Qwen3.8-27B-GSQ-RCO-IQ3_S-128K
         api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
+        weight: 3
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
       model_info:
         max_tokens: 32768
         max_input_tokens: 98304
+        max_output_tokens: 32768
+        supports_vision: true
+        supports_function_calling: true
+        supports_reasoning: true
+
+    - model_name: vision
+      litellm_params:
+        model: openai/Ornith-1.5-35B-A3B-DFlash
+        api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        order: 1
+        weight: 3
+        extra_body:
+          chat_template_kwargs:
+            reasoning_effort: low
+      model_info:
+        max_tokens: 32768
+        max_input_tokens: 229376
         max_output_tokens: 32768
         supports_vision: true
         supports_function_calling: true
@@ -482,13 +565,14 @@ proxy_config:
         supports_function_calling: true
         supports_reasoning: true
 
-    # --- long-context: 256K-512K Context (Resident node-9 512K primary, node-4 & node-6 256K secondary) ---
+    # --- long-context: 256K-512K Context (Resident node-9 512K + Resident node-7 256K primary) ---
     - model_name: long-context
       litellm_params:
         model: openai/Qwen3.6-35B-A3B-DFlash-512K
         api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
+        weight: 3
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
@@ -496,6 +580,24 @@ proxy_config:
         max_tokens: 32768
         max_input_tokens: 491520
         max_output_tokens: 32768
+        supports_function_calling: true
+        supports_reasoning: true
+
+    - model_name: long-context
+      litellm_params:
+        model: openai/Ornith-1.5-35B-A3B-DFlash
+        api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        order: 1
+        weight: 3
+        extra_body:
+          chat_template_kwargs:
+            reasoning_effort: low
+      model_info:
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_vision: true
         supports_function_calling: true
         supports_reasoning: true
 
@@ -528,21 +630,6 @@ proxy_config:
         supports_function_calling: true
         supports_reasoning: true
 
-    # --- diffusion: Isolated Resident Discrete Diffusion (mlops-node-7) ---
-    - model_name: diffusion
-      litellm_params:
-        model: openai/DiffusionGemma-26B-A4B
-        api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: os.environ/INFERENCE_BACKEND_KEY
-        order: 1
-        extra_body:
-          enable_thinking: false
-      model_info:
-        max_tokens: 32768
-        max_input_tokens: 98304
-        max_output_tokens: 32768
-        supports_function_calling: true
-
   router_settings:
     routing_strategy: least-busy
     enable_pre_call_checks: true
@@ -573,8 +660,6 @@ proxy_config:
           - coder
       - vision:
           - mlops-node-4/Gemma-4-31B-QAT-NoThink
-      - diffusion:
-          - fast
 
   litellm_settings:
     drop_params: true
