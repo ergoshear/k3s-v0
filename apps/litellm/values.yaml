@@ -191,7 +191,7 @@ proxy_config:
 
     # ==========================================================================
     # 3. Direct Node Presets: mlops-node-7 (Strix Halo EVO-X2 128GB - Resident Ornith-1.5)
-    #    Single Resident 256K Preset serves Low, NoThink & Vision (0s Swap!)
+    #    Single Resident 256K Preset serves Low, Medium, NoThink & Vision (0s Swap!)
     # ==========================================================================
     - model_name: mlops-node-7/Ornith-1.5-35B-A3B-DFlash-Low
       litellm_params:
@@ -203,6 +203,23 @@ proxy_config:
             reasoning_effort: low
       model_info:
         id: node7-ornith15-35b-a3b-dflash-low
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_vision: true
+        supports_function_calling: true
+        supports_reasoning: true
+
+    - model_name: mlops-node-7/Ornith-1.5-35B-A3B-DFlash-Medium
+      litellm_params:
+        model: openai/Ornith-1.5-35B-A3B-DFlash
+        api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        extra_body:
+          chat_template_kwargs:
+            reasoning_effort: medium
+      model_info:
+        id: node7-ornith15-35b-a3b-dflash-medium
         max_tokens: 32768
         max_input_tokens: 229376
         max_output_tokens: 32768
@@ -248,9 +265,9 @@ proxy_config:
         supports_reasoning: true
 
     # ==========================================================================
-    # 4. Direct Node Presets: mlops-node-9 (Strix Halo 192GB - 2 Resident Slots)
-    #    Slot 1: Qwen3.6-35B-A3B-DFlash-512K
-    #    Slot 2: Qwen3.8-27B (GSQ-RCO-IQ3_S-mtp + draft-mtp + Vision @ 256K)
+    # 4. Direct Node Presets: mlops-node-9 (Strix Halo 192GB - 2 Resident MoE Slots)
+    #    Slot 1: Qwen3.6-35B-A3B-DFlash-512K (512K Context + 16-tok DFlash)
+    #    Slot 2: Ornith-1.5-35B-A3B-DFlash (256K Context + 16-tok DFlash + Vision)
     # ==========================================================================
     - model_name: mlops-node-9/Qwen3.6-35B-A3B-DFlash-512K-Low
       litellm_params:
@@ -287,16 +304,16 @@ proxy_config:
         max_output_tokens: 32768
         supports_function_calling: true
 
-    - model_name: mlops-node-9/Qwen3.8-27B-Low
+    - model_name: mlops-node-9/Ornith-1.5-35B-A3B-DFlash-Low
       litellm_params:
-        model: openai/Qwen3.8-27B
+        model: openai/Ornith-1.5-35B-A3B-DFlash
         api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
       model_info:
-        id: node9-qwen38-27b-low
+        id: node9-ornith15-35b-a3b-dflash-low
         max_tokens: 32768
         max_input_tokens: 229376
         max_output_tokens: 32768
@@ -304,16 +321,16 @@ proxy_config:
         supports_function_calling: true
         supports_reasoning: true
 
-    - model_name: mlops-node-9/Qwen3.8-27B-Medium
+    - model_name: mlops-node-9/Ornith-1.5-35B-A3B-DFlash-Medium
       litellm_params:
-        model: openai/Qwen3.8-27B
+        model: openai/Ornith-1.5-35B-A3B-DFlash
         api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         extra_body:
           chat_template_kwargs:
             reasoning_effort: medium
       model_info:
-        id: node9-qwen38-27b-medium
+        id: node9-ornith15-35b-a3b-dflash-medium
         max_tokens: 32768
         max_input_tokens: 229376
         max_output_tokens: 32768
@@ -321,36 +338,36 @@ proxy_config:
         supports_function_calling: true
         supports_reasoning: true
 
-    - model_name: mlops-node-9/Qwen3.8-27B-NoThink
+    - model_name: mlops-node-9/Ornith-1.5-35B-A3B-DFlash-NoThink
       litellm_params:
-        model: openai/Qwen3.8-27B
+        model: openai/Ornith-1.5-35B-A3B-DFlash
         api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
-        temperature: 0.7
-        top_p: 0.8
+        temperature: 0.6
+        top_p: 0.95
         extra_body:
           reasoning_format: none
           chat_template_kwargs:
             enable_thinking: false
             reasoning_effort: none
       model_info:
-        id: node9-qwen38-27b-nothink
+        id: node9-ornith15-35b-a3b-dflash-nothink
         max_tokens: 32768
         max_input_tokens: 229376
         max_output_tokens: 32768
         supports_vision: true
         supports_function_calling: true
 
-    - model_name: mlops-node-9/Qwen3.8-27B-Vision
+    - model_name: mlops-node-9/Ornith-1.5-35B-A3B-DFlash-Vision
       litellm_params:
-        model: openai/Qwen3.8-27B
+        model: openai/Ornith-1.5-35B-A3B-DFlash
         api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
       model_info:
-        id: node9-qwen38-27b-vision
+        id: node9-ornith15-35b-a3b-dflash-vision
         max_tokens: 32768
         max_input_tokens: 229376
         max_output_tokens: 32768
@@ -359,9 +376,9 @@ proxy_config:
         supports_reasoning: true
 
     # ==========================================================================
-    # 5. Standard High-Speed Aliases (No ergoshear-* Prefixes)
+    # 5. Standard High-Speed Model Groups (Pool Targets for Auto Routers)
     # ==========================================================================
-    # --- fast: Instant 0-Think Edits & Autocomplete (85-145 tok/s, 0s Swap) ---
+    # --- fast: Instant 0-Think Edits & Autocomplete (80-136 tok/s, 0s Swap) ---
     - model_name: fast
       litellm_params:
         model: openai/Qwen3.8-27B-GSQ-RCO-IQ3_S-128K
@@ -380,6 +397,7 @@ proxy_config:
         max_tokens: 32768
         max_input_tokens: 98304
         max_output_tokens: 32768
+        supports_vision: true
         supports_function_calling: true
 
     - model_name: fast
@@ -400,6 +418,28 @@ proxy_config:
         max_tokens: 32768
         max_input_tokens: 229376
         max_output_tokens: 32768
+        supports_vision: true
+        supports_function_calling: true
+
+    - model_name: fast
+      litellm_params:
+        model: openai/Ornith-1.5-35B-A3B-DFlash
+        api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        order: 1
+        weight: 2
+        temperature: 0.6
+        top_p: 0.95
+        extra_body:
+          reasoning_format: none
+          chat_template_kwargs:
+            enable_thinking: false
+            reasoning_effort: none
+      model_info:
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_vision: true
         supports_function_calling: true
 
     - model_name: fast
@@ -434,7 +474,7 @@ proxy_config:
         max_output_tokens: 32768
         supports_function_calling: true
 
-    # --- coder: Top-Tier Agentic Coding (Qwen3.8-27B + Ornith-1.5-35B-A3B + Qwen3.6-DFlash) ---
+    # --- coder: Top-Tier Agentic Coding (Qwen3.8-27B + Dual Ornith-1.5 + Qwen3.6-DFlash) ---
     - model_name: coder
       litellm_params:
         model: openai/Qwen3.8-27B-GSQ-RCO-IQ3_S-128K
@@ -460,6 +500,24 @@ proxy_config:
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
         weight: 3
+        extra_body:
+          chat_template_kwargs:
+            reasoning_effort: low
+      model_info:
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_vision: true
+        supports_function_calling: true
+        supports_reasoning: true
+
+    - model_name: coder
+      litellm_params:
+        model: openai/Ornith-1.5-35B-A3B-DFlash
+        api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        order: 1
+        weight: 2
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
@@ -490,24 +548,6 @@ proxy_config:
 
     - model_name: coder
       litellm_params:
-        model: openai/Qwen3.8-27B
-        api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: os.environ/INFERENCE_BACKEND_KEY
-        order: 1
-        weight: 2
-        extra_body:
-          chat_template_kwargs:
-            reasoning_effort: low
-      model_info:
-        max_tokens: 32768
-        max_input_tokens: 229376
-        max_output_tokens: 32768
-        supports_vision: true
-        supports_function_calling: true
-        supports_reasoning: true
-
-    - model_name: coder
-      litellm_params:
         model: openai/Qwen3.6-35B-A3B-DFlash-Low
         api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
@@ -519,7 +559,7 @@ proxy_config:
         supports_function_calling: true
         supports_reasoning: true
 
-    # --- architect: Deep System Design & Hard Bugs (Qwen3.8-27B Medium on node-6 & node-9) ---
+    # --- architect: Deep System Design & Hard Bugs (Qwen3.8-27B @ 136 tok/s + Ornith-1.5 Medium @ 85 tok/s) ---
     - model_name: architect
       litellm_params:
         model: openai/Qwen3.8-27B-GSQ-RCO-IQ3_S-128K
@@ -540,7 +580,25 @@ proxy_config:
 
     - model_name: architect
       litellm_params:
-        model: openai/Qwen3.8-27B
+        model: openai/Ornith-1.5-35B-A3B-DFlash
+        api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        order: 1
+        weight: 2
+        extra_body:
+          chat_template_kwargs:
+            reasoning_effort: medium
+      model_info:
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_vision: true
+        supports_function_calling: true
+        supports_reasoning: true
+
+    - model_name: architect
+      litellm_params:
+        model: openai/Ornith-1.5-35B-A3B-DFlash
         api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
@@ -556,7 +614,7 @@ proxy_config:
         supports_function_calling: true
         supports_reasoning: true
 
-    # --- vision: Multimodal (Resident node-6 Qwen3.8 + node-7 Ornith-1.5 + node-9 Qwen3.8) ---
+    # --- vision: Multimodal (Resident node-6 Qwen3.8 + Resident node-7 & node-9 Ornith-1.5) ---
     - model_name: vision
       litellm_params:
         model: openai/Qwen3.8-27B-GSQ-RCO-IQ3_S-128K
@@ -595,7 +653,7 @@ proxy_config:
 
     - model_name: vision
       litellm_params:
-        model: openai/Qwen3.8-27B
+        model: openai/Ornith-1.5-35B-A3B-DFlash
         api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
@@ -663,7 +721,7 @@ proxy_config:
 
     - model_name: long-context
       litellm_params:
-        model: openai/Qwen3.8-27B
+        model: openai/Ornith-1.5-35B-A3B-DFlash
         api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
@@ -708,6 +766,57 @@ proxy_config:
         supports_function_calling: true
         supports_reasoning: true
 
+    # ==========================================================================
+    # 6. Auto Routers (Sit Above Your Deployments & Pick a Tier Per Request)
+    # ==========================================================================
+    # --- auto: Sub-Millisecond Heuristic Auto Router (Zero Classifier Latency) ---
+    - model_name: auto
+      litellm_params:
+        model: auto_router/complexity_router
+        complexity_router_default_model: coder
+        complexity_router_config:
+          classifier_type: heuristic
+          enable_context_window_escalation: true
+          context_window_escalation_buffer: 0.95
+          modality_routing: true
+          classification_mode: user_turn
+          tiers:
+            SIMPLE: fast
+            MEDIUM: coder
+            COMPLEX: coder
+            REASONING: architect
+          keyword_tier_rules:
+            - keywords: ["hi", "hello", "thanks", "ping", "commit message", "docstring", "rename"]
+              tier: SIMPLE
+            - keywords: ["architecture", "root cause", "race condition", "deadlock", "design a", "tradeoffs", "step by step"]
+              tier: REASONING
+
+    # --- auto-hybrid: Heuristic + Fast Agentic Judge for Boundary Requests ---
+    - model_name: auto-hybrid
+      litellm_params:
+        model: auto_router/complexity_router
+        complexity_router_default_model: coder
+        complexity_router_config:
+          classifier_type: hybrid
+          local_heuristic: heuristic
+          hybrid_boundary_margin: 0.05
+          enable_context_window_escalation: true
+          context_window_escalation_buffer: 0.95
+          modality_routing: true
+          classification_mode: user_turn
+          classifier_llm_config:
+            model: fast
+            timeout_ms: 2500
+            classification_rubric: agentic
+            classifier_fallback: heuristic
+            classifier_context_window_size: 3
+            classifier_context_budget_chars: 8000
+          tiers:
+            SIMPLE: fast
+            MEDIUM: coder
+            COMPLEX: coder
+            REASONING: architect
+
   router_settings:
     routing_strategy: least-busy
     enable_pre_call_checks: true
@@ -715,9 +824,9 @@ proxy_config:
     timeout: 300
     cooldown_time: 15
     model_group_alias:
-      default: coder
+      default: auto
       gpt-4o:
-        model: coder
+        model: auto
         hidden: true
       gpt-4o-mini:
         model: fast
@@ -726,9 +835,15 @@ proxy_config:
         model: architect
         hidden: true
       claude-3-7-sonnet-latest:
-        model: coder
+        model: auto
         hidden: true
     fallbacks:
+      - auto:
+          - coder
+          - fast
+      - auto-hybrid:
+          - auto
+          - coder
       - fast:
           - coder
       - coder:

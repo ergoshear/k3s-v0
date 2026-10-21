@@ -116,7 +116,12 @@ class SecurityBoundaryTests(unittest.TestCase):
         self.assertNotIn("traefik.ingress.kubernetes.io/router.middlewares",
                          public["ingress"]["annotations"])
         self.assertEqual(public["environmentSecrets"], ["inference-backend"])
-        for model in public["proxy_config"]["model_list"]:
+        backend_models = [
+            model for model in public["proxy_config"]["model_list"]
+            if "api_base" in model["litellm_params"]
+        ]
+        self.assertTrue(backend_models)
+        for model in backend_models:
             expected_key = "os.environ/INFERENCE_BACKEND_KEY"
             self.assertEqual(model["litellm_params"]["api_key"], expected_key)
 

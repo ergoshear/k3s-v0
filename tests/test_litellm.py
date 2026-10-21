@@ -35,10 +35,21 @@ class LiteLLMTests(unittest.TestCase):
                 self.assertIsInstance(params, dict)
                 if not isinstance(params, dict):
                     continue
-                for key in ("model", "api_base", "api_key"):
+                for key in ("model",):
                     with self.subTest(parameter=key):
                         self.assertIsInstance(params.get(key), str)
                         self.assertTrue(params[key].strip())
+
+                if params["model"] == "auto_router/complexity_router":
+                    self.assertIsInstance(
+                        params.get("complexity_router_default_model"), str
+                    )
+                    self.assertIsInstance(params.get("complexity_router_config"), dict)
+                else:
+                    for key in ("api_base", "api_key"):
+                        with self.subTest(parameter=key):
+                            self.assertIsInstance(params.get(key), str)
+                            self.assertTrue(params[key].strip())
 
                 if "model_info" in entry:
                     self.assertIsInstance(entry["model_info"], dict)
