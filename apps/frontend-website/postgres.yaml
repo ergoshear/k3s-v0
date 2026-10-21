@@ -30,6 +30,8 @@ spec:
       labels:
         app.kubernetes.io/name: postgres
     spec:
+      imagePullSecrets:
+        - name: ghcr-registry-credentials
       containers:
         - name: postgres
           image: postgres:17

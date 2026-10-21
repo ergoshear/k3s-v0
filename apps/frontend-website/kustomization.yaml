@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - certificate.yaml
   - deployment.yaml
+  - ghcr-secret.yaml
   - ingress.yaml
   - network-policy.yaml
   - postgres.yaml
