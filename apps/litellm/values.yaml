@@ -360,9 +360,9 @@ proxy_config:
         supports_reasoning: true
 
     # ==========================================================================
-    # 5. Standard High-Speed Model Groups (All 4 Nodes Resident @ order: 1!)
+    # 5. Standard High-Speed Model Groups (Hard-Pinned 1 Concurrent Req Per Slot!)
     # ==========================================================================
-    # --- fast: Instant 0-Think Edits & Autocomplete (80-137 tok/s, 0s Swap) ---
+    # --- fast: Instant 0-Think Edits & Autocomplete (80-159 tok/s, 0s Swap) ---
     - model_name: fast
       litellm_params:
         model: openai/Qwen3.8-27B-GSQ-RCO-IQ3_S-128K
@@ -370,6 +370,7 @@ proxy_config:
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
         weight: 3
+        max_parallel_requests: 1
         temperature: 0.7
         top_p: 0.8
         extra_body:
@@ -391,6 +392,7 @@ proxy_config:
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
         weight: 3
+        max_parallel_requests: 1
         temperature: 0.6
         top_p: 0.8
         extra_body:
@@ -411,6 +413,7 @@ proxy_config:
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
         weight: 3
+        max_parallel_requests: 1
         temperature: 0.6
         top_p: 0.95
         extra_body:
@@ -432,6 +435,7 @@ proxy_config:
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
         weight: 2
+        max_parallel_requests: 1
         temperature: 0.6
         top_p: 0.95
         extra_body:
@@ -453,6 +457,7 @@ proxy_config:
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
         weight: 2
+        max_parallel_requests: 1
         temperature: 0.6
         top_p: 0.8
         extra_body:
@@ -466,7 +471,7 @@ proxy_config:
         max_output_tokens: 32768
         supports_function_calling: true
 
-    # --- coder: Top-Tier Agentic Coding (All 4 Nodes Resident @ 75-137 tok/s) ---
+    # --- coder: Top-Tier Agentic Coding (5 Resident Slots Across 4 Nodes!) ---
     - model_name: coder
       litellm_params:
         model: openai/Qwen3.8-27B-GSQ-RCO-IQ3_S-128K
@@ -474,6 +479,7 @@ proxy_config:
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
         weight: 3
+        max_parallel_requests: 1
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
@@ -492,6 +498,7 @@ proxy_config:
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
         weight: 3
+        max_parallel_requests: 1
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
@@ -509,6 +516,7 @@ proxy_config:
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
         weight: 3
+        max_parallel_requests: 1
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
@@ -527,6 +535,7 @@ proxy_config:
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
         weight: 2
+        max_parallel_requests: 1
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
@@ -545,6 +554,7 @@ proxy_config:
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
         weight: 2
+        max_parallel_requests: 1
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
@@ -555,7 +565,7 @@ proxy_config:
         supports_function_calling: true
         supports_reasoning: true
 
-    # --- architect: Deep System Design & Hard Bugs (Qwen3.8-27B @ 137 tok/s + Ornith-1.5 Medium @ 89 tok/s) ---
+    # --- architect: Deep System Design & Hard Bugs (3 Resident Slots Across node-6, 7, 9) ---
     - model_name: architect
       litellm_params:
         model: openai/Qwen3.8-27B-GSQ-RCO-IQ3_S-128K
@@ -563,6 +573,7 @@ proxy_config:
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
         weight: 3
+        max_parallel_requests: 1
         extra_body:
           chat_template_kwargs:
             reasoning_effort: medium
@@ -581,6 +592,7 @@ proxy_config:
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
         weight: 2
+        max_parallel_requests: 1
         extra_body:
           chat_template_kwargs:
             reasoning_effort: medium
@@ -599,6 +611,7 @@ proxy_config:
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
         weight: 2
+        max_parallel_requests: 1
         extra_body:
           chat_template_kwargs:
             reasoning_effort: medium
@@ -610,7 +623,7 @@ proxy_config:
         supports_function_calling: true
         supports_reasoning: true
 
-    # --- vision: Multimodal (Resident node-6 Qwen3.8 + Resident node-7 & node-9 Ornith-1.5) ---
+    # --- vision: Multimodal (3 Resident Vision Slots Across node-6, 7, 9) ---
     - model_name: vision
       litellm_params:
         model: openai/Qwen3.8-27B-GSQ-RCO-IQ3_S-128K
@@ -618,6 +631,7 @@ proxy_config:
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
         weight: 3
+        max_parallel_requests: 1
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
@@ -636,6 +650,7 @@ proxy_config:
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
         weight: 3
+        max_parallel_requests: 1
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
@@ -654,6 +669,7 @@ proxy_config:
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
         weight: 2
+        max_parallel_requests: 1
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
@@ -665,7 +681,7 @@ proxy_config:
         supports_function_calling: true
         supports_reasoning: true
 
-    # --- long-context: 256K-512K Context (Resident node-9 512K & 256K + node-4 & node-7 256K primary) ---
+    # --- long-context: 256K-512K Context (4 Resident Slots + node-6 256K secondary) ---
     - model_name: long-context
       litellm_params:
         model: openai/Qwen3.6-35B-A3B-DFlash-512K
@@ -673,6 +689,7 @@ proxy_config:
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
         weight: 3
+        max_parallel_requests: 1
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
@@ -690,6 +707,7 @@ proxy_config:
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
         weight: 3
+        max_parallel_requests: 1
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
@@ -707,6 +725,7 @@ proxy_config:
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
         weight: 3
+        max_parallel_requests: 1
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
@@ -725,6 +744,7 @@ proxy_config:
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
         weight: 2
+        max_parallel_requests: 1
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
@@ -742,6 +762,7 @@ proxy_config:
         api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 2
+        max_parallel_requests: 1
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
@@ -804,7 +825,7 @@ proxy_config:
             REASONING: architect
 
   router_settings:
-    routing_strategy: least-busy
+    routing_strategy: simple-shuffle
     enable_pre_call_checks: true
     num_retries: 2
     timeout: 300
