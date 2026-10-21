@@ -245,12 +245,18 @@ This direct integration follows Argo CD's Identity Center guide but retains
 that upstream limitation. A maintained SAML-to-OIDC broker, or a direct
 OIDC identity provider, is preferable for a higher-assurance deployment.
 
-Run the rendered-manifest and certificate tests with Python 3, PyYAML,
-`kubectl`, and OpenSSL:
+Install [uv](https://docs.astral.sh/uv/), [just](https://just.systems/), and
+the required system tools (`kubectl` and OpenSSL), then run the test suite:
 
 ```sh
-python3 -m unittest discover -s tests -v
+uv sync --locked
+just test
+just install-hooks
 ```
+
+`just test` runs the full Python test suite in the project environment.
+`just install-hooks` enables the pre-commit hook, which runs `just test`
+before each commit.
 
 Pull requests run these tests on a GitHub-hosted runner. Only pushes to
 `main` deploy, and deployment waits for the Argo CD server and Dex rollouts.
