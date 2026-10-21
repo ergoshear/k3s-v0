@@ -65,7 +65,7 @@ jobs:
           sudo -n kubectl --kubeconfig="$KUBECONFIG" -n argocd \
             exec deployment/argocd-server -c argocd-server -- \
             argocd app sync argocd \
-              --server https://argocd-server.argocd.svc.cluster.local \
+              --server argocd-server.argocd.svc.cluster.local \
               --insecure --grpc-web
 
       - name: Sync and wait for each application to be Healthy
@@ -84,11 +84,11 @@ jobs:
             sudo -n kubectl --kubeconfig="$KUBECONFIG" -n argocd \
               exec deployment/argocd-server -c argocd-server -- \
               argocd app sync "$app" \
-                --server https://argocd-server.argocd.svc.cluster.local \
+                --server argocd-server.argocd.svc.cluster.local \
                 --insecure --grpc-web
             sudo -n kubectl --kubeconfig="$KUBECONFIG" -n argocd \
               exec deployment/argocd-server -c argocd-server -- \
               argocd app wait "$app" --timeout 15m \
-                --server https://argocd-server.argocd.svc.cluster.local \
+                --server argocd-server.argocd.svc.cluster.local \
                 --insecure --grpc-web
           done
