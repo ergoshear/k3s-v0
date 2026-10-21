@@ -289,7 +289,7 @@ proxy_config:
       model: openai/Qwen3.8-27B
       api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
       api_key: os.environ/INFERENCE_BACKEND_KEY
-      order: 2
+      order: 1
       extra_body:
         chat_template_kwargs:
           reasoning_effort: medium
