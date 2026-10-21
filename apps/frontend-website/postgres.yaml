@@ -32,6 +32,8 @@ spec:
     spec:
       imagePullSecrets:
         - name: ghcr-registry-credentials
+      securityContext:
+        fsGroup: 999
       containers:
         - name: postgres
           image: postgres:17
@@ -51,8 +53,6 @@ spec:
                   name: frontend-website-secrets
                   key: POSTGRES_PASSWORD
           securityContext:
-            runAsNonRoot: true
-            runAsUser: 999
             allowPrivilegeEscalation: false
             capabilities:
               drop:
