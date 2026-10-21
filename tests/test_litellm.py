@@ -129,7 +129,9 @@ class LiteLLMTests(unittest.TestCase):
                 "Muse-Glimmer-30B-Vision",
             ),
             "mlops-node-7": (
-                "DiffusionGemma-26B-A4B",
+                "Qwen3.6-35B-A3B-DFlash-Low",
+                "Qwen3.6-35B-A3B-DFlash-Medium",
+                "Qwen3.6-35B-A3B-DFlash-NoThink",
             ),
             "mlops-node-9": (
                 "Qwen3.6-35B-A3B-DFlash-512K-Low",
@@ -140,7 +142,7 @@ class LiteLLMTests(unittest.TestCase):
             ),
         }
 
-        self.assertEqual(len(model_list), 14)
+        self.assertEqual(len(model_list), 16)
         self.assertEqual(
             {entry["model_name"] for entry in model_list},
             {f"{node}/{model}" for node, models in presets.items() for model in models},
@@ -148,7 +150,9 @@ class LiteLLMTests(unittest.TestCase):
         for entry in model_list:
             node, model = entry["model_name"].split("/", 1)
             expected_model = model
-            if node == "mlops-node-9" and model.startswith("Qwen3.6-"):
+            if node == "mlops-node-7":
+                expected_model = "Qwen3.6-35B-A3B-DFlash"
+            elif node == "mlops-node-9" and model.startswith("Qwen3.6-"):
                 expected_model = "Qwen3.6-35B-A3B-DFlash-512K"
             elif node == "mlops-node-9" and model.startswith("Qwen3.8-"):
                 expected_model = "Qwen3.8-27B"
@@ -163,18 +167,44 @@ class LiteLLMTests(unittest.TestCase):
             )
             self.assertEqual(
                 entry["litellm_params"]["api_key"],
-                "os.environ/INFERENCE_BACKEND_KEY",
+                "none" if node == "mlops-node-7" else "os.environ/INFERENCE_BACKEND_KEY",
             )
-        node7 = next(
-            entry for entry in model_list
+        node7 = {
+            entry["model_name"].split("/", 1)[1]: entry
+            for entry in model_list
             if entry["model_name"].startswith("mlops-node-7/")
+        }
+        self.assertEqual(
+            set(node7),
+            {
+                "Qwen3.6-35B-A3B-DFlash-Low",
+                "Qwen3.6-35B-A3B-DFlash-Medium",
+                "Qwen3.6-35B-A3B-DFlash-NoThink",
+            },
         )
         self.assertEqual(
-            node7["model_info"],
+            node7["Qwen3.6-35B-A3B-DFlash-Low"]["litellm_params"]["extra_body"],
+            {"chat_template_kwargs": {"reasoning_effort": "low"}},
+        )
+        self.assertEqual(
+            node7["Qwen3.6-35B-A3B-DFlash-Medium"]["litellm_params"]["extra_body"],
+            {"chat_template_kwargs": {"reasoning_effort": "medium"}},
+        )
+        self.assertEqual(
+            node7["Qwen3.6-35B-A3B-DFlash-NoThink"]["litellm_params"],
             {
-                "id": "node7-diffusiongemma-26b-a4b",
-                "max_tokens": 8192,
-                "max_input_tokens": 57344,
+                "model": "openai/Qwen3.6-35B-A3B-DFlash",
+                "api_base": "http://192.168.202.17:8080/v1",
+                "api_key": "none",
+                "temperature": 0.6,
+                "top_p": 0.80,
+                "extra_body": {
+                    "reasoning_format": "none",
+                    "chat_template_kwargs": {
+                        "enable_thinking": False,
+                        "reasoning_effort": "none",
+                    },
+                },
             },
         )
         self.assertEqual(
@@ -188,12 +218,12 @@ class LiteLLMTests(unittest.TestCase):
             for entry in self.values["proxy_config"]["model_list"]
             if entry["model_name"].startswith("mlops-node-")
         }
-        self.assertEqual(len({info["id"] for info in direct.values()}), 14)
+        self.assertEqual(len({info["id"] for info in direct.values()}), 16)
         for name, info in direct.items():
             node, model = name.split("/", 1)
             output, context = (32768, 262144)
             if node == "mlops-node-7":
-                output, context = (8192, 65536)
+                output, context = (32768, 262144)
             elif model == "Muse-Glimmer-30B-128K":
                 output, context = (16384, 131072)
             elif model == "Muse-Glimmer-30B-Vision":
@@ -203,18 +233,17 @@ class LiteLLMTests(unittest.TestCase):
             ):
                 output, context = (32768, 524288)
             self.assertEqual(info["max_tokens"], output, name)
-            if node == "mlops-node-7":
-                self.assertNotIn("max_output_tokens", info)
-            else:
+            if node != "mlops-node-7":
                 self.assertEqual(info["max_output_tokens"], output, name)
             self.assertEqual(info["max_input_tokens"], context - output, name)
-            if node != "mlops-node-7":
-                self.assertTrue(info["supports_function_calling"], name)
+            self.assertTrue(info["supports_function_calling"], name)
             vision = "Vision" in model or model == "Gemma-4-31B-QAT-NoThink"
             if node != "mlops-node-7":
                 self.assertEqual(info.get("supports_vision", False), vision, name)
             reasoning = "NoThink" not in model and model != "Qwen3-Coder-30B-A3B"
-            if node != "mlops-node-7":
+            if model == "Qwen3.6-35B-A3B-DFlash-NoThink" and node == "mlops-node-7":
+                self.assertNotIn("supports_reasoning", info, name)
+            elif node != "mlops-node-7":
                 self.assertEqual(info.get("supports_reasoning", False), reasoning, name)
 
     def test_semantic_groups_reuse_backend_routes_and_metadata(self):
@@ -241,7 +270,7 @@ class LiteLLMTests(unittest.TestCase):
                 ("mlops-node-6/Muse-Glimmer-30B-256K-VRAM", 3, None),
             ],
         }
-        self.assertEqual(len(entries), 24)
+        self.assertEqual(len(entries), 26)
         direct_by_name = {
             entry["model_name"]: entry for entry in entries
             if entry["model_name"].startswith("mlops-node-")

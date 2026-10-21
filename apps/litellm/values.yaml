@@ -141,17 +141,54 @@ proxy_config:
       supports_reasoning: true
       max_output_tokens: 32768
   # ----------------------------------------------------------------------------
-  # 3. Direct Node Preset: mlops-node-7 (Strix Halo 128GB - PR #24423 Diffusion)
+  # 3. Direct Node Presets: mlops-node-7 (Strix Halo 128GB - 1 Resident Slot)
+  #    Single Resident Process: openai/Qwen3.6-35B-A3B-DFlash (256K Context)
   # ----------------------------------------------------------------------------
-  - model_name: mlops-node-7/DiffusionGemma-26B-A4B
+  - model_name: mlops-node-7/Qwen3.6-35B-A3B-DFlash-Low
     litellm_params:
-      model: openai/DiffusionGemma-26B-A4B
-      api_base: http://192.168.202.17:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
+      model: openai/Qwen3.6-35B-A3B-DFlash
+      api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
+      api_key: "none"
+      extra_body:
+        chat_template_kwargs:
+          reasoning_effort: "low"
     model_info:
-      id: node7-diffusiongemma-26b-a4b
-      max_tokens: 8192
-      max_input_tokens: 57344
+      id: node7-qwen36-dflash-low
+      max_tokens: 32768
+      max_input_tokens: 229376
+      supports_function_calling: true
+      supports_reasoning: true
+  - model_name: mlops-node-7/Qwen3.6-35B-A3B-DFlash-Medium
+    litellm_params:
+      model: openai/Qwen3.6-35B-A3B-DFlash
+      api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
+      api_key: "none"
+      extra_body:
+        chat_template_kwargs:
+          reasoning_effort: "medium"
+    model_info:
+      id: node7-qwen36-dflash-medium
+      max_tokens: 32768
+      max_input_tokens: 229376
+      supports_function_calling: true
+      supports_reasoning: true
+  - model_name: mlops-node-7/Qwen3.6-35B-A3B-DFlash-NoThink
+    litellm_params:
+      model: openai/Qwen3.6-35B-A3B-DFlash
+      api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
+      api_key: "none"
+      temperature: 0.6
+      top_p: 0.80
+      extra_body:
+        reasoning_format: "none"
+        chat_template_kwargs:
+          enable_thinking: false
+          reasoning_effort: "none"
+    model_info:
+      id: node7-qwen36-dflash-nothink
+      max_tokens: 32768
+      max_input_tokens: 229376
+      supports_function_calling: true
   - model_name: mlops-node-9/Qwen3.6-35B-A3B-DFlash-512K-Low
     litellm_params:
       model: openai/Qwen3.6-35B-A3B-DFlash-512K
