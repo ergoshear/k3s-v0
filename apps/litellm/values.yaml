@@ -75,7 +75,7 @@ proxy_config:
         temperature: 0.6
         top_p: 0.8
         extra_body:
-          reasoning_format: none
+          reasoning_budget: 0
           chat_template_kwargs:
             enable_thinking: false
             reasoning_effort: none
@@ -133,7 +133,7 @@ proxy_config:
         temperature: 0.7
         top_p: 0.8
         extra_body:
-          reasoning_format: none
+          reasoning_budget: 0
           chat_template_kwargs:
             enable_thinking: false
             reasoning_effort: none
@@ -225,7 +225,7 @@ proxy_config:
         temperature: 0.6
         top_p: 0.95
         extra_body:
-          reasoning_format: none
+          reasoning_budget: 0
           chat_template_kwargs:
             enable_thinking: false
             reasoning_effort: none
@@ -284,7 +284,7 @@ proxy_config:
         temperature: 0.6
         top_p: 0.8
         extra_body:
-          reasoning_format: none
+          reasoning_budget: 0
           chat_template_kwargs:
             enable_thinking: false
             reasoning_effort: none
@@ -338,7 +338,7 @@ proxy_config:
         temperature: 0.6
         top_p: 0.95
         extra_body:
-          reasoning_format: none
+          reasoning_budget: 0
           chat_template_kwargs:
             enable_thinking: false
             reasoning_effort: none
@@ -381,7 +381,7 @@ proxy_config:
         temperature: 0.7
         top_p: 0.8
         extra_body:
-          reasoning_format: none
+          reasoning_budget: 0
           chat_template_kwargs:
             enable_thinking: false
             reasoning_effort: none
@@ -402,7 +402,7 @@ proxy_config:
         temperature: 0.6
         top_p: 0.8
         extra_body:
-          reasoning_format: none
+          reasoning_budget: 0
           chat_template_kwargs:
             enable_thinking: false
             reasoning_effort: none
@@ -423,7 +423,7 @@ proxy_config:
         temperature: 0.6
         top_p: 0.95
         extra_body:
-          reasoning_format: none
+          reasoning_budget: 0
           chat_template_kwargs:
             enable_thinking: false
             reasoning_effort: none
@@ -444,7 +444,7 @@ proxy_config:
         temperature: 0.6
         top_p: 0.95
         extra_body:
-          reasoning_format: none
+          reasoning_budget: 0
           chat_template_kwargs:
             enable_thinking: false
             reasoning_effort: none
@@ -465,7 +465,7 @@ proxy_config:
         temperature: 0.6
         top_p: 0.8
         extra_body:
-          reasoning_format: none
+          reasoning_budget: 0
           chat_template_kwargs:
             enable_thinking: false
             reasoning_effort: none
