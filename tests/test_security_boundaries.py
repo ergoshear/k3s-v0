@@ -117,11 +117,7 @@ class SecurityBoundaryTests(unittest.TestCase):
                          public["ingress"]["annotations"])
         self.assertEqual(public["environmentSecrets"], ["inference-backend"])
         for model in public["proxy_config"]["model_list"]:
-            expected_key = (
-                "none"
-                if model["model_name"].startswith("mlops-node-7/")
-                else "os.environ/INFERENCE_BACKEND_KEY"
-            )
+            expected_key = "os.environ/INFERENCE_BACKEND_KEY"
             self.assertEqual(model["litellm_params"]["api_key"], expected_key)
 
     def test_only_named_clients_can_enter_shared_egress_proxies(self):
