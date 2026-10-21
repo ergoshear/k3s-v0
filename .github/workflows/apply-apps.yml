@@ -55,20 +55,16 @@ jobs:
           sudo -n kubectl --kubeconfig="$KUBECONFIG" -n argocd \
             rollout status deployment/argocd-server --timeout=5m
 
-      - name: Sync the parent Argo CD application
+      - name: Apply the Argo CD application definitions
         run: |
           # Ensures all child Application definitions in argocd/applications are
-          # present (creates any newly added ones). Idempotent: a no-op when the
-          # parent is already synced. The argocd CLI run via kubectl exec needs an
-          # explicit in-cluster server address and the in-cluster service-account
-          # token (auto-provisioned in the pod).
-          sudo -n kubectl --kubeconfig="$KUBECONFIG" -n argocd \
-            exec deployment/argocd-server -c argocd-server -- \
-            argocd app sync argocd \
-              --server argocd-server.argocd.svc.cluster.local:80 \
-              --grpc-web
+          # present (creates any newly added ones). Argo CD's automated sync then
+          # applies the apps/ manifests for each. Idempotent: a no-op when already
+          # synced. This avoids the argocd CLI gRPC connection issues in-cluster.
+          sudo -n kubectl --kubeconfig="$KUBECONFIG" \
+            apply --server-side --force-conflicts -k argocd/applications
 
-      - name: Sync and wait for each application to be Healthy
+      - name: Wait for each application to be Synced and Healthy
         run: |
           apps="$(awk '/^  - /{print $2}' argocd/applications/kustomization.yaml | sed 's/\.yaml$//')"
           for app in $apps; do
@@ -80,15 +76,25 @@ jobs:
               fi
               sleep 5
             done
-            # Trigger a sync (idempotent) and wait for Synced + Healthy.
-            sudo -n kubectl --kubeconfig="$KUBECONFIG" -n argocd \
-              exec deployment/argocd-server -c argocd-server -- \
-              argocd app sync "$app" \
-                --server argocd-server.argocd.svc.cluster.local:80 \
-                --grpc-web
-            sudo -n kubectl --kubeconfig="$KUBECONFIG" -n argocd \
-              exec deployment/argocd-server -c argocd-server -- \
-              argocd app wait "$app" --timeout 15m \
-                --server argocd-server.argocd.svc.cluster.local:80 \
-                --grpc-web
+            # Poll the Application status until it is Synced and Healthy.
+            # Argo CD's automated sync drives the actual deployment.
+            for _ in $(seq 1 90); do
+              status="$(sudo -n kubectl --kubeconfig="$KUBECONFIG" -n argocd \
+                get application "$app" -o jsonpath='{.status.sync.status}/{.status.health.status}' 2>/dev/null)"
+              if [ "$status" = "Synced/Healthy" ]; then
+                echo "$app is Synced/Healthy"
+                break
+              fi
+              # Fail fast if the app reports an error state.
+              if [ "$status" = "*/Error" ] || [ "$status" = "*/Degraded" ]; then
+                echo "$app reached $status" >&2
+                exit 1
+              fi
+              sleep 10
+            done
+            # If we exhausted the loop without Synced/Healthy, fail.
+            if [ "$status" != "Synced/Healthy" ]; then
+              echo "$app did not reach Synced/Healthy (last: $status)" >&2
+              exit 1
+            fi
           done
