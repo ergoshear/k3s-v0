@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend-website
+  namespace: frontend-website
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-route53
+    external-dns.kubernetes.io/target: k3s.ergoshear.dev
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - ergoshear.dev
+      secretName: frontend-website-tls
+  rules:
+    - host: ergoshear.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-website
+                port:
+                  name: http

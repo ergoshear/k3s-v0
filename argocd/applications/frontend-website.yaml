@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: frontend-website
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:ergoshear/k3s.git
+    targetRevision: HEAD
+    path: apps/frontend-website
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: frontend-website
+  syncPolicy:
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

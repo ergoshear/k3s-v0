@@ -1,0 +1,51 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: frontend-website
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: web-ingress
+  namespace: frontend-website
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: frontend-website
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        # Flannel is the source for cross-node traffic from host-networked Traefik.
+        - ipBlock:
+            cidr: 100.126.105.69/32
+        - ipBlock:
+            cidr: 10.42.0.0/32
+      ports:
+        - protocol: TCP
+          port: 8000
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgres-ingress
+  namespace: frontend-website
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: postgres
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: frontend-website
+      ports:
+        - protocol: TCP
+          port: 5432

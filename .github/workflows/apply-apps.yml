@@ -1,0 +1,85 @@
+name: Apply apps
+
+# Runs on merge to main (and manually). Validates the manifests, then asks
+# Argo CD to sync each child Application in argocd/applications and waits for
+# each to be Synced and Healthy. Argo CD remains the single owner of both the
+# Application definitions and the apps/ manifests (no kubectl ownership).
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: k3s-apply-apps
+  cancel-in-progress: false
+
+jobs:
+  configuration-tests:
+    name: Validate app manifests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install PyYAML
+      - run: python -m unittest discover -s tests -v
+
+  apply:
+    needs: configuration-tests
+    # Only apply on pushes to main or manual runs, not on pull requests.
+    if: github.event_name != 'pull_request'
+    name: Apply Argo CD applications
+    runs-on: [self-hosted, k3s-control-plane-01]
+    timeout-minutes: 45
+    env:
+      KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Ensure Argo CD is available
+        run: |
+          sudo -n kubectl --kubeconfig="$KUBECONFIG" -n argocd \
+            rollout status deployment/argocd-application-controller --timeout=5m
+          sudo -n kubectl --kubeconfig="$KUBECONFIG" -n argocd \
+            rollout status deployment/argocd-server --timeout=5m
+
+      - name: Sync the parent Argo CD application
+        run: |
+          # Ensures all child Application definitions in argocd/applications are
+          # present (creates any newly added ones). Idempotent: a no-op when the
+          # parent is already synced.
+          sudo -n kubectl --kubeconfig="$KUBECONFIG" -n argocd \
+            exec deployment/argocd-server -c argocd-server -- \
+            argocd app sync argocd
+
+      - name: Sync and wait for each application to be Healthy
+        run: |
+          apps="$(awk '/^  - /{print $2}' argocd/applications/kustomization.yaml | sed 's/\.yaml$//')"
+          for app in $apps; do
+            # Wait for the Application object to exist (bounded to ~60s).
+            for _ in $(seq 1 12); do
+              if sudo -n kubectl --kubeconfig="$KUBECONFIG" -n argocd \
+                get application "$app" >/dev/null 2>&1; then
+                break
+              fi
+              sleep 5
+            done
+            # Trigger a sync (idempotent) and wait for Synced + Healthy.
+            sudo -n kubectl --kubeconfig="$KUBECONFIG" -n argocd \
+              exec deployment/argocd-server -c argocd-server -- \
+              argocd app sync "$app"
+            sudo -n kubectl --kubeconfig="$KUBECONFIG" -n argocd \
+              exec deployment/argocd-server -c argocd-server -- \
+              argocd app wait "$app" --timeout 15m
+          done

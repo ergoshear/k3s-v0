@@ -1,38 +1,22 @@
-name: Apply Argo CD
+name: Provision Argo CD
 
+# Manual-only workflow that bootstraps the Argo CD platform stack (CRDs,
+# cert-manager, Argo CD, and the parent Application). Run this once on first
+# setup and again only when the platform manifests change. It is intentionally
+# NOT triggered on merge so the stack is not re-installed on every push.
 on:
-  pull_request:
-    branches:
-      - main
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: k3s-argocd
+  group: k3s-provision-argocd
   cancel-in-progress: false
 
 jobs:
-  configuration-tests:
-    name: Validate Argo CD configuration
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
-        with:
-          enable-cache: true
-      - uses: extractions/setup-just@v3
-      - run: uv python install 3.12
-      - run: uv sync --locked
-      - run: just test
-
-  apply:
-    needs: configuration-tests
-    if: github.event_name != 'pull_request'
-    name: Apply Argo CD manifests
+  provision:
+    name: Provision Argo CD manifests
     runs-on: [self-hosted, k3s-control-plane-01]
     timeout-minutes: 30
     env:
