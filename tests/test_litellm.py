@@ -151,6 +151,10 @@ class LiteLLMTests(unittest.TestCase):
             expected_model = model
             if node == "mlops-node-7":
                 expected_model = "DiffusionGemma-26B-A4B"
+            elif node == "mlops-node-4" and model.startswith("Qwen3.6-"):
+                expected_model = "Qwen3.6-35B-A3B-DFlash"
+            elif node == "mlops-node-4" and model == "Gemma-4-31B-QAT-NoThink":
+                expected_model = "Gemma-4-31B-QAT-Vision"
             elif node == "mlops-node-9" and model.startswith("Qwen3.6-"):
                 expected_model = "Qwen3.6-35B-A3B-DFlash-512K"
             elif node == "mlops-node-9" and model.startswith("Qwen3.8-"):
@@ -230,28 +234,33 @@ class LiteLLMTests(unittest.TestCase):
     def test_semantic_groups_reuse_backend_routes_and_metadata(self):
         entries = self.values["proxy_config"]["model_list"]
         expected = {
-            "ergoshear-fast-edit": [
-                ("mlops-node-4/Qwen3.6-35B-A3B-DFlash-NoThink", 1, 2),
+            "fast": [
+                ("mlops-node-9/Qwen3.6-35B-A3B-DFlash-512K-NoThink", 1, 2),
+                ("mlops-node-4/Qwen3.6-35B-A3B-DFlash-NoThink", 1, 3),
+                ("mlops-node-7/DiffusionGemma-26B-A4B-NoThink", 2, None),
             ],
-            "ergoshear-coder": [
-                ("mlops-node-4/Qwen3.6-35B-A3B-DFlash-Low", 1, None),
-                ("mlops-node-6/Muse-Glimmer-30B-128K", 2, None),
-                ("mlops-node-9/Qwen3.6-35B-A3B-DFlash-512K-Low", 2, None),
+            "coder": [
+                ("mlops-node-9/Qwen3.6-35B-A3B-DFlash-512K-Low", 1, 3),
+                ("mlops-node-6/Muse-Glimmer-30B-128K", 1, 2),
+                ("mlops-node-4/Qwen3.6-35B-A3B-DFlash-Low", 2, None),
             ],
-            "ergoshear-architect": [
+            "architect": [
                 ("mlops-node-9/Qwen3.8-27B-Medium", 1, None),
+                ("mlops-node-7/DiffusionGemma-26B-A4B-Think", 2, None),
             ],
-            "ergoshear-vision": [
+            "vision": [
                 ("mlops-node-6/Muse-Glimmer-30B-Vision", 1, None),
                 ("mlops-node-4/Gemma-4-31B-QAT-Vision", 2, None),
             ],
-            "ergoshear-long-context": [
+            "long-context": [
                 ("mlops-node-9/Qwen3.6-35B-A3B-DFlash-512K-Low", 1, None),
-                ("mlops-node-4/Qwen3.6-35B-A3B-DFlash-Low", 2, None),
-                ("mlops-node-6/Muse-Glimmer-30B-256K-VRAM", 3, None),
+                ("mlops-node-6/Muse-Glimmer-30B-256K-VRAM", 2, None),
+            ],
+            "diffusion": [
+                ("mlops-node-7/DiffusionGemma-26B-A4B-NoThink", 1, None),
             ],
         }
-        self.assertEqual(len(entries), 25)
+        self.assertEqual(len(entries), 28)
         direct_by_name = {
             entry["model_name"]: entry for entry in entries
             if entry["model_name"].startswith("mlops-node-")
@@ -286,26 +295,23 @@ class LiteLLMTests(unittest.TestCase):
         self.assertEqual(
             router["model_group_alias"],
             {
-                "fast": "ergoshear-fast-edit",
-                "coder": "ergoshear-coder",
-                "architect": "ergoshear-architect",
-                "vision": "ergoshear-vision",
-                "long-context": "ergoshear-long-context",
-                "default": "ergoshear-coder",
-                "gpt-4o": {"model": "ergoshear-coder", "hidden": True},
-                "gpt-4o-mini": {"model": "ergoshear-fast-edit", "hidden": True},
-                "o3-mini": {"model": "ergoshear-architect", "hidden": True},
+                "default": "coder",
+                "gpt-4o": {"model": "coder", "hidden": True},
+                "gpt-4o-mini": {"model": "fast", "hidden": True},
+                "o3-mini": {"model": "architect", "hidden": True},
                 "claude-3-7-sonnet-latest": {
-                    "model": "ergoshear-coder", "hidden": True,
+                    "model": "coder", "hidden": True,
                 },
             },
         )
         self.assertEqual(
             router["fallbacks"],
             [
-                {"ergoshear-fast-edit": ["ergoshear-coder"]},
-                {"ergoshear-coder": ["ergoshear-fast-edit", "ergoshear-architect"]},
-                {"ergoshear-vision": ["mlops-node-4/Gemma-4-31B-QAT-NoThink"]},
+                {"fast": ["coder"]},
+                {"coder": ["fast", "architect"]},
+                {"architect": ["coder"]},
+                {"vision": ["mlops-node-4/Gemma-4-31B-QAT-NoThink"]},
+                {"diffusion": ["fast"]},
             ],
         )
         self.assertEqual(
@@ -315,6 +321,7 @@ class LiteLLMTests(unittest.TestCase):
                 "modify_params": True,
                 "allowed_openai_params": [
                     "chat_template_kwargs", "reasoning_format", "reasoning_budget",
+                    "enable_thinking",
                 ],
                 "set_verbose": False,
                 "request_timeout": 300,
