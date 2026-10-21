@@ -45,12 +45,16 @@ proxy_config:
   model_list:
     # ==========================================================================
     # 1. Direct Node Presets: mlops-node-4 (Radeon AI PRO R9700 32GB GDDR6)
+    #    Single Resident 256K Preset serves Low & NoThink at ~113 tok/s (0s Swap!)
     # ==========================================================================
     - model_name: mlops-node-4/Qwen3.6-35B-A3B-DFlash-Low
       litellm_params:
-        model: openai/Qwen3.6-35B-A3B-DFlash-Low
+        model: openai/Qwen3.6-35B-A3B-DFlash
         api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
+        extra_body:
+          chat_template_kwargs:
+            reasoning_effort: low
       model_info:
         id: node4-qwen36-dflash-low
         max_tokens: 32768
@@ -61,41 +65,21 @@ proxy_config:
 
     - model_name: mlops-node-4/Qwen3.6-35B-A3B-DFlash-NoThink
       litellm_params:
-        model: openai/Qwen3.6-35B-A3B-DFlash-NoThink
+        model: openai/Qwen3.6-35B-A3B-DFlash
         api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
+        temperature: 0.6
+        top_p: 0.8
+        extra_body:
+          reasoning_format: none
+          chat_template_kwargs:
+            enable_thinking: false
+            reasoning_effort: none
       model_info:
         id: node4-qwen36-dflash-nothink
         max_tokens: 32768
         max_input_tokens: 229376
         max_output_tokens: 32768
-        supports_function_calling: true
-
-    - model_name: mlops-node-4/Gemma-4-31B-QAT-Vision
-      litellm_params:
-        model: openai/Gemma-4-31B-QAT-Vision
-        api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: os.environ/INFERENCE_BACKEND_KEY
-      model_info:
-        id: node4-gemma4-31b-vision
-        max_tokens: 32768
-        max_input_tokens: 229376
-        max_output_tokens: 32768
-        supports_vision: true
-        supports_function_calling: true
-        supports_reasoning: true
-
-    - model_name: mlops-node-4/Gemma-4-31B-QAT-NoThink
-      litellm_params:
-        model: openai/Gemma-4-31B-QAT-NoThink
-        api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: os.environ/INFERENCE_BACKEND_KEY
-      model_info:
-        id: node4-gemma4-31b-nothink
-        max_tokens: 32768
-        max_input_tokens: 229376
-        max_output_tokens: 32768
-        supports_vision: true
         supports_function_calling: true
 
     # ==========================================================================
@@ -376,9 +360,9 @@ proxy_config:
         supports_reasoning: true
 
     # ==========================================================================
-    # 5. Standard High-Speed Model Groups (Pool Targets for Auto Routers)
+    # 5. Standard High-Speed Model Groups (All 4 Nodes Resident @ order: 1!)
     # ==========================================================================
-    # --- fast: Instant 0-Think Edits & Autocomplete (80-136 tok/s, 0s Swap) ---
+    # --- fast: Instant 0-Think Edits & Autocomplete (80-137 tok/s, 0s Swap) ---
     - model_name: fast
       litellm_params:
         model: openai/Qwen3.8-27B-GSQ-RCO-IQ3_S-128K
@@ -402,6 +386,26 @@ proxy_config:
 
     - model_name: fast
       litellm_params:
+        model: openai/Qwen3.6-35B-A3B-DFlash
+        api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        order: 1
+        weight: 3
+        temperature: 0.6
+        top_p: 0.8
+        extra_body:
+          reasoning_format: none
+          chat_template_kwargs:
+            enable_thinking: false
+            reasoning_effort: none
+      model_info:
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_function_calling: true
+
+    - model_name: fast
+      litellm_params:
         model: openai/Ornith-1.5-35B-A3B-DFlash
         api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
@@ -462,19 +466,7 @@ proxy_config:
         max_output_tokens: 32768
         supports_function_calling: true
 
-    - model_name: fast
-      litellm_params:
-        model: openai/Qwen3.6-35B-A3B-DFlash-NoThink
-        api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: os.environ/INFERENCE_BACKEND_KEY
-        order: 2
-      model_info:
-        max_tokens: 32768
-        max_input_tokens: 229376
-        max_output_tokens: 32768
-        supports_function_calling: true
-
-    # --- coder: Top-Tier Agentic Coding (Qwen3.8-27B + Dual Ornith-1.5 + Qwen3.6-DFlash) ---
+    # --- coder: Top-Tier Agentic Coding (All 4 Nodes Resident @ 75-137 tok/s) ---
     - model_name: coder
       litellm_params:
         model: openai/Qwen3.8-27B-GSQ-RCO-IQ3_S-128K
@@ -490,6 +482,23 @@ proxy_config:
         max_input_tokens: 98304
         max_output_tokens: 32768
         supports_vision: true
+        supports_function_calling: true
+        supports_reasoning: true
+
+    - model_name: coder
+      litellm_params:
+        model: openai/Qwen3.6-35B-A3B-DFlash
+        api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        order: 1
+        weight: 3
+        extra_body:
+          chat_template_kwargs:
+            reasoning_effort: low
+      model_info:
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
         supports_function_calling: true
         supports_reasoning: true
 
@@ -546,20 +555,7 @@ proxy_config:
         supports_function_calling: true
         supports_reasoning: true
 
-    - model_name: coder
-      litellm_params:
-        model: openai/Qwen3.6-35B-A3B-DFlash-Low
-        api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: os.environ/INFERENCE_BACKEND_KEY
-        order: 2
-      model_info:
-        max_tokens: 32768
-        max_input_tokens: 229376
-        max_output_tokens: 32768
-        supports_function_calling: true
-        supports_reasoning: true
-
-    # --- architect: Deep System Design & Hard Bugs (Qwen3.8-27B @ 136 tok/s + Ornith-1.5 Medium @ 85 tok/s) ---
+    # --- architect: Deep System Design & Hard Bugs (Qwen3.8-27B @ 137 tok/s + Ornith-1.5 Medium @ 89 tok/s) ---
     - model_name: architect
       litellm_params:
         model: openai/Qwen3.8-27B-GSQ-RCO-IQ3_S-128K
@@ -669,21 +665,7 @@ proxy_config:
         supports_function_calling: true
         supports_reasoning: true
 
-    - model_name: vision
-      litellm_params:
-        model: openai/Gemma-4-31B-QAT-Vision
-        api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: os.environ/INFERENCE_BACKEND_KEY
-        order: 2
-      model_info:
-        max_tokens: 32768
-        max_input_tokens: 229376
-        max_output_tokens: 32768
-        supports_vision: true
-        supports_function_calling: true
-        supports_reasoning: true
-
-    # --- long-context: 256K-512K Context (Resident node-9 512K & 256K + node-7 256K primary) ---
+    # --- long-context: 256K-512K Context (Resident node-9 512K & 256K + node-4 & node-7 256K primary) ---
     - model_name: long-context
       litellm_params:
         model: openai/Qwen3.6-35B-A3B-DFlash-512K
@@ -697,6 +679,23 @@ proxy_config:
       model_info:
         max_tokens: 32768
         max_input_tokens: 491520
+        max_output_tokens: 32768
+        supports_function_calling: true
+        supports_reasoning: true
+
+    - model_name: long-context
+      litellm_params:
+        model: openai/Qwen3.6-35B-A3B-DFlash
+        api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        order: 1
+        weight: 3
+        extra_body:
+          chat_template_kwargs:
+            reasoning_effort: low
+      model_info:
+        max_tokens: 32768
+        max_input_tokens: 229376
         max_output_tokens: 32768
         supports_function_calling: true
         supports_reasoning: true
@@ -739,23 +738,10 @@ proxy_config:
 
     - model_name: long-context
       litellm_params:
-        model: openai/Qwen3.6-35B-A3B-DFlash-Low
-        api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: os.environ/INFERENCE_BACKEND_KEY
-        order: 2
-      model_info:
-        max_tokens: 32768
-        max_input_tokens: 229376
-        max_output_tokens: 32768
-        supports_function_calling: true
-        supports_reasoning: true
-
-    - model_name: long-context
-      litellm_params:
         model: openai/Qwen3.8-27B-GSQ-RCO-IQ3_S-256K
         api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
-        order: 3
+        order: 2
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
@@ -852,7 +838,7 @@ proxy_config:
       - architect:
           - coder
       - vision:
-          - mlops-node-4/Gemma-4-31B-QAT-NoThink
+          - coder
 
   litellm_settings:
     drop_params: true
