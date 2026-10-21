@@ -13,3 +13,4 @@ dev = [
 
 [tool.uv]
 package = false
+python-downloads = "automatic"

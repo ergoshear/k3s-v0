@@ -37,7 +37,7 @@ Before syncing the application, generate the required credentials and load the
 `hermes-workspace-secrets` Secret into the cluster:
 
 ```sh
-python3 scripts/create_hermes_workspace_secret.py
+uv run python scripts/create_hermes_workspace_secret.py
 ```
 
 The script uses `~/.kube/k3s.yaml` by default; pass `--kubeconfig` to use
@@ -78,7 +78,7 @@ ProxyGroup and model endpoint Services. Before syncing these applications:
    `Devices/Core`, and `Keys/Auth Keys`, scoped to `tag:k8s-operator`.
 3. Allow `tag:k8s` to reach `mlops-node-4`, `mlops-node-6`, `mlops-node-7`,
    and `mlops-node-9` on TCP port 8080 in the tailnet access policy.
-4. Run `python3 scripts/create_tailscale_operator_secret.py` to securely
+4. Run `uv run python scripts/create_tailscale_operator_secret.py` to securely
    prompt for the OAuth client ID and secret and store them in the
    `tailscale/operator-oauth` Kubernetes Secret. The script creates the
    namespace if needed and never prints the credentials. Use `--rotate` to
@@ -254,6 +254,7 @@ just test
 just install-hooks
 ```
 
+The `.python-version` file selects Python 3.12; `uv` installs it automatically.
 `just test` runs the full Python test suite in the project environment.
 `just install-hooks` enables the pre-commit hook, which runs `just test`
 before each commit.
