@@ -5,7 +5,7 @@ metadata:
   namespace: frontend-website
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-route53
-    external-dns.kubernetes.io/target: k3s.ergoshear.dev
+    external-dns.kubernetes.io/target: 18.189.255.125
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
 spec:
   ingressClassName: traefik

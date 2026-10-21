@@ -213,6 +213,9 @@ ExternalDNS publishes `argocd.ergoshear.dev` as a CNAME to
 `k3s.ergoshear.dev`; cert-manager obtains a publicly trusted Let's Encrypt
 certificate using Route 53 DNS-01. The ingress uses the
 `external-dns.kubernetes.io/target` annotation supported by ExternalDNS v0.23.
+The frontend ingress is for the zone apex, so its target is the k3s Elastic IP
+(`18.189.255.125`) to create an A record; Route 53 cannot create a CNAME at the
+apex. Update this annotation if Terraform replaces that Elastic IP.
 ExternalDNS uses `sync` with its TXT ownership registry to remove obsolete
 owned records, including when a record changes from A to CNAME; it does not
 manage Terraform-owned records. This requires the `ergoshear.dev` Route 53
