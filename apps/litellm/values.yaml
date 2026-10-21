@@ -48,7 +48,7 @@ proxy_config:
     # ==========================================================================
     - model_name: mlops-node-4/Qwen3.6-35B-A3B-DFlash-Low
       litellm_params:
-        model: openai/Qwen3.6-35B-A3B-DFlash
+        model: openai/Qwen3.6-35B-A3B-DFlash-Low
         api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         extra_body:
@@ -64,7 +64,7 @@ proxy_config:
 
     - model_name: mlops-node-4/Qwen3.6-35B-A3B-DFlash-NoThink
       litellm_params:
-        model: openai/Qwen3.6-35B-A3B-DFlash
+        model: openai/Qwen3.6-35B-A3B-DFlash-NoThink
         api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         temperature: 0.6
@@ -100,7 +100,7 @@ proxy_config:
 
     - model_name: mlops-node-4/Gemma-4-31B-QAT-NoThink
       litellm_params:
-        model: openai/Gemma-4-31B-QAT-Vision
+        model: openai/Gemma-4-31B-QAT-NoThink
         api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         extra_body:
@@ -318,7 +318,7 @@ proxy_config:
 
     - model_name: fast
       litellm_params:
-        model: openai/Qwen3.6-35B-A3B-DFlash
+        model: openai/Qwen3.6-35B-A3B-DFlash-NoThink
         api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
@@ -345,9 +345,9 @@ proxy_config:
         extra_body:
           enable_thinking: false
       model_info:
-        max_tokens: 16384
-        max_input_tokens: 49152
-        max_output_tokens: 16384
+        max_tokens: 32768
+        max_input_tokens: 98304
+        max_output_tokens: 32768
         supports_function_calling: true
 
     # --- coder: High-Throughput Agentic Coding (Resident node-9 + node-6 first) ---
@@ -384,7 +384,7 @@ proxy_config:
 
     - model_name: coder
       litellm_params:
-        model: openai/Qwen3.6-35B-A3B-DFlash
+        model: openai/Qwen3.6-35B-A3B-DFlash-Low
         api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 2
@@ -424,9 +424,9 @@ proxy_config:
         extra_body:
           enable_thinking: true
       model_info:
-        max_tokens: 16384
-        max_input_tokens: 49152
-        max_output_tokens: 16384
+        max_tokens: 32768
+        max_input_tokens: 98304
+        max_output_tokens: 32768
         supports_function_calling: true
         supports_reasoning: true
 

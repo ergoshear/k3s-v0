@@ -151,10 +151,6 @@ class LiteLLMTests(unittest.TestCase):
             expected_model = model
             if node == "mlops-node-7":
                 expected_model = "DiffusionGemma-26B-A4B"
-            elif node == "mlops-node-4" and model.startswith("Qwen3.6-"):
-                expected_model = "Qwen3.6-35B-A3B-DFlash"
-            elif node == "mlops-node-4" and model == "Gemma-4-31B-QAT-NoThink":
-                expected_model = "Gemma-4-31B-QAT-Vision"
             elif node == "mlops-node-9" and model.startswith("Qwen3.6-"):
                 expected_model = "Qwen3.6-35B-A3B-DFlash-512K"
             elif node == "mlops-node-9" and model.startswith("Qwen3.8-"):
@@ -206,7 +202,7 @@ class LiteLLMTests(unittest.TestCase):
             node, model = name.split("/", 1)
             output, context = (32768, 262144)
             if node == "mlops-node-7":
-                output, context = (16384, 65536)
+                output, context = (32768, 131072)
             elif model == "Muse-Glimmer-30B-128K":
                 output, context = (16384, 131072)
             elif model == "Muse-Glimmer-30B-Vision":
