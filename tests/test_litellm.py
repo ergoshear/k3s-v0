@@ -161,9 +161,7 @@ class LiteLLMTests(unittest.TestCase):
             )
             self.assertEqual(
                 entry["litellm_params"]["api_base"],
-                "http://192.168.202.17:8080/v1"
-                if node == "mlops-node-7"
-                else f"http://{node}.hermes-workspace.svc.cluster.local:8080/v1",
+                f"http://{node}.hermes-workspace.svc.cluster.local:8080/v1",
             )
             self.assertEqual(
                 entry["litellm_params"]["api_key"],
@@ -194,7 +192,7 @@ class LiteLLMTests(unittest.TestCase):
             node7["Qwen3.6-35B-A3B-DFlash-NoThink"]["litellm_params"],
             {
                 "model": "openai/Qwen3.6-35B-A3B-DFlash",
-                "api_base": "http://192.168.202.17:8080/v1",
+                "api_base": "http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1",
                 "api_key": "none",
                 "temperature": 0.6,
                 "top_p": 0.80,
