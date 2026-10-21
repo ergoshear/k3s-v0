@@ -57,6 +57,11 @@ spec:
             capabilities:
               drop:
                 - ALL
+              add:
+                - CHOWN
+                - FOWNER
+                - SETGID
+                - SETUID
           readinessProbe:
             exec:
               command:
