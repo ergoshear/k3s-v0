@@ -43,344 +43,457 @@ envVars:
 
 proxy_config:
   model_list:
-  - model_name: mlops-node-4/Qwen3.6-35B-A3B-DFlash-Low
-    litellm_params:
-      model: openai/Qwen3.6-35B-A3B-DFlash-Low
-      api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
-    model_info:
-      id: node4-qwen36-dflash-low
-      max_tokens: 32768
-      max_input_tokens: 229376
-      supports_function_calling: true
-      supports_reasoning: true
-      max_output_tokens: 32768
-  - model_name: mlops-node-4/Qwen3.6-35B-A3B-DFlash-NoThink
-    litellm_params:
-      model: openai/Qwen3.6-35B-A3B-DFlash-NoThink
-      api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
-    model_info:
-      id: node4-qwen36-dflash-nothink
-      max_tokens: 32768
-      max_input_tokens: 229376
-      supports_function_calling: true
-      max_output_tokens: 32768
-  - model_name: mlops-node-4/Gemma-4-31B-QAT-Vision
-    litellm_params:
-      model: openai/Gemma-4-31B-QAT-Vision
-      api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
-    model_info:
-      id: node4-gemma4-31b-vision
-      max_tokens: 32768
-      max_input_tokens: 229376
-      supports_vision: true
-      supports_function_calling: true
-      supports_reasoning: true
-      max_output_tokens: 32768
-  - model_name: mlops-node-4/Gemma-4-31B-QAT-NoThink
-    litellm_params:
-      model: openai/Gemma-4-31B-QAT-NoThink
-      api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
-    model_info:
-      id: node4-gemma4-31b-nothink
-      max_tokens: 32768
-      max_input_tokens: 229376
-      supports_vision: true
-      supports_function_calling: true
-      max_output_tokens: 32768
-  - model_name: mlops-node-6/Muse-Glimmer-30B-128K
-    litellm_params:
-      model: openai/Muse-Glimmer-30B-128K
-      api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
-    model_info:
-      id: node6-muse-glimmer-128k
-      max_tokens: 16384
-      max_input_tokens: 114688
-      supports_function_calling: true
-      supports_reasoning: true
-      max_output_tokens: 16384
-  - model_name: mlops-node-6/Muse-Glimmer-30B-256K-VRAM
-    litellm_params:
-      model: openai/Muse-Glimmer-30B-256K-VRAM
-      api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
-    model_info:
-      id: node6-muse-glimmer-256k-vram
-      max_tokens: 32768
-      max_input_tokens: 229376
-      supports_function_calling: true
-      supports_reasoning: true
-      max_output_tokens: 32768
-  - model_name: mlops-node-6/Muse-Glimmer-30B-Vision
-    litellm_params:
-      model: openai/Muse-Glimmer-30B-Vision
-      api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
-    model_info:
-      id: node6-muse-glimmer-vision
-      max_tokens: 16384
-      max_input_tokens: 81920
-      supports_vision: true
-      supports_function_calling: true
-      supports_reasoning: true
-      max_output_tokens: 16384
-  - model_name: mlops-node-6/Muse-Glimmer-30B-512K-Hybrid
-    litellm_params:
-      model: openai/Muse-Glimmer-30B-512K-Hybrid
-      api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
-    model_info:
-      id: node6-muse-glimmer-512k-hybrid
-      max_tokens: 32768
-      max_input_tokens: 491520
-      supports_function_calling: true
-      supports_reasoning: true
-      max_output_tokens: 32768
-  # ----------------------------------------------------------------------------
-  # 3. Direct Node Presets: mlops-node-7 (Strix Halo 128GB - Resident Diffusion)
-  #    Single Resident Process: openai/DiffusionGemma-26B-A4B (0.0s Swap!)
-  # ----------------------------------------------------------------------------
-  - model_name: mlops-node-7/DiffusionGemma-26B-A4B-Think
-    litellm_params:
-      model: openai/DiffusionGemma-26B-A4B
-      api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
-      extra_body:
-        enable_thinking: true
-    model_info:
-      id: node7-diffusiongemma-26b-a4b-think
-      max_tokens: 16384
-      max_input_tokens: 49152
-      supports_function_calling: true
-      supports_reasoning: true
-  - model_name: mlops-node-7/DiffusionGemma-26B-A4B-NoThink
-    litellm_params:
-      model: openai/DiffusionGemma-26B-A4B
-      api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
-      extra_body:
-        enable_thinking: false
-    model_info:
-      id: node7-diffusiongemma-26b-a4b-nothink
-      max_tokens: 16384
-      max_input_tokens: 49152
-      supports_function_calling: true
-  - model_name: mlops-node-9/Qwen3.6-35B-A3B-DFlash-512K-Low
-    litellm_params:
-      model: openai/Qwen3.6-35B-A3B-DFlash-512K
-      api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
-      extra_body:
-        chat_template_kwargs:
-          reasoning_effort: low
-    model_info:
-      id: node9-qwen36-dflash-512k-low
-      max_tokens: 32768
-      max_input_tokens: 491520
-      supports_function_calling: true
-      supports_reasoning: true
-      max_output_tokens: 32768
-  - model_name: mlops-node-9/Qwen3.6-35B-A3B-DFlash-512K-NoThink
-    litellm_params:
-      model: openai/Qwen3.6-35B-A3B-DFlash-512K
-      api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
-      temperature: 0.6
-      top_p: 0.8
-      extra_body:
-        reasoning_format: none
-        chat_template_kwargs:
+    # ==========================================================================
+    # 1. Direct Node Presets: mlops-node-4 (Radeon AI PRO R9700 32GB GDDR6)
+    # ==========================================================================
+    - model_name: mlops-node-4/Qwen3.6-35B-A3B-DFlash-Low
+      litellm_params:
+        model: openai/Qwen3.6-35B-A3B-DFlash
+        api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        extra_body:
+          chat_template_kwargs:
+            reasoning_effort: low
+      model_info:
+        id: node4-qwen36-dflash-low
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_function_calling: true
+        supports_reasoning: true
+
+    - model_name: mlops-node-4/Qwen3.6-35B-A3B-DFlash-NoThink
+      litellm_params:
+        model: openai/Qwen3.6-35B-A3B-DFlash
+        api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        temperature: 0.6
+        top_p: 0.8
+        extra_body:
+          reasoning_format: none
+          chat_template_kwargs:
+            enable_thinking: false
+            reasoning_effort: none
+      model_info:
+        id: node4-qwen36-dflash-nothink
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_function_calling: true
+
+    - model_name: mlops-node-4/Gemma-4-31B-QAT-Vision
+      litellm_params:
+        model: openai/Gemma-4-31B-QAT-Vision
+        api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        extra_body:
+          chat_template_kwargs:
+            enable_thinking: true
+      model_info:
+        id: node4-gemma4-31b-vision
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_vision: true
+        supports_function_calling: true
+        supports_reasoning: true
+
+    - model_name: mlops-node-4/Gemma-4-31B-QAT-NoThink
+      litellm_params:
+        model: openai/Gemma-4-31B-QAT-Vision
+        api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        extra_body:
+          reasoning_format: none
+          chat_template_kwargs:
+            enable_thinking: false
+      model_info:
+        id: node4-gemma4-31b-nothink
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_vision: true
+        supports_function_calling: true
+
+    # ==========================================================================
+    # 2. Direct Node Presets: mlops-node-6 (RTX 4090 24GB)
+    # ==========================================================================
+    - model_name: mlops-node-6/Muse-Glimmer-30B-128K
+      litellm_params:
+        model: openai/Muse-Glimmer-30B-128K
+        api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+      model_info:
+        id: node6-muse-glimmer-128k
+        max_tokens: 16384
+        max_input_tokens: 114688
+        max_output_tokens: 16384
+        supports_function_calling: true
+        supports_reasoning: true
+
+    - model_name: mlops-node-6/Muse-Glimmer-30B-256K-VRAM
+      litellm_params:
+        model: openai/Muse-Glimmer-30B-256K-VRAM
+        api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+      model_info:
+        id: node6-muse-glimmer-256k-vram
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_function_calling: true
+        supports_reasoning: true
+
+    - model_name: mlops-node-6/Muse-Glimmer-30B-Vision
+      litellm_params:
+        model: openai/Muse-Glimmer-30B-Vision
+        api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+      model_info:
+        id: node6-muse-glimmer-vision
+        max_tokens: 16384
+        max_input_tokens: 81920
+        max_output_tokens: 16384
+        supports_vision: true
+        supports_function_calling: true
+        supports_reasoning: true
+
+    - model_name: mlops-node-6/Muse-Glimmer-30B-512K-Hybrid
+      litellm_params:
+        model: openai/Muse-Glimmer-30B-512K-Hybrid
+        api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+      model_info:
+        id: node6-muse-glimmer-512k-hybrid
+        max_tokens: 32768
+        max_input_tokens: 491520
+        max_output_tokens: 32768
+        supports_function_calling: true
+        supports_reasoning: true
+
+    # ==========================================================================
+    # 3. Direct Node Presets: mlops-node-7 (Strix Halo 128GB - Resident Diffusion)
+    # ==========================================================================
+    - model_name: mlops-node-7/DiffusionGemma-26B-A4B-Think
+      litellm_params:
+        model: openai/DiffusionGemma-26B-A4B
+        api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        extra_body:
+          enable_thinking: true
+      model_info:
+        id: node7-diffusiongemma-26b-a4b-think
+        max_tokens: 16384
+        max_input_tokens: 49152
+        max_output_tokens: 16384
+        supports_function_calling: true
+        supports_reasoning: true
+
+    - model_name: mlops-node-7/DiffusionGemma-26B-A4B-NoThink
+      litellm_params:
+        model: openai/DiffusionGemma-26B-A4B
+        api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        extra_body:
           enable_thinking: false
-          reasoning_effort: none
-    model_info:
-      id: node9-qwen36-dflash-512k-nothink
-      max_tokens: 32768
-      max_input_tokens: 491520
-      supports_function_calling: true
-      max_output_tokens: 32768
-  - model_name: mlops-node-9/Qwen3.8-27B-Low
-    litellm_params:
-      model: openai/Qwen3.8-27B
-      api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
-      extra_body:
-        chat_template_kwargs:
-          reasoning_effort: low
-    model_info:
-      id: node9-qwen38-27b-low
-      max_tokens: 32768
-      max_input_tokens: 229376
-      supports_function_calling: true
-      supports_reasoning: true
-      max_output_tokens: 32768
-  - model_name: mlops-node-9/Qwen3.8-27B-Medium
-    litellm_params:
-      model: openai/Qwen3.8-27B
-      api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
-      extra_body:
-        chat_template_kwargs:
-          reasoning_effort: medium
-    model_info:
-      id: node9-qwen38-27b-medium
-      max_tokens: 32768
-      max_input_tokens: 229376
-      supports_function_calling: true
-      supports_reasoning: true
-      max_output_tokens: 32768
-  - model_name: mlops-node-9/Qwen3.8-27B-NoThink
-    litellm_params:
-      model: openai/Qwen3.8-27B
-      api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
-      temperature: 0.7
-      top_p: 0.8
-      extra_body:
-        reasoning_format: none
-        chat_template_kwargs:
+      model_info:
+        id: node7-diffusiongemma-26b-a4b-nothink
+        max_tokens: 16384
+        max_input_tokens: 49152
+        max_output_tokens: 16384
+        supports_function_calling: true
+
+    # ==========================================================================
+    # 4. Direct Node Presets: mlops-node-9 (Strix Halo 192GB - 2 Resident Slots)
+    # ==========================================================================
+    - model_name: mlops-node-9/Qwen3.6-35B-A3B-DFlash-512K-Low
+      litellm_params:
+        model: openai/Qwen3.6-35B-A3B-DFlash-512K
+        api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        extra_body:
+          chat_template_kwargs:
+            reasoning_effort: low
+      model_info:
+        id: node9-qwen36-dflash-512k-low
+        max_tokens: 32768
+        max_input_tokens: 491520
+        max_output_tokens: 32768
+        supports_function_calling: true
+        supports_reasoning: true
+
+    - model_name: mlops-node-9/Qwen3.6-35B-A3B-DFlash-512K-NoThink
+      litellm_params:
+        model: openai/Qwen3.6-35B-A3B-DFlash-512K
+        api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        temperature: 0.6
+        top_p: 0.8
+        extra_body:
+          reasoning_format: none
+          chat_template_kwargs:
+            enable_thinking: false
+            reasoning_effort: none
+      model_info:
+        id: node9-qwen36-dflash-512k-nothink
+        max_tokens: 32768
+        max_input_tokens: 491520
+        max_output_tokens: 32768
+        supports_function_calling: true
+
+    - model_name: mlops-node-9/Qwen3.8-27B-Low
+      litellm_params:
+        model: openai/Qwen3.8-27B
+        api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        extra_body:
+          chat_template_kwargs:
+            reasoning_effort: low
+      model_info:
+        id: node9-qwen38-27b-low
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_function_calling: true
+        supports_reasoning: true
+
+    - model_name: mlops-node-9/Qwen3.8-27B-Medium
+      litellm_params:
+        model: openai/Qwen3.8-27B
+        api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        extra_body:
+          chat_template_kwargs:
+            reasoning_effort: medium
+      model_info:
+        id: node9-qwen38-27b-medium
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_function_calling: true
+        supports_reasoning: true
+
+    - model_name: mlops-node-9/Qwen3.8-27B-NoThink
+      litellm_params:
+        model: openai/Qwen3.8-27B
+        api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        temperature: 0.7
+        top_p: 0.8
+        extra_body:
+          reasoning_format: none
+          chat_template_kwargs:
+            enable_thinking: false
+            reasoning_effort: none
+      model_info:
+        id: node9-qwen38-27b-nothink
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_function_calling: true
+
+    # ==========================================================================
+    # 5. Standard High-Speed Aliases (No ergoshear-* Prefixes)
+    # ==========================================================================
+    # --- fast: 0-Think Instant Sub-300ms TTFT, 81-114 tok/s ---
+    - model_name: fast
+      litellm_params:
+        model: openai/Qwen3.6-35B-A3B-DFlash-512K
+        api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        order: 1
+        weight: 2
+        temperature: 0.6
+        top_p: 0.8
+        extra_body:
+          reasoning_format: none
+          chat_template_kwargs:
+            enable_thinking: false
+            reasoning_effort: none
+      model_info:
+        max_tokens: 32768
+        max_input_tokens: 491520
+        max_output_tokens: 32768
+        supports_function_calling: true
+
+    - model_name: fast
+      litellm_params:
+        model: openai/Qwen3.6-35B-A3B-DFlash-NoThink
+        api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        order: 1
+        weight: 3
+      model_info:
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_function_calling: true
+
+    - model_name: fast
+      litellm_params:
+        model: openai/DiffusionGemma-26B-A4B
+        api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        order: 2
+        extra_body:
           enable_thinking: false
-          reasoning_effort: none
-    model_info:
-      id: node9-qwen38-27b-nothink
-      max_tokens: 32768
-      max_input_tokens: 229376
-      supports_function_calling: true
-      max_output_tokens: 32768
-  - model_name: ergoshear-fast-edit
-    litellm_params:
-      model: openai/Qwen3.6-35B-A3B-DFlash-NoThink
-      api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
-      order: 1
-      weight: 2
-    model_info:
-      max_tokens: 32768
-      max_input_tokens: 229376
-      supports_function_calling: true
-      max_output_tokens: 32768
-  - model_name: ergoshear-coder
-    litellm_params:
-      model: openai/Qwen3.6-35B-A3B-DFlash-Low
-      api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
-      order: 1
-    model_info:
-      max_tokens: 32768
-      max_input_tokens: 229376
-      supports_function_calling: true
-      supports_reasoning: true
-      max_output_tokens: 32768
-  - model_name: ergoshear-coder
-    litellm_params:
-      model: openai/Muse-Glimmer-30B-128K
-      api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
-      order: 2
-    model_info:
-      max_tokens: 16384
-      max_input_tokens: 114688
-      supports_function_calling: true
-      supports_reasoning: true
-      max_output_tokens: 16384
-  - model_name: ergoshear-coder
-    litellm_params:
-      model: openai/Qwen3.6-35B-A3B-DFlash-512K
-      api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
-      order: 2
-      extra_body:
-        chat_template_kwargs:
-          reasoning_effort: low
-    model_info:
-      max_tokens: 32768
-      max_input_tokens: 491520
-      supports_function_calling: true
-      supports_reasoning: true
-      max_output_tokens: 32768
-  - model_name: ergoshear-architect
-    litellm_params:
-      model: openai/Qwen3.8-27B
-      api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
-      order: 1
-      extra_body:
-        chat_template_kwargs:
-          reasoning_effort: medium
-    model_info:
-      max_tokens: 32768
-      max_input_tokens: 229376
-      supports_function_calling: true
-      supports_reasoning: true
-      max_output_tokens: 32768
-  - model_name: ergoshear-vision
-    litellm_params:
-      model: openai/Muse-Glimmer-30B-Vision
-      api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
-      order: 1
-    model_info:
-      max_tokens: 16384
-      max_input_tokens: 81920
-      supports_vision: true
-      supports_function_calling: true
-      supports_reasoning: true
-      max_output_tokens: 16384
-  - model_name: ergoshear-vision
-    litellm_params:
-      model: openai/Gemma-4-31B-QAT-Vision
-      api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
-      order: 2
-    model_info:
-      max_tokens: 32768
-      max_input_tokens: 229376
-      supports_vision: true
-      supports_function_calling: true
-      supports_reasoning: true
-      max_output_tokens: 32768
-  - model_name: ergoshear-long-context
-    litellm_params:
-      model: openai/Qwen3.6-35B-A3B-DFlash-512K
-      api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
-      order: 1
-      extra_body:
-        chat_template_kwargs:
-          reasoning_effort: low
-    model_info:
-      max_tokens: 32768
-      max_input_tokens: 491520
-      supports_function_calling: true
-      supports_reasoning: true
-      max_output_tokens: 32768
-  - model_name: ergoshear-long-context
-    litellm_params:
-      model: openai/Qwen3.6-35B-A3B-DFlash-Low
-      api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
-      order: 2
-    model_info:
-      max_tokens: 32768
-      max_input_tokens: 229376
-      supports_function_calling: true
-      supports_reasoning: true
-      max_output_tokens: 32768
-  - model_name: ergoshear-long-context
-    litellm_params:
-      model: openai/Muse-Glimmer-30B-256K-VRAM
-      api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: os.environ/INFERENCE_BACKEND_KEY
-      order: 3
-    model_info:
-      max_tokens: 32768
-      max_input_tokens: 229376
-      supports_function_calling: true
-      supports_reasoning: true
-      max_output_tokens: 32768
+      model_info:
+        max_tokens: 16384
+        max_input_tokens: 49152
+        max_output_tokens: 16384
+        supports_function_calling: true
+
+    # --- coder: High-Throughput Agentic Coding (Resident node-9 + node-6 first) ---
+    - model_name: coder
+      litellm_params:
+        model: openai/Qwen3.6-35B-A3B-DFlash-512K
+        api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        order: 1
+        weight: 3
+        extra_body:
+          chat_template_kwargs:
+            reasoning_effort: low
+      model_info:
+        max_tokens: 32768
+        max_input_tokens: 491520
+        max_output_tokens: 32768
+        supports_function_calling: true
+        supports_reasoning: true
+
+    - model_name: coder
+      litellm_params:
+        model: openai/Muse-Glimmer-30B-128K
+        api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        order: 1
+        weight: 2
+      model_info:
+        max_tokens: 16384
+        max_input_tokens: 114688
+        max_output_tokens: 16384
+        supports_function_calling: true
+        supports_reasoning: true
+
+    - model_name: coder
+      litellm_params:
+        model: openai/Qwen3.6-35B-A3B-DFlash-Low
+        api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        order: 2
+      model_info:
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_function_calling: true
+        supports_reasoning: true
+
+    # --- architect: Deep System Design & Reasoning (Resident node-9 + node-7) ---
+    - model_name: architect
+      litellm_params:
+        model: openai/Qwen3.8-27B
+        api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        order: 1
+        extra_body:
+          chat_template_kwargs:
+            reasoning_effort: medium
+      model_info:
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_function_calling: true
+        supports_reasoning: true
+
+    - model_name: architect
+      litellm_params:
+        model: openai/DiffusionGemma-26B-A4B
+        api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        order: 2
+        extra_body:
+          enable_thinking: true
+      model_info:
+        max_tokens: 16384
+        max_input_tokens: 49152
+        max_output_tokens: 16384
+        supports_function_calling: true
+        supports_reasoning: true
+
+    # --- vision: Multimodal (node-6 @ 82.4 tok/s primary, node-4 secondary) ---
+    - model_name: vision
+      litellm_params:
+        model: openai/Muse-Glimmer-30B-Vision
+        api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        order: 1
+      model_info:
+        max_tokens: 16384
+        max_input_tokens: 81920
+        max_output_tokens: 16384
+        supports_vision: true
+        supports_function_calling: true
+        supports_reasoning: true
+
+    - model_name: vision
+      litellm_params:
+        model: openai/Gemma-4-31B-QAT-Vision
+        api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        order: 2
+      model_info:
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_vision: true
+        supports_function_calling: true
+        supports_reasoning: true
+
+    # --- long-context: 256K-512K Context at 73-86 tok/s ---
+    - model_name: long-context
+      litellm_params:
+        model: openai/Qwen3.6-35B-A3B-DFlash-512K
+        api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        order: 1
+        extra_body:
+          chat_template_kwargs:
+            reasoning_effort: low
+      model_info:
+        max_tokens: 32768
+        max_input_tokens: 491520
+        max_output_tokens: 32768
+        supports_function_calling: true
+        supports_reasoning: true
+
+    - model_name: long-context
+      litellm_params:
+        model: openai/Muse-Glimmer-30B-256K-VRAM
+        api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        order: 2
+      model_info:
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_function_calling: true
+        supports_reasoning: true
+
+    # --- diffusion: Direct Resident Discrete Diffusion (mlops-node-7) ---
+    - model_name: diffusion
+      litellm_params:
+        model: openai/DiffusionGemma-26B-A4B
+        api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        order: 1
+        extra_body:
+          enable_thinking: false
+      model_info:
+        max_tokens: 16384
+        max_input_tokens: 49152
+        max_output_tokens: 16384
+        supports_function_calling: true
+
   router_settings:
     routing_strategy: least-busy
     enable_pre_call_checks: true
@@ -388,40 +501,42 @@ proxy_config:
     timeout: 300
     cooldown_time: 15
     model_group_alias:
-      fast: ergoshear-fast-edit
-      coder: ergoshear-coder
-      architect: ergoshear-architect
-      vision: ergoshear-vision
-      long-context: ergoshear-long-context
-      default: ergoshear-coder
+      default: coder
       gpt-4o:
-        model: ergoshear-coder
+        model: coder
         hidden: true
       gpt-4o-mini:
-        model: ergoshear-fast-edit
+        model: fast
         hidden: true
       o3-mini:
-        model: ergoshear-architect
+        model: architect
         hidden: true
       claude-3-7-sonnet-latest:
-        model: ergoshear-coder
+        model: coder
         hidden: true
     fallbacks:
-    - ergoshear-fast-edit:
-      - ergoshear-coder
-    - ergoshear-coder:
-      - ergoshear-fast-edit
-      - ergoshear-architect
-    - ergoshear-vision:
-      - mlops-node-4/Gemma-4-31B-QAT-NoThink
+      - fast:
+          - coder
+      - coder:
+          - fast
+          - architect
+      - architect:
+          - coder
+      - vision:
+          - mlops-node-4/Gemma-4-31B-QAT-NoThink
+      - diffusion:
+          - fast
+
   litellm_settings:
     drop_params: true
     modify_params: true
     allowed_openai_params:
-    - chat_template_kwargs
-    - reasoning_format
-    - reasoning_budget
+      - chat_template_kwargs
+      - reasoning_format
+      - reasoning_budget
+      - enable_thinking
     set_verbose: false
     request_timeout: 300
+
   general_settings:
     master_key: os.environ/PROXY_MASTER_KEY
