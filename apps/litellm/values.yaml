@@ -147,7 +147,7 @@ proxy_config:
     litellm_params:
       model: openai/DiffusionGemma-26B-A4B
       api_base: http://192.168.202.17:8080/v1
-      api_key: os.environ/LLAMA_BACKEND_KEY
+      api_key: os.environ/INFERENCE_BACKEND_KEY
     model_info:
       id: node7-diffusiongemma-26b-a4b
       max_tokens: 8192

@@ -161,12 +161,10 @@ class LiteLLMTests(unittest.TestCase):
                 if node == "mlops-node-7"
                 else f"http://{node}.hermes-workspace.svc.cluster.local:8080/v1",
             )
-            expected_key = (
-                "os.environ/LLAMA_BACKEND_KEY"
-                if node == "mlops-node-7"
-                else "os.environ/INFERENCE_BACKEND_KEY"
+            self.assertEqual(
+                entry["litellm_params"]["api_key"],
+                "os.environ/INFERENCE_BACKEND_KEY",
             )
-            self.assertEqual(entry["litellm_params"]["api_key"], expected_key)
         node7 = next(
             entry for entry in model_list
             if entry["model_name"].startswith("mlops-node-7/")
