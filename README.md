@@ -21,6 +21,23 @@ provide a web dashboard. Scan jobs are limited to two concurrent jobs, and the
 operator, scanner jobs, and node collector tolerate the control-plane taint so
 that control-plane workloads and the node can be scanned as well.
 
+## Frontend Website
+
+The frontend website pulls its private image from GHCR. After the Argo CD
+application creates the `frontend-website` namespace and syncs the removal of
+the old checked-in Secret, create the image-pull Secret without storing its
+credential in Git:
+
+```sh
+uv run python scripts/create_frontend_website_ghcr_secret.py
+```
+
+The script uses `~/.kube/k3s.yaml` by default; pass `--kubeconfig` to use
+another file. Enter a GHCR username and a token with `read:packages` access
+when prompted. The token is not displayed or written to the repository. Use
+`--rotate` to replace an existing Secret. Revoke any previously committed
+GHCR token and restart the `frontend-website` Deployment after rotation.
+
 ## Hermes Workspace
 
 The `hermes-workspace` Argo CD application deploys Hermes Workspace with its
