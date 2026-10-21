@@ -7,6 +7,7 @@ resources:
   - kube-prometheus-stack.yaml
   - litellm.yaml
   - lens.yaml
+  - sealed-secrets.yaml
   - tailscale-egress.yaml
   - tailscale-operator.yaml
   - trivy-operator.yaml

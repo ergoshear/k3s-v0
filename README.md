@@ -23,20 +23,29 @@ that control-plane workloads and the node can be scanned as well.
 
 ## Frontend Website
 
-The frontend website pulls its private image from GHCR. After the Argo CD
-application creates the `frontend-website` namespace and syncs the removal of
-the old checked-in Secret, create the image-pull Secret without storing its
-credential in Git:
+The frontend website pulls its private image from GHCR. Argo CD manages the
+Sealed Secrets controller from the pinned upstream chart and reconciles the
+encrypted image-pull Secret. The controller is installed in `kube-system`.
+
+After the controller application is synced, install the `kubeseal` CLI and
+generate the encrypted manifest:
 
 ```sh
-uv run python scripts/create_frontend_website_ghcr_secret.py
+brew install kubeseal
+uv run python scripts/seal_frontend_website_ghcr_secret.py
 ```
 
 The script uses `~/.kube/k3s.yaml` by default; pass `--kubeconfig` to use
-another file. Enter a GHCR username and a token with `read:packages` access
-when prompted. The token is not displayed or written to the repository. Use
-`--rotate` to replace an existing Secret. Revoke any previously committed
-GHCR token and restart the `frontend-website` Deployment after rotation.
+another file. Enter the GHCR username and a classic PAT with `read:packages`
+access when prompted. It writes an encrypted SealedSecret to
+`apps/frontend-website/ghcr-sealed-secret.yaml` and registers it in that
+application's Kustomization. The token is not displayed or written to Git.
+Commit and push the generated encrypted manifest and Kustomization change so
+Argo CD can apply it. Use `--rotate` with a new token to replace the manifest.
+
+Back up the Sealed Secrets controller's private-key Secret as part of the
+cluster backup; losing that key prevents decrypting existing SealedSecrets.
+Revoke any previously exposed GHCR tokens.
 
 ## Hermes Workspace
 
