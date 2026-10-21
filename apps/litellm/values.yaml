@@ -249,6 +249,8 @@ proxy_config:
 
     # ==========================================================================
     # 4. Direct Node Presets: mlops-node-9 (Strix Halo 192GB - 2 Resident Slots)
+    #    Slot 1: Qwen3.6-35B-A3B-DFlash-512K
+    #    Slot 2: Qwen3.8-27B (GSQ-RCO-IQ3_S-mtp + draft-mtp + Vision @ 256K)
     # ==========================================================================
     - model_name: mlops-node-9/Qwen3.6-35B-A3B-DFlash-512K-Low
       litellm_params:
@@ -298,6 +300,7 @@ proxy_config:
         max_tokens: 32768
         max_input_tokens: 229376
         max_output_tokens: 32768
+        supports_vision: true
         supports_function_calling: true
         supports_reasoning: true
 
@@ -314,6 +317,7 @@ proxy_config:
         max_tokens: 32768
         max_input_tokens: 229376
         max_output_tokens: 32768
+        supports_vision: true
         supports_function_calling: true
         supports_reasoning: true
 
@@ -334,12 +338,30 @@ proxy_config:
         max_tokens: 32768
         max_input_tokens: 229376
         max_output_tokens: 32768
+        supports_vision: true
         supports_function_calling: true
+
+    - model_name: mlops-node-9/Qwen3.8-27B-Vision
+      litellm_params:
+        model: openai/Qwen3.8-27B
+        api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        extra_body:
+          chat_template_kwargs:
+            reasoning_effort: low
+      model_info:
+        id: node9-qwen38-27b-vision
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_vision: true
+        supports_function_calling: true
+        supports_reasoning: true
 
     # ==========================================================================
     # 5. Standard High-Speed Aliases (No ergoshear-* Prefixes)
     # ==========================================================================
-    # --- fast: Instant 0-Think Edits & Autocomplete (81-145 tok/s, 0s Swap) ---
+    # --- fast: Instant 0-Think Edits & Autocomplete (85-145 tok/s, 0s Swap) ---
     - model_name: fast
       litellm_params:
         model: openai/Qwen3.8-27B-GSQ-RCO-IQ3_S-128K
@@ -468,6 +490,24 @@ proxy_config:
 
     - model_name: coder
       litellm_params:
+        model: openai/Qwen3.8-27B
+        api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        order: 1
+        weight: 2
+        extra_body:
+          chat_template_kwargs:
+            reasoning_effort: low
+      model_info:
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_vision: true
+        supports_function_calling: true
+        supports_reasoning: true
+
+    - model_name: coder
+      litellm_params:
         model: openai/Qwen3.6-35B-A3B-DFlash-Low
         api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
@@ -479,7 +519,7 @@ proxy_config:
         supports_function_calling: true
         supports_reasoning: true
 
-    # --- architect: Deep System Design & Hard Bugs (Qwen3.8-27B Medium + Ornith-1.5) ---
+    # --- architect: Deep System Design & Hard Bugs (Qwen3.8-27B Medium on node-6 & node-9) ---
     - model_name: architect
       litellm_params:
         model: openai/Qwen3.8-27B-GSQ-RCO-IQ3_S-128K
@@ -503,7 +543,8 @@ proxy_config:
         model: openai/Qwen3.8-27B
         api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
-        order: 2
+        order: 1
+        weight: 2
         extra_body:
           chat_template_kwargs:
             reasoning_effort: medium
@@ -511,10 +552,11 @@ proxy_config:
         max_tokens: 32768
         max_input_tokens: 229376
         max_output_tokens: 32768
+        supports_vision: true
         supports_function_calling: true
         supports_reasoning: true
 
-    # --- vision: Multimodal (Resident node-6 Qwen3.8 + Resident node-7 Ornith-1.5 primary) ---
+    # --- vision: Multimodal (Resident node-6 Qwen3.8 + node-7 Ornith-1.5 + node-9 Qwen3.8) ---
     - model_name: vision
       litellm_params:
         model: openai/Qwen3.8-27B-GSQ-RCO-IQ3_S-128K
@@ -540,6 +582,24 @@ proxy_config:
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
         weight: 3
+        extra_body:
+          chat_template_kwargs:
+            reasoning_effort: low
+      model_info:
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_vision: true
+        supports_function_calling: true
+        supports_reasoning: true
+
+    - model_name: vision
+      litellm_params:
+        model: openai/Qwen3.8-27B
+        api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        order: 1
+        weight: 2
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
@@ -565,7 +625,7 @@ proxy_config:
         supports_function_calling: true
         supports_reasoning: true
 
-    # --- long-context: 256K-512K Context (Resident node-9 512K + Resident node-7 256K primary) ---
+    # --- long-context: 256K-512K Context (Resident node-9 512K & 256K + node-7 256K primary) ---
     - model_name: long-context
       litellm_params:
         model: openai/Qwen3.6-35B-A3B-DFlash-512K
@@ -590,6 +650,24 @@ proxy_config:
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
         weight: 3
+        extra_body:
+          chat_template_kwargs:
+            reasoning_effort: low
+      model_info:
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_vision: true
+        supports_function_calling: true
+        supports_reasoning: true
+
+    - model_name: long-context
+      litellm_params:
+        model: openai/Qwen3.8-27B
+        api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        order: 1
+        weight: 2
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
