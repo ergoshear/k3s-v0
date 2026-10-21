@@ -1,3 +1,6 @@
+image:
+  tag: "1.107.0-rc.2"
+
 ingress:
   enabled: true
   className: traefik
@@ -60,6 +63,7 @@ proxy_config:
         max_tokens: 32768
         max_input_tokens: 229376
         max_output_tokens: 32768
+        supports_vision: false
         supports_function_calling: true
         supports_reasoning: true
 
@@ -80,6 +84,7 @@ proxy_config:
         max_tokens: 32768
         max_input_tokens: 229376
         max_output_tokens: 32768
+        supports_vision: false
         supports_function_calling: true
 
     # ==========================================================================
@@ -170,6 +175,7 @@ proxy_config:
         max_tokens: 32768
         max_input_tokens: 229376
         max_output_tokens: 32768
+        supports_vision: false
         supports_function_calling: true
         supports_reasoning: true
 
@@ -266,6 +272,7 @@ proxy_config:
         max_tokens: 32768
         max_input_tokens: 491520
         max_output_tokens: 32768
+        supports_vision: false
         supports_function_calling: true
         supports_reasoning: true
 
@@ -286,6 +293,7 @@ proxy_config:
         max_tokens: 32768
         max_input_tokens: 491520
         max_output_tokens: 32768
+        supports_vision: false
         supports_function_calling: true
 
     - model_name: mlops-node-9/Ornith-1.5-35B-A3B-DFlash-Low
@@ -360,7 +368,7 @@ proxy_config:
         supports_reasoning: true
 
     # ==========================================================================
-    # 5. Standard High-Speed Model Groups (Hard-Pinned 1 Concurrent Req Per Slot!)
+    # 5. Standard High-Speed Model Groups (Equal-Weight Least-Busy Across 5 Slots!)
     # ==========================================================================
     # --- fast: Instant 0-Think Edits & Autocomplete (80-159 tok/s, 0s Swap) ---
     - model_name: fast
@@ -369,8 +377,7 @@ proxy_config:
         api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
-        weight: 3
-        max_parallel_requests: 1
+        max_parallel_requests: 2
         temperature: 0.7
         top_p: 0.8
         extra_body:
@@ -391,8 +398,7 @@ proxy_config:
         api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
-        weight: 3
-        max_parallel_requests: 1
+        max_parallel_requests: 2
         temperature: 0.6
         top_p: 0.8
         extra_body:
@@ -404,6 +410,7 @@ proxy_config:
         max_tokens: 32768
         max_input_tokens: 229376
         max_output_tokens: 32768
+        supports_vision: false
         supports_function_calling: true
 
     - model_name: fast
@@ -412,8 +419,7 @@ proxy_config:
         api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
-        weight: 3
-        max_parallel_requests: 1
+        max_parallel_requests: 2
         temperature: 0.6
         top_p: 0.95
         extra_body:
@@ -434,8 +440,7 @@ proxy_config:
         api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
-        weight: 2
-        max_parallel_requests: 1
+        max_parallel_requests: 2
         temperature: 0.6
         top_p: 0.95
         extra_body:
@@ -456,8 +461,7 @@ proxy_config:
         api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
-        weight: 2
-        max_parallel_requests: 1
+        max_parallel_requests: 2
         temperature: 0.6
         top_p: 0.8
         extra_body:
@@ -469,6 +473,7 @@ proxy_config:
         max_tokens: 32768
         max_input_tokens: 491520
         max_output_tokens: 32768
+        supports_vision: false
         supports_function_calling: true
 
     # --- coder: Top-Tier Agentic Coding (5 Resident Slots Across 4 Nodes!) ---
@@ -478,8 +483,7 @@ proxy_config:
         api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
-        weight: 3
-        max_parallel_requests: 1
+        max_parallel_requests: 2
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
@@ -497,8 +501,7 @@ proxy_config:
         api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
-        weight: 3
-        max_parallel_requests: 1
+        max_parallel_requests: 2
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
@@ -506,6 +509,7 @@ proxy_config:
         max_tokens: 32768
         max_input_tokens: 229376
         max_output_tokens: 32768
+        supports_vision: false
         supports_function_calling: true
         supports_reasoning: true
 
@@ -515,8 +519,7 @@ proxy_config:
         api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
-        weight: 3
-        max_parallel_requests: 1
+        max_parallel_requests: 2
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
@@ -534,8 +537,7 @@ proxy_config:
         api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
-        weight: 2
-        max_parallel_requests: 1
+        max_parallel_requests: 2
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
@@ -553,8 +555,7 @@ proxy_config:
         api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
-        weight: 2
-        max_parallel_requests: 1
+        max_parallel_requests: 2
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
@@ -562,6 +563,7 @@ proxy_config:
         max_tokens: 32768
         max_input_tokens: 491520
         max_output_tokens: 32768
+        supports_vision: false
         supports_function_calling: true
         supports_reasoning: true
 
@@ -572,8 +574,7 @@ proxy_config:
         api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
-        weight: 3
-        max_parallel_requests: 1
+        max_parallel_requests: 2
         extra_body:
           chat_template_kwargs:
             reasoning_effort: medium
@@ -591,8 +592,7 @@ proxy_config:
         api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
-        weight: 2
-        max_parallel_requests: 1
+        max_parallel_requests: 2
         extra_body:
           chat_template_kwargs:
             reasoning_effort: medium
@@ -610,8 +610,7 @@ proxy_config:
         api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
-        weight: 2
-        max_parallel_requests: 1
+        max_parallel_requests: 2
         extra_body:
           chat_template_kwargs:
             reasoning_effort: medium
@@ -630,8 +629,7 @@ proxy_config:
         api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
-        weight: 3
-        max_parallel_requests: 1
+        max_parallel_requests: 2
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
@@ -649,8 +647,7 @@ proxy_config:
         api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
-        weight: 3
-        max_parallel_requests: 1
+        max_parallel_requests: 2
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
@@ -668,8 +665,7 @@ proxy_config:
         api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
-        weight: 2
-        max_parallel_requests: 1
+        max_parallel_requests: 2
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
@@ -688,8 +684,7 @@ proxy_config:
         api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
-        weight: 3
-        max_parallel_requests: 1
+        max_parallel_requests: 2
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
@@ -697,6 +692,7 @@ proxy_config:
         max_tokens: 32768
         max_input_tokens: 491520
         max_output_tokens: 32768
+        supports_vision: false
         supports_function_calling: true
         supports_reasoning: true
 
@@ -706,8 +702,7 @@ proxy_config:
         api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
-        weight: 3
-        max_parallel_requests: 1
+        max_parallel_requests: 2
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
@@ -715,6 +710,7 @@ proxy_config:
         max_tokens: 32768
         max_input_tokens: 229376
         max_output_tokens: 32768
+        supports_vision: false
         supports_function_calling: true
         supports_reasoning: true
 
@@ -724,8 +720,7 @@ proxy_config:
         api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
-        weight: 3
-        max_parallel_requests: 1
+        max_parallel_requests: 2
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
@@ -743,8 +738,7 @@ proxy_config:
         api_base: http://mlops-node-9.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 1
-        weight: 2
-        max_parallel_requests: 1
+        max_parallel_requests: 2
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
@@ -762,7 +756,7 @@ proxy_config:
         api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
         order: 2
-        max_parallel_requests: 1
+        max_parallel_requests: 2
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
@@ -770,6 +764,7 @@ proxy_config:
         max_tokens: 32768
         max_input_tokens: 229376
         max_output_tokens: 32768
+        supports_vision: false
         supports_function_calling: true
         supports_reasoning: true
 
@@ -825,7 +820,7 @@ proxy_config:
             REASONING: architect
 
   router_settings:
-    routing_strategy: simple-shuffle
+    routing_strategy: least-busy
     enable_pre_call_checks: true
     num_retries: 2
     timeout: 300
@@ -865,6 +860,15 @@ proxy_config:
     drop_params: true
     modify_params: true
     allowed_openai_params:
+      - max_tokens
+      - max_completion_tokens
+      - temperature
+      - top_p
+      - stop
+      - stream
+      - tools
+      - tool_choice
+      - response_format
       - chat_template_kwargs
       - reasoning_format
       - reasoning_budget
