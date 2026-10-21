@@ -183,9 +183,9 @@ proxy_config:
           enable_thinking: true
       model_info:
         id: node7-diffusiongemma-26b-a4b-think
-        max_tokens: 16384
-        max_input_tokens: 49152
-        max_output_tokens: 16384
+        max_tokens: 32768
+        max_input_tokens: 98304
+        max_output_tokens: 32768
         supports_function_calling: true
         supports_reasoning: true
 
@@ -198,9 +198,9 @@ proxy_config:
           enable_thinking: false
       model_info:
         id: node7-diffusiongemma-26b-a4b-nothink
-        max_tokens: 16384
-        max_input_tokens: 49152
-        max_output_tokens: 16384
+        max_tokens: 32768
+        max_input_tokens: 98304
+        max_output_tokens: 32768
         supports_function_calling: true
 
     # ==========================================================================
@@ -502,9 +502,9 @@ proxy_config:
         extra_body:
           enable_thinking: false
       model_info:
-        max_tokens: 16384
-        max_input_tokens: 49152
-        max_output_tokens: 16384
+        max_tokens: 32768
+        max_input_tokens: 98304
+        max_output_tokens: 32768
         supports_function_calling: true
 
   router_settings:
