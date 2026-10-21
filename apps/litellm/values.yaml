@@ -141,53 +141,33 @@ proxy_config:
       supports_reasoning: true
       max_output_tokens: 32768
   # ----------------------------------------------------------------------------
-  # 3. Direct Node Presets: mlops-node-7 (Strix Halo 128GB - 1 Resident Slot)
-  #    Single Resident Process: openai/Qwen3.6-35B-A3B-DFlash (256K Context)
+  # 3. Direct Node Presets: mlops-node-7 (Strix Halo 128GB - Resident Diffusion)
+  #    Single Resident Process: openai/DiffusionGemma-26B-A4B (0.0s Swap!)
   # ----------------------------------------------------------------------------
-  - model_name: mlops-node-7/Qwen3.6-35B-A3B-DFlash-Low
+  - model_name: mlops-node-7/DiffusionGemma-26B-A4B-Think
     litellm_params:
-      model: openai/Qwen3.6-35B-A3B-DFlash
+      model: openai/DiffusionGemma-26B-A4B
       api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: "none"
+      api_key: os.environ/INFERENCE_BACKEND_KEY
       extra_body:
-        chat_template_kwargs:
-          reasoning_effort: "low"
+        enable_thinking: true
     model_info:
-      id: node7-qwen36-dflash-low
-      max_tokens: 32768
-      max_input_tokens: 229376
+      id: node7-diffusiongemma-26b-a4b-think
+      max_tokens: 16384
+      max_input_tokens: 49152
       supports_function_calling: true
       supports_reasoning: true
-  - model_name: mlops-node-7/Qwen3.6-35B-A3B-DFlash-Medium
+  - model_name: mlops-node-7/DiffusionGemma-26B-A4B-NoThink
     litellm_params:
-      model: openai/Qwen3.6-35B-A3B-DFlash
+      model: openai/DiffusionGemma-26B-A4B
       api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: "none"
+      api_key: os.environ/INFERENCE_BACKEND_KEY
       extra_body:
-        chat_template_kwargs:
-          reasoning_effort: "medium"
+        enable_thinking: false
     model_info:
-      id: node7-qwen36-dflash-medium
-      max_tokens: 32768
-      max_input_tokens: 229376
-      supports_function_calling: true
-      supports_reasoning: true
-  - model_name: mlops-node-7/Qwen3.6-35B-A3B-DFlash-NoThink
-    litellm_params:
-      model: openai/Qwen3.6-35B-A3B-DFlash
-      api_base: http://mlops-node-7.hermes-workspace.svc.cluster.local:8080/v1
-      api_key: "none"
-      temperature: 0.6
-      top_p: 0.80
-      extra_body:
-        reasoning_format: "none"
-        chat_template_kwargs:
-          enable_thinking: false
-          reasoning_effort: "none"
-    model_info:
-      id: node7-qwen36-dflash-nothink
-      max_tokens: 32768
-      max_input_tokens: 229376
+      id: node7-diffusiongemma-26b-a4b-nothink
+      max_tokens: 16384
+      max_input_tokens: 49152
       supports_function_calling: true
   - model_name: mlops-node-9/Qwen3.6-35B-A3B-DFlash-512K-Low
     litellm_params:
