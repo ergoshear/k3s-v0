@@ -12,6 +12,12 @@ config:
 
 admissionController:
   replicas: 2
+  rbac:
+    clusterRole:
+      extraResources:
+        - apiGroups: [""]
+          resources: ["secrets"]
+          verbs: ["get", "list", "watch"]
 
 backgroundController:
   rbac:

@@ -84,6 +84,20 @@ class GhcrRegistryTests(unittest.TestCase):
             apps["ghcr-registry"]["spec"]["source"]["path"], "apps/ghcr-registry"
         )
 
+    def test_both_controllers_can_read_secrets_and_background_can_synchronize(self):
+        values = yaml.safe_load((ROOT / "apps/kyverno/values.yaml").read_text())
+        for controller in ["admissionController", "backgroundController"]:
+            rule = values[controller]["rbac"]["clusterRole"]["extraResources"][0]
+            self.assertEqual(rule["apiGroups"], [""])
+            self.assertEqual(rule["resources"], ["secrets"])
+            self.assertTrue({"get", "list", "watch"}.issubset(rule["verbs"]))
+        background = values["backgroundController"]["rbac"]["clusterRole"]
+        self.assertTrue(
+            {"create", "update", "patch", "delete"}.issubset(
+                background["extraResources"][0]["verbs"]
+            )
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
