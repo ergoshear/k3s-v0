@@ -74,6 +74,11 @@ class SealedSecretsTests(unittest.TestCase):
              "/app/.venv/bin/python manage.py runserver 0.0.0.0:8000"],
         )
         self.assertEqual(container["securityContext"]["runAsUser"], 65534)
+        for probe in ["startupProbe", "readinessProbe", "livenessProbe"]:
+            self.assertEqual(
+                container[probe]["httpGet"]["httpHeaders"],
+                [{"name": "Host", "value": "ergoshear.dev"}],
+            )
 
 
 if __name__ == "__main__":

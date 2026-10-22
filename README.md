@@ -110,6 +110,7 @@ injection.
 The deployment invokes the image's installed `/app/.venv/bin/python` directly
 for migrations and startup. Running `uv` at startup attempts to create a cache
 under `/.cache/uv`, which is not writable by the non-root workload user.
+HTTP probes send `Host: ergoshear.dev` to satisfy Django's allowed-host checks.
 
 ## Hermes Workspace
 

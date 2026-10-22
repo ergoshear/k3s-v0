@@ -64,18 +64,27 @@ spec:
             httpGet:
               path: /
               port: http
+              httpHeaders:
+                - name: Host
+                  value: ergoshear.dev
             periodSeconds: 5
             failureThreshold: 36
           readinessProbe:
             httpGet:
               path: /
               port: http
+              httpHeaders:
+                - name: Host
+                  value: ergoshear.dev
             periodSeconds: 10
             timeoutSeconds: 5
           livenessProbe:
             httpGet:
               path: /
               port: http
+              httpHeaders:
+                - name: Host
+                  value: ergoshear.dev
             periodSeconds: 20
             timeoutSeconds: 5
           resources:
