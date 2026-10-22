@@ -21,31 +21,75 @@ provide a web dashboard. Scan jobs are limited to two concurrent jobs, and the
 operator, scanner jobs, and node collector tolerate the control-plane taint so
 that control-plane workloads and the node can be scanned as well.
 
-## Frontend Website
+## Cluster-wide private GHCR images
 
-The frontend website pulls its private image from GHCR. Argo CD manages the
-Sealed Secrets controller from the pinned upstream chart and reconciles the
-encrypted image-pull Secret. The controller is installed in `kube-system`.
+Argo CD manages Kyverno (chart `3.9.2`) and the `ghcr-registry` application.
+Sealed Secrets decrypts the source `ghcr-registry-credentials` Secret in the
+`ghcr-registry` namespace. Kyverno copies it to every existing and future
+namespace and synchronizes credential rotations. A Pod CREATE policy adds the
+pull-secret reference, preserving other pull secrets and supporting custom
+service accounts, init containers, and any image repository under `ghcr.io`.
+It does not modify Deployment templates, avoiding GitOps drift. Existing pods
+are not changed; recreate them if they lack the reference.
 
-After the controller application is synced, install the `kubeseal` CLI and
-generate the encrypted manifest:
+This is kubelet image authentication, not Argo CD Git or private OCI Helm chart
+authentication. A credential can only pull packages its GitHub account can read.
+Use a dedicated account and classic PAT with `read:packages`, grant that account
+read access to each private package, and authorize the token for organization SSO
+where required. Granting repository access alone may not grant package access.
+Every namespace receives the same credential: anyone allowed to read Secrets or
+create pods there can use its package access. Do not use a write/admin token.
+
+Sync `sealed-secrets` and `kyverno` before `ghcr-registry`; the source Secret
+must decrypt before namespace generation succeeds. Kyverno has two admission
+replicas. The injection webhook fails closed: loss of all admission replicas
+can block new pods. The chart's own controller resources remain filtered to
+allow controller recovery; other workloads in system and Kyverno namespaces
+are included. Generated secrets are retained if the policy is removed, avoiding
+accidental credential deletion during controller removal.
+
+Install the `kubeseal` CLI and generate the encrypted source:
 
 ```sh
 brew install kubeseal
-uv run python scripts/seal_frontend_website_ghcr_secret.py
+uv run python scripts/seal_frontend_website_ghcr_secret.py --namespace ghcr-registry
 ```
 
 The script uses `~/.kube/k3s.yaml` by default; pass `--kubeconfig` to use
-another file. Enter the GHCR username and a classic PAT with `read:packages`
-access when prompted. It writes an encrypted SealedSecret to
-`apps/frontend-website/ghcr-sealed-secret.yaml` and registers it in that
-application's Kustomization. The token is not displayed or written to Git.
+another file. Enter the GHCR username and classic PAT when prompted. It writes
+`apps/ghcr-registry/ghcr-sealed-secret.yaml` and registers it in that application's
+Kustomization. The token is not displayed or written to Git.
 Commit and push the generated encrypted manifest and Kustomization change so
-Argo CD can apply it. Use `--rotate` with a new token to replace the manifest.
+Argo CD can apply it. To migrate an existing working credential without
+displaying it:
+
+```sh
+uv run python scripts/seal_frontend_website_ghcr_secret.py \
+  --namespace ghcr-registry \
+  --from-secret frontend-website/ghcr-registry-credentials
+```
+
+Use `--rotate --namespace ghcr-registry` and enter a new token for rotation.
+Commit and push the replacement encrypted manifest; Sealed Secrets updates the
+source and Kyverno updates every copy. Do not edit generated namespace copies.
+The script's default namespace remains `frontend-website` for compatibility;
+do not provision a competing frontend-only SealedSecret when using this policy.
+
+Verify a newly created namespace receives the Secret and that a new Pod with
+`imagePullPolicy: Always` receives `ghcr-registry-credentials` and successfully
+pulls a private image. Inspect Pod events for `Pulled`, not just a cached running
+container. Namespace synchronization is asynchronous; a pod created immediately
+after its namespace may briefly retry until the Secret appears.
 
 Back up the Sealed Secrets controller's private-key Secret as part of the
 cluster backup; losing that key prevents decrypting existing SealedSecrets.
 Revoke any previously exposed GHCR tokens.
+
+## Frontend Website
+
+The frontend website uses the cluster-wide GHCR pull Secret described above.
+Its explicit `imagePullSecrets` reference remains compatible with automatic
+injection.
 
 ## Hermes Workspace
 
@@ -123,10 +167,10 @@ sharing a retained 20Gi local-path volume. The upstream chart and custom image
 are pinned to the same source commit in [the values](apps/lens/values.yaml);
 the deployed image additionally uses its immutable registry digest.
 The custom Lens image targets amd64 nodes. ClickHouse is not publicly exposed.
-The private GHCR image requires the separately provisioned `lens-ghcr`
-image-pull Secret in the `lens` namespace. Keep it outside Git and refresh it
-when its GitHub credential expires or is rotated; prefer a dedicated credential
-with only `read:packages` access for routine pulls.
+New Lens pods receive the cluster-wide `ghcr-registry-credentials` pull Secret.
+The existing `lens-ghcr` reference is retained for migration compatibility;
+automatic injection preserves it. Once cluster-wide access is verified, the
+legacy reference and separately provisioned Secret may be retired together.
 
 Argo CD preserves the chart-generated `lens-admin` and `lens-clickhouse`
 credentials during syncs. Retrieve the `admin-token` key from the `lens-admin`

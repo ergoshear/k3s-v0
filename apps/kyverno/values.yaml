@@ -1,0 +1,28 @@
+config:
+  preserve: false
+  enableDefaultRegistryMutation: false
+  excludeKyvernoNamespace: false
+  resourceFiltersExclude:
+    - '[*/*,kube-system,*]'
+    - '[*/*,kube-public,*]'
+    - '[*/*,kube-node-lease,*]'
+  webhooks:
+    namespaceSelector:
+      matchExpressions: []
+
+admissionController:
+  replicas: 2
+
+backgroundController:
+  rbac:
+    clusterRole:
+      extraResources:
+        - apiGroups: [""]
+          resources: ["secrets"]
+          verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+cleanupController:
+  enabled: false
+
+reportsController:
+  enabled: false

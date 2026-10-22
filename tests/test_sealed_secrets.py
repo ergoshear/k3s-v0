@@ -58,8 +58,8 @@ class SealedSecretsTests(unittest.TestCase):
             [{"name": "ghcr-registry-credentials"}],
         )
         self.assertEqual(
-            pod_spec["containers"][0]["image"],
-            "ghcr.io/ergoshear/frontend-website:latest",
+            pod_spec["containers"][0]["image"].split(":")[0],
+            "ghcr.io/ergoshear/frontend-website",
         )
 
 

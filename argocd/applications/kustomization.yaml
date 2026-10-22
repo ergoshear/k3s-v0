@@ -3,8 +3,10 @@ kind: Kustomization
 
 resources:
   - frontend-website.yaml
+  - ghcr-registry.yaml
   - hermes-workspace.yaml
   - kube-prometheus-stack.yaml
+  - kyverno.yaml
   - litellm.yaml
   - lens.yaml
   - sealed-secrets.yaml

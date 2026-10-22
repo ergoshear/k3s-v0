@@ -132,6 +132,69 @@ class FrontendWebsiteGhcrSecretTests(unittest.TestCase):
         run.assert_not_called()
         prompt.assert_not_called()
 
+    def test_seals_existing_secret_for_cluster_wide_source_without_prompting(self):
+        app_dir = self.root / "apps" / "ghcr-registry"
+        app_dir.mkdir()
+        (app_dir / "kustomization.yaml").write_text("resources:\n  - policies.yaml\n")
+        data = secret_script.docker_config_data("gh-user", "gh-token")
+        source = {
+            "type": "kubernetes.io/dockerconfigjson",
+            "data": {".dockerconfigjson": data},
+        }
+        with (
+            patch.object(secret_script.shutil, "which", return_value="/bin/tool"),
+            patch.object(
+                secret_script.subprocess, "run",
+                side_effect=[completed(json.dumps(source)), completed(SEALED_MANIFEST)],
+            ) as run,
+            patch("builtins.input") as prompt,
+            patch.object(secret_script.getpass, "getpass") as password,
+            contextlib.redirect_stdout(io.StringIO()) as output,
+        ):
+            self.run_script([
+                "--namespace", "ghcr-registry",
+                "--from-secret", "frontend-website/ghcr-registry-credentials",
+            ])
+        prompt.assert_not_called()
+        password.assert_not_called()
+        sealed_input = json.loads(run.call_args.kwargs["input"])
+        self.assertEqual(sealed_input["metadata"]["namespace"], "ghcr-registry")
+        self.assertEqual(sealed_input["data"][".dockerconfigjson"], data)
+        self.assertNotIn("gh-token", output.getvalue())
+        self.assertTrue((app_dir / secret_script.SEALED_SECRET_FILE).is_file())
+
+    def test_invalid_source_secret_fails_without_disclosing_contents(self):
+        for source in [
+            "not-json-gh-token",
+            json.dumps({"data": {}, "type": "Opaque"}),
+            json.dumps({
+                "type": "kubernetes.io/dockerconfigjson",
+                "data": {".dockerconfigjson": "invalid-base64-gh-token"},
+            }),
+        ]:
+            with (
+                self.subTest(source=source),
+                patch.object(secret_script.shutil, "which", return_value="/bin/tool"),
+                patch.object(
+                    secret_script.subprocess, "run", return_value=completed(source)
+                ) as run,
+                self.assertRaisesRegex(SystemExit, "source must be a Docker config"),
+            ):
+                self.run_script(["--from-secret", "frontend-website/existing"])
+            self.assertEqual(run.call_count, 1)
+
+    def test_unreadable_source_secret_stops_before_sealing(self):
+        with (
+            patch.object(secret_script.shutil, "which", return_value="/bin/tool"),
+            patch.object(
+                secret_script.subprocess, "run",
+                return_value=completed(returncode=1, stderr="source read failed"),
+            ) as run,
+            self.assertRaisesRegex(SystemExit, "Could not read the source Secret"),
+        ):
+            self.run_script(["--from-secret", "frontend-website/existing"])
+        self.assertEqual(run.call_count, 1)
+
 
 if __name__ == "__main__":
     unittest.main()

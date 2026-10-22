@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Encrypt GHCR credentials into a SealedSecret for the frontend website."""
+"""Encrypt GHCR credentials into a namespace-bound SealedSecret."""
 
 import argparse
 import base64
@@ -62,6 +62,17 @@ def main(argv=None):
         action="store_true",
         help="Replace the existing encrypted manifest with new GHCR credentials.",
     )
+    parser.add_argument(
+        "--namespace",
+        default=NAMESPACE,
+        choices=[NAMESPACE, "ghcr-registry"],
+        help="Secret namespace and application directory (default: frontend-website).",
+    )
+    parser.add_argument(
+        "--from-secret",
+        metavar="NAMESPACE/NAME",
+        help="Seal an existing cluster Secret instead of prompting for credentials.",
+    )
     args = parser.parse_args(argv)
     kubeconfig = args.kubeconfig.expanduser()
     if not kubeconfig.is_file():
@@ -72,7 +83,7 @@ def main(argv=None):
             "sealed-secrets Argo CD application before generating this manifest."
         )
 
-    app_directory = Path(__file__).resolve().parents[1] / "apps" / NAMESPACE
+    app_directory = Path(__file__).resolve().parents[1] / "apps" / args.namespace
     output_path = app_directory / SEALED_SECRET_FILE
     kustomization_path = app_directory / "kustomization.yaml"
     if output_path.exists() and not args.rotate:
@@ -81,17 +92,51 @@ def main(argv=None):
             "Use --rotate to replace it."
         )
 
-    username = input("GHCR username: ").strip()
-    token = getpass.getpass("GHCR classic PAT with read:packages: ")
-    if not username or not token:
-        raise SystemExit("Both the GHCR username and token are required.")
+    if args.from_secret:
+        parts = args.from_secret.split("/")
+        if len(parts) != 2 or not all(parts):
+            raise SystemExit("--from-secret must be NAMESPACE/NAME.")
+        if shutil.which("kubectl") is None:
+            raise SystemExit("kubectl was not found on PATH.")
+        source = subprocess.run(
+            [
+                "kubectl", "--kubeconfig", str(kubeconfig),
+                "--namespace", parts[0], "get", "secret", parts[1], "-o", "json",
+            ],
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        if source.returncode:
+            raise SystemExit(
+                f"Could not read the source Secret (exit code {source.returncode})."
+            )
+        try:
+            source_secret = json.loads(source.stdout)
+            config_data = source_secret["data"][".dockerconfigjson"]
+            config = json.loads(base64.b64decode(config_data, validate=True))
+            if (
+                source_secret["type"] != "kubernetes.io/dockerconfigjson"
+                or not config.get("auths", {}).get("ghcr.io")
+            ):
+                raise ValueError("Missing GHCR Docker credentials")
+        except (ValueError, KeyError, TypeError, AttributeError):
+            raise SystemExit(
+                "The source must be a Docker config Secret containing ghcr.io credentials."
+            ) from None
+    else:
+        username = input("GHCR username: ").strip()
+        token = getpass.getpass("GHCR classic PAT with read:packages: ")
+        if not username or not token:
+            raise SystemExit("Both the GHCR username and token are required.")
+        config_data = docker_config_data(username, token)
 
     secret = {
         "apiVersion": "v1",
         "kind": "Secret",
-        "metadata": {"name": SECRET_NAME, "namespace": NAMESPACE},
+        "metadata": {"name": SECRET_NAME, "namespace": args.namespace},
         "type": "kubernetes.io/dockerconfigjson",
-        "data": {".dockerconfigjson": docker_config_data(username, token)},
+        "data": {".dockerconfigjson": config_data},
     }
     command = [
         "kubeseal",

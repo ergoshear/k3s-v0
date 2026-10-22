@@ -1,0 +1,53 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: synchronize-ghcr-credentials
+spec:
+  rules:
+    - name: synchronize-pull-secret
+      match:
+        any:
+          - resources:
+              kinds:
+                - Namespace
+      exclude:
+        any:
+          - resources:
+              names:
+                - ghcr-registry
+      generate:
+        generateExisting: true
+        apiVersion: v1
+        kind: Secret
+        name: ghcr-registry-credentials
+        namespace: "{{ request.object.metadata.name }}"
+        synchronize: true
+        orphanDownstreamOnPolicyDelete: true
+        clone:
+          namespace: ghcr-registry
+          name: ghcr-registry-credentials
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: inject-ghcr-credentials
+  annotations:
+    pod-policies.kyverno.io/autogen-controllers: none
+spec:
+  background: false
+  webhookConfiguration:
+    failurePolicy: Fail
+  rules:
+    - name: inject-pull-secret
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              operations:
+                - CREATE
+      mutate:
+        patchStrategicMerge:
+          spec:
+            imagePullSecrets:
+              - name: ghcr-registry-credentials
