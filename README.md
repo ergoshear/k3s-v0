@@ -264,16 +264,17 @@ LiteLLM registers concrete server-prefixed models in
 [the Helm values](apps/litellm/values.yaml). Nodes 4 and 6 retain their Qwen
 presets and port-8080 Tailscale egress Services. Nodes 7 and 9 now each serve
 **DeepSeek 4.1 Flash 1017**, advertised upstream as `deepseek-v4.1-flash`,
-with 262,144-token context and text/image input:
+with a configured 65,536-token context budget and text/image input:
 
 | Direct model | HTTPS API base |
 |---|---|
-| `mlops-node-7/DeepSeek-4.1-Flash-1017-256K` | `https://mlops-node-7.tailb11f97.ts.net/v1` |
-| `mlops-node-9/DeepSeek-4.1-Flash-1017-256K` | `https://mlops-node-9.tailb11f97.ts.net/v1` |
+| `mlops-node-7/DeepSeek-4.1-Flash-1017-64K` | `https://mlops-node-7.tailb11f97.ts.net/v1` |
+| `mlops-node-9/DeepSeek-4.1-Flash-1017-64K` | `https://mlops-node-9.tailb11f97.ts.net/v1` |
 
 The retired node-7 Ornith and node-9 Ornith/Qwen-512K deployments are removed.
-DeepSeek deployments reserve 32,768 tokens for output, leaving 229,376 input
-tokens. They use the server's default reasoning behavior rather than the old
+DeepSeek deployments reserve 32,768 tokens for output, leaving 32,768 input
+tokens. This gateway budget does not reconfigure the inference servers'
+allocated context. They use the server's default reasoning behavior rather than the old
 Qwen/Ornith chat-template overrides.
 
 Semantic groups use `least-busy` routing among equal-priority eligible hosts,
@@ -284,7 +285,7 @@ except the DeepSeek-only pool:
 | `fast` | Node 4 and node 6 no-think presets |
 | `coder` | Node 4, node 6, and both DeepSeek hosts |
 | `architect`, `vision` | Node 6 and both DeepSeek hosts |
-| `long-context` | Node 4 and both DeepSeek hosts; node 6 256K secondary |
+| `long-context` | Node 4 and both DeepSeek hosts (64K budget); node 6 256K secondary |
 | `deepseek` | Only nodes 7 and 9, with two parallel requests per deployment |
 
 `high-performance` and `deepseek-flash` are aliases for the `deepseek` pool.

@@ -95,13 +95,13 @@ class LiteLLMTests(unittest.TestCase):
                 self.assertNotIn("extra_body", params)
                 self.assertNotIn("ssl_verify", params)
                 info = entry["model_info"]
-                self.assertEqual(info["max_input_tokens"] + info["max_output_tokens"], 262144)
+                self.assertEqual(info["max_input_tokens"] + info["max_output_tokens"], 65536)
                 self.assertTrue(info["supports_vision"])
                 self.assertTrue(info["supports_reasoning"])
         direct = [e["model_name"] for e in deepseek if e["model_name"].startswith("mlops-node-")]
         self.assertEqual(
             set(direct),
-            {f"mlops-node-{node}/DeepSeek-4.1-Flash-1017-256K" for node in (7, 9)},
+            {f"mlops-node-{node}/DeepSeek-4.1-Flash-1017-64K" for node in (7, 9)},
         )
 
     def test_deepseek_pool_and_aliases_never_fall_back_to_other_families(self):
