@@ -47,6 +47,8 @@ can block new pods. The chart's own controller resources remain filtered to
 allow controller recovery; other workloads in system and Kyverno namespaces
 are included. Generated secrets are retained if the policy is removed, avoiding
 accidental credential deletion during controller removal.
+Unused policy reporting is disabled and each controller's Kubernetes client is
+limited to 10 requests per second (burst 20) for the small k3s control plane.
 
 Install the `kubeseal` CLI and generate the encrypted source:
 
