@@ -12,6 +12,13 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
+  ignoreDifferences:
+    - group: argoproj.io
+      kind: Application
+      name: frontend-website
+      namespace: argocd
+      jsonPointers:
+        - /spec/source/kustomize/images
   syncPolicy:
     automated:
       enabled: true
@@ -20,3 +27,4 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+      - RespectIgnoreDifferences=true

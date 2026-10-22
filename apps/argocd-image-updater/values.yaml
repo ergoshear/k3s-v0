@@ -1,0 +1,30 @@
+createClusterRoles: false
+
+config:
+  argocd.namespace: argocd
+  watch.namespaces: argocd
+  interval: 1m
+  registries:
+    - name: GitHub Container Registry
+      prefix: ghcr.io
+      api_url: https://ghcr.io
+      credentials: pullsecret:argocd/ghcr-registry-credentials
+      credsexpire: 5m
+      limit: 2
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    memory: 256Mi
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: node-role.kubernetes.io/control-plane
+              operator: DoesNotExist
+            - key: node-role.kubernetes.io/master
+              operator: DoesNotExist

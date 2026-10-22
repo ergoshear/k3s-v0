@@ -112,6 +112,32 @@ for migrations and startup. Running `uv` at startup attempts to create a cache
 under `/.cache/uv`, which is not writable by the non-root workload user.
 HTTP probes send `Host: ergoshear.dev` to satisfy Django's allowed-host checks.
 
+### Automatic `latest` image updates
+
+The frontend manifest uses `ghcr.io/ergoshear/frontend-website:latest` with
+`imagePullPolicy: Always`. Argo CD Image Updater (Helm chart `1.3.2`) polls GHCR
+every minute using the synchronized pull Secret in `argocd`. It watches only
+this application's `latest` tag using the `digest` strategy. When the tag
+changes, it updates the frontend Application's Kustomize image override to
+`latest@sha256:...`; Argo CD then rolls out that exact build automatically.
+`Always` alone does not restart existing pods when a mutable tag changes.
+
+The updater runs on workers with namespace-scoped permissions. Its registry
+credential is read-only; it does not need GitHub repository write access.
+The parent Application ignores only the frontend's
+`/spec/source/kustomize/images` override and respects that exception during sync,
+so self-healing does not undo automatic updates. All other frontend settings
+remain Git-managed. If the Application is recreated, the updater rediscovers
+the current `latest` digest on its next reconciliation.
+
+To test the complete path, first record the deployed digest, dispatch the
+frontend repository's `Build and push image` workflow on `main`, and wait for
+the build to publish a different `latest` digest. Without manually restarting
+the Deployment or changing its image, verify the updater changes the
+Application override, Argo CD reports `Synced/Healthy`, and the ready pod's
+image ID matches the newly published image. Detection normally takes up to a
+minute plus Argo CD reconciliation, image download, and startup time.
+
 ## Hermes Workspace
 
 The `hermes-workspace` Argo CD application deploys Hermes Workspace with its

@@ -19,8 +19,8 @@ spec:
         - name: ghcr-registry-credentials
       containers:
         - name: web
-          image: ghcr.io/ergoshear/frontend-website:96244bb
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/ergoshear/frontend-website:latest
+          imagePullPolicy: Always
           command:
             - /bin/sh
             - -c

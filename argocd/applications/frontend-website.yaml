@@ -9,6 +9,7 @@ spec:
     repoURL: git@github.com:ergoshear/k3s.git
     targetRevision: HEAD
     path: apps/frontend-website
+    kustomize: {}
   destination:
     server: https://kubernetes.default.svc
     namespace: frontend-website
