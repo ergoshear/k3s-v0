@@ -18,7 +18,7 @@ patches:
       group: apps
       version: v1
       kind: Deployment
-      name: cert-manager.*
+      name: cert-manager
     patch: |-
       - op: add
         path: /spec/template/spec/tolerations
@@ -26,3 +26,6 @@ patches:
           - key: node-role.kubernetes.io/control-plane
             operator: Exists
             effect: NoSchedule
+      - op: add
+        path: /spec/template/spec/nodeSelector/node-role.kubernetes.io~1control-plane
+        value: "true"

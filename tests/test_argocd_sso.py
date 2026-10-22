@@ -96,17 +96,17 @@ class SSOTests(unittest.TestCase):
             "-noout", "-checkend", str(30 * 24 * 60 * 60),
         ], check=True, capture_output=True)
 
-    def test_existing_dex_mounts_and_control_plane_toleration_are_preserved(self):
+    def test_existing_dex_mounts_are_preserved_without_control_plane_toleration(self):
         spec = self.resources[("Deployment", "argocd-dex-server")]["spec"]["template"]["spec"]
         container = next(container for container in spec["containers"] if container["name"] == "dex")
         self.assertTrue(
             {"static-files", "dexconfig", "argocd-dex-server-tls"}
             <= {mount["name"] for mount in container["volumeMounts"]}
         )
-        self.assertIn({
+        self.assertNotIn({
             "key": "node-role.kubernetes.io/control-plane",
             "operator": "Exists", "effect": "NoSchedule",
-        }, spec["tolerations"])
+        }, spec.get("tolerations", []))
         self.assertEqual(container["securityContext"]["runAsUser"], 1001)
 
     def test_existing_ingress_tls_termination_setting_is_preserved(self):

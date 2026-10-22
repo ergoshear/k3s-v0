@@ -45,6 +45,8 @@ spec:
         app.kubernetes.io/name: external-dns
     spec:
       serviceAccountName: external-dns
+      nodeSelector:
+        node-role.kubernetes.io/control-plane: "true"
       tolerations:
         - key: node-role.kubernetes.io/control-plane
           operator: Exists

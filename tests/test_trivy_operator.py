@@ -56,13 +56,13 @@ class TrivyOperatorTests(unittest.TestCase):
         self.assertTrue(spec["syncPolicy"]["automated"]["selfHeal"])
         self.assertIn("CreateNamespace=true", spec["syncPolicy"]["syncOptions"])
 
-    def test_scans_all_namespaces_with_control_plane_tolerations(self):
+    def test_only_node_local_collection_tolerates_the_control_plane(self):
         self.assertEqual(self.values["targetNamespaces"], "")
         self.assertEqual(self.values["operator"]["scanJobsConcurrentLimit"], 2)
-        self.assertEqual(self.values["tolerations"], [CONTROL_PLANE_TOLERATION])
+        self.assertEqual(self.values["tolerations"], [])
         self.assertEqual(
             self.values["trivyOperator"]["scanJobTolerations"],
-            [CONTROL_PLANE_TOLERATION],
+            [],
         )
         self.assertEqual(
             self.values["nodeCollector"]["tolerations"],

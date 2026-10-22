@@ -4,15 +4,9 @@ operator:
   scanJobsConcurrentLimit: 2
 
 trivyOperator:
-  scanJobTolerations:
-    - key: node-role.kubernetes.io/control-plane
-      operator: Exists
-      effect: NoSchedule
+  scanJobTolerations: []
 
-tolerations:
-  - key: node-role.kubernetes.io/control-plane
-    operator: Exists
-    effect: NoSchedule
+tolerations: []
 
 nodeCollector:
   tolerations:

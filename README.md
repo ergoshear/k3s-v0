@@ -18,8 +18,21 @@ pinned to chart version `0.37.0`. Its values are kept in
 [`apps/trivy-operator/values.yaml`](apps/trivy-operator/values.yaml). It scans
 all namespaces and creates Kubernetes security report resources; it does not
 provide a web dashboard. Scan jobs are limited to two concurrent jobs, and the
-operator, scanner jobs, and node collector tolerate the control-plane taint so
-that control-plane workloads and the node can be scanned as well.
+operator and image scanner jobs run on workers. Only the node collector
+tolerates the control-plane taint because it must inspect each node locally.
+
+## Control-plane placement
+
+Keep the control-plane `node-role.kubernetes.io/control-plane=true:NoSchedule`
+taint in place. Argo CD, cert-manager's webhook and CA injector, and normal
+workloads must not tolerate it. Existing pods must be recreated to move them;
+adding a NoSchedule taint alone does not evict them.
+
+Traefik remains on the control plane because ingress uses its host IP.
+ExternalDNS and the cert-manager controller remain pinned there because they
+use its AWS instance profile. Node exporter and node-local collection remain
+per-node. Moving these exceptions requires changing their network or credential
+dependencies first.
 
 ## Cluster-wide private GHCR images
 
