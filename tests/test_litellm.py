@@ -117,6 +117,14 @@ class LiteLLMTests(unittest.TestCase):
             self.assertEqual(entry["litellm_params"]["max_parallel_requests"], 2)
         router = config["router_settings"]
         self.assertEqual(router["routing_strategy"], "least-busy")
+        self.assertEqual(
+            router["routing_groups"],
+            [{
+                "group_name": "deepseek-balanced",
+                "models": ["deepseek"],
+                "routing_strategy": "simple-shuffle",
+            }],
+        )
         for alias in ("high-performance", "deepseek-flash"):
             self.assertEqual(router["model_group_alias"][alias], "deepseek")
         self.assertFalse(any("deepseek" in fallback for fallback in router["fallbacks"]))

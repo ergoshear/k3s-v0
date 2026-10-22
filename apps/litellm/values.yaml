@@ -483,7 +483,7 @@ proxy_config:
         supports_function_calling: true
         supports_reasoning: true
 
-    # DeepSeek-only pool: no classifier call or cross-family fallback.
+    # DeepSeek-only pool: equal-probability routing without idle tie bias.
     - model_name: deepseek
       litellm_params:
         model: openai/deepseek-v4.1-flash
@@ -567,6 +567,11 @@ proxy_config:
 
   router_settings:
     routing_strategy: least-busy
+    routing_groups:
+      - group_name: deepseek-balanced
+        models:
+          - deepseek
+        routing_strategy: simple-shuffle
     enable_pre_call_checks: true
     num_retries: 2
     timeout: 300

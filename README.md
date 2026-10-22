@@ -276,7 +276,8 @@ DeepSeek deployments reserve 32,768 tokens for output, leaving 229,376 input
 tokens. They use the server's default reasoning behavior rather than the old
 Qwen/Ornith chat-template overrides.
 
-Semantic groups use `least-busy` routing among equal-priority eligible hosts:
+Semantic groups use `least-busy` routing among equal-priority eligible hosts,
+except the DeepSeek-only pool:
 
 | Group | Deployments |
 |---|---|
@@ -287,6 +288,12 @@ Semantic groups use `least-busy` routing among equal-priority eligible hosts:
 | `deepseek` | Only nodes 7 and 9, with two parallel requests per deployment |
 
 `high-performance` and `deepseek-flash` are aliases for the `deepseek` pool.
+Its dedicated `deepseek-balanced` routing group uses `simple-shuffle` with
+equal-probability selection between the two eligible deployments. Unlike
+`least-busy`, which chooses the first host when idle counts tie, this spreads
+sequential traffic across both hosts. Distribution is statistical, not strict
+round-robin; small samples can still select one host repeatedly. Other groups
+retain `least-busy`.
 It adds no classifier call and has no cross-family fallback: retries stay
 within the two DeepSeek hosts. This is a concurrency-oriented routing policy,
 not a claim of measured throughput. `auto` and `auto-hybrid` route SIMPLE
