@@ -47,6 +47,7 @@ class GhcrRegistryTests(unittest.TestCase):
             "none",
         )
         self.assertFalse(policy["spec"]["background"])
+        self.assertEqual(policy["spec"]["webhookConfiguration"]["failurePolicy"], "Ignore")
         rule = policy["spec"]["rules"][0]
         self.assertEqual(
             rule["match"]["any"][0]["resources"],

@@ -21,6 +21,11 @@ spec:
         - name: web
           image: ghcr.io/ergoshear/frontend-website:96244bb
           imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -c
+          args:
+            - /app/.venv/bin/python manage.py migrate && exec /app/.venv/bin/python manage.py runserver 0.0.0.0:8000
           ports:
             - name: http
               containerPort: 8000

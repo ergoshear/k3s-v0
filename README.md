@@ -55,8 +55,10 @@ create pods there can use its package access. Do not use a write/admin token.
 
 Sync `sealed-secrets` and `kyverno` before `ghcr-registry`; the source Secret
 must decrypt before namespace generation succeeds. Kyverno has two admission
-replicas. The injection webhook fails closed: loss of all admission replicas
-can block new pods. The chart's own controller resources remain filtered to
+replicas. Injection fails open so an unavailable registry helper cannot block
+cluster recovery. Pods created during an outage may lack the automatic Secret
+reference; recreate those pods after recovery. Explicit workload references
+continue to work. The chart's own controller resources remain filtered to
 allow controller recovery; other workloads in system and Kyverno namespaces
 are included. Generated secrets are retained if the policy is removed, avoiding
 accidental credential deletion during controller removal.
@@ -105,6 +107,9 @@ Revoke any previously exposed GHCR tokens.
 The frontend website uses the cluster-wide GHCR pull Secret described above.
 Its explicit `imagePullSecrets` reference remains compatible with automatic
 injection.
+The deployment invokes the image's installed `/app/.venv/bin/python` directly
+for migrations and startup. Running `uv` at startup attempts to create a cache
+under `/.cache/uv`, which is not writable by the non-root workload user.
 
 ## Hermes Workspace
 

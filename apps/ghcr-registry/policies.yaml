@@ -36,7 +36,7 @@ metadata:
 spec:
   background: false
   webhookConfiguration:
-    failurePolicy: Fail
+    failurePolicy: Ignore
   rules:
     - name: inject-pull-secret
       match:

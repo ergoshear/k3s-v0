@@ -62,6 +62,19 @@ class SealedSecretsTests(unittest.TestCase):
             "ghcr.io/ergoshear/frontend-website",
         )
 
+    def test_frontend_runs_installed_environment_without_runtime_uv_writes(self):
+        deployment = yaml.safe_load(
+            (ROOT / "apps/frontend-website/deployment.yaml").read_text()
+        )
+        container = deployment["spec"]["template"]["spec"]["containers"][0]
+        self.assertEqual(container["command"], ["/bin/sh", "-c"])
+        self.assertEqual(
+            container["args"],
+            ["/app/.venv/bin/python manage.py migrate && exec "
+             "/app/.venv/bin/python manage.py runserver 0.0.0.0:8000"],
+        )
+        self.assertEqual(container["securityContext"]["runAsUser"], 65534)
+
 
 if __name__ == "__main__":
     unittest.main()
