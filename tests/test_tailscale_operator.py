@@ -56,7 +56,10 @@ class TailscaleOperatorTests(unittest.TestCase):
                     "tailscale.com/proxy-group": "egress-proxies",
                 },
             )
-            self.assertEqual(service["spec"]["ports"][0]["port"], 8080)
+            expected_ports = {443, 8080} if node in ("mlops-node-7", "mlops-node-9") else {8080}
+            self.assertEqual(
+                {port["port"] for port in service["spec"]["ports"]}, expected_ports
+            )
         self.assertEqual(
             {item["name"] for item in app["ignoreDifferences"]},
             set(nodes),
@@ -67,6 +70,17 @@ class TailscaleOperatorTests(unittest.TestCase):
                 for item in app["ignoreDifferences"]
             )
         )
+
+    def test_magicdns_forwards_tailnet_queries_to_pinned_nameserver(self):
+        dns = self.egress[("DNSConfig", "ts-dns")]["spec"]["nameserver"]
+        self.assertEqual(
+            dns["image"], {"repo": "tailscale/k8s-nameserver", "tag": "v1.104.1"}
+        )
+        config = self.egress[("ConfigMap", "coredns-custom")]
+        self.assertEqual(config["metadata"]["namespace"], "kube-system")
+        server = config["data"]["tailnet.server"]
+        self.assertIn("tailb11f97.ts.net:53", server)
+        self.assertIn(f'forward . {dns["service"]["clusterIP"]}', server)
 
 
 if __name__ == "__main__":

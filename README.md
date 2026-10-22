@@ -260,36 +260,57 @@ do not delete this Secret or rotate it without a recovery/migration plan.
 
 ## LiteLLM model discovery
 
-LiteLLM explicitly registers the 17 llama.cpp router presets managed by Salt
-in [the Helm values](apps/litellm/values.yaml), routing requests through the
-Tailscale egress Services. Its `/v1/models` list and admin UI use concrete IDs
-with the server prefixes `mlops-node-4/`, `mlops-node-6/`, `mlops-node-7/`, and
-`mlops-node-9/`, rather than wildcard entries. The prefix selects the server;
-the remaining ID exactly matches its Salt `models.ini` preset. Update these
-entries and their tests whenever Salt adds or renames a preset. Listing models
-does not load them; llama.cpp loads the selected preset when it is requested.
+LiteLLM registers concrete server-prefixed models in
+[the Helm values](apps/litellm/values.yaml). Nodes 4 and 6 retain their Qwen
+presets and port-8080 Tailscale egress Services. Nodes 7 and 9 now each serve
+**DeepSeek 4.1 Flash 1017**, advertised upstream as `deepseek-v4.1-flash`,
+with 262,144-token context and text/image input:
 
-The same configuration adds five semantic groups: `ergoshear-fast-edit`,
-`ergoshear-coder`, `ergoshear-architect`, `ergoshear-vision`, and
-`ergoshear-long-context`. The router uses the `least-busy` strategy. Fast-edit
-assigns a 2:1 weight to node 4 versus node 7; other groups prefer the lowest
-eligible `order`. Group deployments carry the same capability and token
-metadata as their direct presets. These limits describe the supplied
-configuration, not independently measured model capabilities. The gateway
-routes through in-cluster `hermes-workspace` Services and authenticates with
-`INFERENCE_BACKEND_KEY`.
+| Direct model | HTTPS API base |
+|---|---|
+| `mlops-node-7/DeepSeek-4.1-Flash-1017-256K` | `https://mlops-node-7.tailb11f97.ts.net/v1` |
+| `mlops-node-9/DeepSeek-4.1-Flash-1017-256K` | `https://mlops-node-9.tailb11f97.ts.net/v1` |
 
-Short aliases are `fast`, `coder`, `architect`, `vision`, `long-context`, and
-`default` (coder). Hidden compatibility aliases `gpt-4o`, `gpt-4o-mini`, `o3-mini`,
-and `claude-3-7-sonnet-latest` select local groups, not the named hosted models.
+The retired node-7 Ornith and node-9 Ornith/Qwen-512K deployments are removed.
+DeepSeek deployments reserve 32,768 tokens for output, leaving 229,376 input
+tokens. They use the server's default reasoning behavior rather than the old
+Qwen/Ornith chat-template overrides.
+
+Semantic groups use `least-busy` routing among equal-priority eligible hosts:
+
+| Group | Deployments |
+|---|---|
+| `fast` | Node 4 and node 6 no-think presets |
+| `coder` | Node 4, node 6, and both DeepSeek hosts |
+| `architect`, `vision` | Node 6 and both DeepSeek hosts |
+| `long-context` | Node 4 and both DeepSeek hosts; node 6 256K secondary |
+| `deepseek` | Only nodes 7 and 9, with two parallel requests per deployment |
+
+`high-performance` and `deepseek-flash` are aliases for the `deepseek` pool.
+It adds no classifier call and has no cross-family fallback: retries stay
+within the two DeepSeek hosts. This is a concurrency-oriented routing policy,
+not a claim of measured throughput. `auto` and `auto-hybrid` route SIMPLE
+requests to `fast`, MEDIUM to `coder`, and COMPLEX/REASONING to `deepseek`.
+`default` remains an alias for `auto`. Hidden compatibility aliases
+`gpt-4o`, `gpt-4o-mini`, `o3-mini`, and `claude-3-7-sonnet-latest` select local groups, not the named hosted models.
 The router enables pre-call checks, two retries, 300-second timeouts,
 15-second cooldowns, and the configured cross-group fallbacks. Parameter
 dropping/modification is enabled for compatibility; unsupported options may be
 removed rather than rejected. Model metadata declares output budgets explicitly
 with `max_output_tokens`, alongside the supplied `max_tokens` and input limits.
-All routes retain the Tailscale Service addresses and existing master key;
-LAN-only addresses and the attachment's alternate master-key variable are not
-used.
+All upstreams retain `INFERENCE_BACKEND_KEY`, and the existing master key is
+unchanged. No TLS verification bypasses are configured.
+
+For the HTTPS hosts, [Tailscale egress](apps/tailscale-egress/) exposes port
+443 in addition to the existing 8080 ports. A pinned operator `DNSConfig`
+nameserver uses reserved Service IP `10.43.0.54`. The k3s `coredns-custom`
+ConfigMap forwards only `tailb11f97.ts.net` queries to it. The nameserver maps
+tailnet FQDNs to HA egress Services, preserving the HTTPS hostname for SNI and
+certificate verification. Ensure tailnet grants allow `tag:k8s` access to
+nodes 7 and 9 on TCP 443 as well as any retained port-8080 access. If the
+cluster Service CIDR changes, update both the DNSConfig IP and CoreDNS forward
+target together. After first installation, verify DNS from the LiteLLM pod;
+restart the CoreDNS Deployment if the new custom server block has not loaded.
 
 The workspace image is pinned to upstream commit `c631425` and the agent to
 `v0.22.2`. The Deployment uses `Recreate` to avoid attaching local-path claims
