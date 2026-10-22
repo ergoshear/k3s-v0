@@ -95,6 +95,9 @@ class LiteLLMTests(unittest.TestCase):
                 self.assertNotIn("extra_body", params)
                 self.assertNotIn("ssl_verify", params)
                 info = entry["model_info"]
+                self.assertEqual(info["max_input_tokens"], 49152)
+                self.assertEqual(info["max_output_tokens"], 16384)
+                self.assertEqual(info["max_tokens"], 16384)
                 self.assertEqual(info["max_input_tokens"] + info["max_output_tokens"], 65536)
                 self.assertTrue(info["supports_vision"])
                 self.assertTrue(info["supports_reasoning"])

@@ -187,9 +187,9 @@ proxy_config:
         api_key: os.environ/INFERENCE_BACKEND_KEY
       model_info:
         id: node7-deepseek41-flash-1017-64k
-        max_tokens: 32768
-        max_input_tokens: 32768
-        max_output_tokens: 32768
+        max_tokens: 16384
+        max_input_tokens: 49152
+        max_output_tokens: 16384
         supports_vision: true
         supports_function_calling: true
         supports_reasoning: true
@@ -201,9 +201,9 @@ proxy_config:
         api_key: os.environ/INFERENCE_BACKEND_KEY
       model_info:
         id: node9-deepseek41-flash-1017-64k
-        max_tokens: 32768
-        max_input_tokens: 32768
-        max_output_tokens: 32768
+        max_tokens: 16384
+        max_input_tokens: 49152
+        max_output_tokens: 16384
         supports_vision: true
         supports_function_calling: true
         supports_reasoning: true
@@ -296,9 +296,9 @@ proxy_config:
         order: 1
         max_parallel_requests: 2
       model_info:
-        max_tokens: 32768
-        max_input_tokens: 32768
-        max_output_tokens: 32768
+        max_tokens: 16384
+        max_input_tokens: 49152
+        max_output_tokens: 16384
         supports_vision: true
         supports_function_calling: true
         supports_reasoning: true
@@ -311,9 +311,9 @@ proxy_config:
         order: 1
         max_parallel_requests: 2
       model_info:
-        max_tokens: 32768
-        max_input_tokens: 32768
-        max_output_tokens: 32768
+        max_tokens: 16384
+        max_input_tokens: 49152
+        max_output_tokens: 16384
         supports_vision: true
         supports_function_calling: true
         supports_reasoning: true
@@ -345,9 +345,9 @@ proxy_config:
         order: 1
         max_parallel_requests: 2
       model_info:
-        max_tokens: 32768
-        max_input_tokens: 32768
-        max_output_tokens: 32768
+        max_tokens: 16384
+        max_input_tokens: 49152
+        max_output_tokens: 16384
         supports_vision: true
         supports_function_calling: true
         supports_reasoning: true
@@ -360,9 +360,9 @@ proxy_config:
         order: 1
         max_parallel_requests: 2
       model_info:
-        max_tokens: 32768
-        max_input_tokens: 32768
-        max_output_tokens: 32768
+        max_tokens: 16384
+        max_input_tokens: 49152
+        max_output_tokens: 16384
         supports_vision: true
         supports_function_calling: true
         supports_reasoning: true
@@ -394,9 +394,9 @@ proxy_config:
         order: 1
         max_parallel_requests: 2
       model_info:
-        max_tokens: 32768
-        max_input_tokens: 32768
-        max_output_tokens: 32768
+        max_tokens: 16384
+        max_input_tokens: 49152
+        max_output_tokens: 16384
         supports_vision: true
         supports_function_calling: true
         supports_reasoning: true
@@ -409,9 +409,9 @@ proxy_config:
         order: 1
         max_parallel_requests: 2
       model_info:
-        max_tokens: 32768
-        max_input_tokens: 32768
-        max_output_tokens: 32768
+        max_tokens: 16384
+        max_input_tokens: 49152
+        max_output_tokens: 16384
         supports_vision: true
         supports_function_calling: true
         supports_reasoning: true
@@ -461,9 +461,9 @@ proxy_config:
         order: 1
         max_parallel_requests: 2
       model_info:
-        max_tokens: 32768
-        max_input_tokens: 32768
-        max_output_tokens: 32768
+        max_tokens: 16384
+        max_input_tokens: 49152
+        max_output_tokens: 16384
         supports_vision: true
         supports_function_calling: true
         supports_reasoning: true
@@ -476,9 +476,9 @@ proxy_config:
         order: 1
         max_parallel_requests: 2
       model_info:
-        max_tokens: 32768
-        max_input_tokens: 32768
-        max_output_tokens: 32768
+        max_tokens: 16384
+        max_input_tokens: 49152
+        max_output_tokens: 16384
         supports_vision: true
         supports_function_calling: true
         supports_reasoning: true
@@ -492,9 +492,9 @@ proxy_config:
         order: 1
         max_parallel_requests: 2
       model_info:
-        max_tokens: 32768
-        max_input_tokens: 32768
-        max_output_tokens: 32768
+        max_tokens: 16384
+        max_input_tokens: 49152
+        max_output_tokens: 16384
         supports_vision: true
         supports_function_calling: true
         supports_reasoning: true
@@ -507,9 +507,9 @@ proxy_config:
         order: 1
         max_parallel_requests: 2
       model_info:
-        max_tokens: 32768
-        max_input_tokens: 32768
-        max_output_tokens: 32768
+        max_tokens: 16384
+        max_input_tokens: 49152
+        max_output_tokens: 16384
         supports_vision: true
         supports_function_calling: true
         supports_reasoning: true

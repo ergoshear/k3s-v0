@@ -272,7 +272,7 @@ with a configured 65,536-token context budget and text/image input:
 | `mlops-node-9/DeepSeek-4.1-Flash-1017-64K` | `https://mlops-node-9.tailb11f97.ts.net/v1` |
 
 The retired node-7 Ornith and node-9 Ornith/Qwen-512K deployments are removed.
-DeepSeek deployments reserve 32,768 tokens for output, leaving 32,768 input
+DeepSeek deployments reserve 16,384 tokens for output, leaving 49,152 input
 tokens. This gateway budget does not reconfigure the inference servers'
 allocated context. They use the server's default reasoning behavior rather than the old
 Qwen/Ornith chat-template overrides.
