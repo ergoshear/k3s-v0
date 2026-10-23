@@ -44,7 +44,8 @@ class TailscaleOperatorTests(unittest.TestCase):
         )
         proxy_group = self.egress[("ProxyGroup", "egress-proxies")]
         self.assertEqual(proxy_group["spec"], {"type": "egress", "replicas": 2})
-        nodes = ("mlops-node-4", "mlops-node-6", "mlops-node-7", "mlops-node-9")
+        nodes = ("mlops-node-3", "mlops-node-4", "mlops-node-6",
+                 "mlops-node-7", "mlops-node-9")
         for node in nodes:
             service = self.egress[("Service", node)]
             self.assertEqual(service["metadata"]["namespace"], "hermes-workspace")
@@ -56,7 +57,7 @@ class TailscaleOperatorTests(unittest.TestCase):
                     "tailscale.com/proxy-group": "egress-proxies",
                 },
             )
-            expected_ports = {443, 8080}
+            expected_ports = {443} if node == "mlops-node-3" else {443, 8080}
             self.assertEqual(
                 {port["port"] for port in service["spec"]["ports"]}, expected_ports
             )

@@ -343,14 +343,20 @@ LiteLLM's UI automatically redirects login to SSO
 `general_settings.disable_env_credential_login=true` disables environment-based
 UI credential login. The API master key remains configured separately.
 
-For all four HTTPS hosts (nodes 4, 6, 7, and 9),
+The `kokoro` model is a text-to-speech-only route to the OpenAI-compatible
+Kokoro `/v1/audio/speech` endpoint on node 3. The ROCm container stays bound to
+loopback; Tailscale Serve exposes it to tailnet clients over HTTPS, and the
+egress proxy provides the node-3 tailnet route. Clients call LiteLLM's
+`/v1/audio/speech` endpoint with `model: "kokoro"`; this is not a chat model.
+
+For the HTTPS hosts (nodes 3, 4, 6, 7, and 9),
 [Tailscale egress](apps/tailscale-egress/) exposes port 443 in addition to
-the existing 8080 ports. A pinned operator `DNSConfig`
+the existing 8080 ports for nodes 4, 6, 7, and 9. A pinned operator `DNSConfig`
 nameserver uses reserved Service IP `10.43.0.54`. The k3s `coredns-custom`
 ConfigMap forwards only `tailb11f97.ts.net` queries to it. The nameserver maps
 tailnet FQDNs to HA egress Services, preserving the HTTPS hostname for SNI and
 certificate verification. Ensure tailnet grants allow `tag:k8s` access to
-nodes 4, 6, 7, and 9 on TCP 443 as well as any retained port-8080 access. If the
+nodes 3, 4, 6, 7, and 9 on TCP 443 as well as any retained port-8080 access. If the
 cluster Service CIDR changes, update both the DNSConfig IP and CoreDNS forward
 target together. After first installation, verify DNS from the LiteLLM pod;
 restart the CoreDNS Deployment if the new custom server block has not loaded.

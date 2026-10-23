@@ -6,6 +6,7 @@ resources:
   - dnsconfig.yaml
   - coredns-custom.yaml
   - network-policy.yaml
+  - mlops-node-3.yaml
   - mlops-node-4.yaml
   - mlops-node-6.yaml
   - mlops-node-7.yaml

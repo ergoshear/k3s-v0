@@ -48,6 +48,15 @@ envVars:
 proxy_config:
   model_list:
     # ==========================================================================
+    # Text-to-speech: Kokoro on mlops-node-3
+    # ==========================================================================
+    - model_name: kokoro
+      litellm_params:
+        model: openai/kokoro
+        api_base: https://mlops-node-3.tailb11f97.ts.net/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+
+    # ==========================================================================
     # 1. Direct Node Presets: mlops-node-4 (Radeon AI PRO R9700 32GB - 256K + Vision)
     # ==========================================================================
     - model_name: mlops-node-4/Strata-Qwen3.8-Flash-Next-IQ3_S-Low
