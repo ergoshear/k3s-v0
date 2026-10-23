@@ -122,7 +122,7 @@ class LiteLLMTests(unittest.TestCase):
             if any(f"mlops-node-{node}." in entry["litellm_params"].get("api_base", "")
                    for node in (4, 6))
         ]
-        self.assertEqual(len(routes), 15)
+        self.assertEqual(len(routes), 18)
         for entry in routes:
             with self.subTest(model=entry["model_name"]):
                 params = entry["litellm_params"]
@@ -140,6 +140,22 @@ class LiteLLMTests(unittest.TestCase):
                 self.assertTrue(info["supports_vision"])
                 if entry["model_name"].startswith("mlops-node-"):
                     self.assertIn("/Strata-Qwen3.8-Flash-Next-IQ3_S-", entry["model_name"])
+
+    def test_node4_has_medium_vision_and_256k_presets_matching_node6(self):
+        models = {entry["model_name"]: entry
+                  for entry in self.values["proxy_config"]["model_list"]}
+        for suffix in ("Medium", "Vision", "256K"):
+            with self.subTest(preset=suffix):
+                node4 = models[f"mlops-node-4/Strata-Qwen3.8-Flash-Next-IQ3_S-{suffix}"]
+                node6 = models[f"mlops-node-6/Strata-Qwen3.8-Flash-Next-IQ3_S-{suffix}"]
+                self.assertEqual(
+                    node4["litellm_params"]["extra_body"],
+                    node6["litellm_params"]["extra_body"],
+                )
+                self.assertEqual(
+                    {k: v for k, v in node4["model_info"].items() if k != "id"},
+                    {k: v for k, v in node6["model_info"].items() if k != "id"},
+                )
 
     def test_deepseek_pool_and_aliases_never_fall_back_to_other_families(self):
         config = self.values["proxy_config"]

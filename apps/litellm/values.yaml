@@ -68,6 +68,57 @@ proxy_config:
         supports_function_calling: true
         supports_reasoning: true
 
+    - model_name: mlops-node-4/Strata-Qwen3.8-Flash-Next-IQ3_S-Medium
+      litellm_params:
+        model: openai/qwen3.8-flash-next-iq3_s
+        api_base: https://mlops-node-4.tailb11f97.ts.net/v1
+        api_key: os.environ/STRATA_API_KEY
+        extra_body:
+          chat_template_kwargs:
+            reasoning_effort: medium
+      model_info:
+        id: node4-strata-qwen38-flash-next-iq3-s-medium
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_vision: true
+        supports_function_calling: true
+        supports_reasoning: true
+
+    - model_name: mlops-node-4/Strata-Qwen3.8-Flash-Next-IQ3_S-Vision
+      litellm_params:
+        model: openai/qwen3.8-flash-next-iq3_s
+        api_base: https://mlops-node-4.tailb11f97.ts.net/v1
+        api_key: os.environ/STRATA_API_KEY
+        extra_body:
+          chat_template_kwargs:
+            reasoning_effort: low
+      model_info:
+        id: node4-strata-qwen38-flash-next-iq3-s-vision
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_vision: true
+        supports_function_calling: true
+        supports_reasoning: true
+
+    - model_name: mlops-node-4/Strata-Qwen3.8-Flash-Next-IQ3_S-256K
+      litellm_params:
+        model: openai/qwen3.8-flash-next-iq3_s
+        api_base: https://mlops-node-4.tailb11f97.ts.net/v1
+        api_key: os.environ/STRATA_API_KEY
+        extra_body:
+          chat_template_kwargs:
+            reasoning_effort: low
+      model_info:
+        id: node4-strata-qwen38-flash-next-iq3-s-256k
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_vision: true
+        supports_function_calling: true
+        supports_reasoning: true
+
     - model_name: mlops-node-4/Strata-Qwen3.8-Flash-Next-IQ3_S-NoThink
       litellm_params:
         model: openai/qwen3.8-flash-next-iq3_s

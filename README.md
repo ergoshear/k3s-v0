@@ -265,7 +265,8 @@ LiteLLM registers concrete server-prefixed models in
 presets. Nodes 4 and 6 are configured
 for Strata's `qwen3.8-flash-next-iq3_s`, using the direct-name prefix
 `mlops-node-N/Strata-Qwen3.8-Flash-Next-IQ3_S-` with their existing effort,
-no-think, vision, and context suffixes. Every node-4/node-6 route, including
+no-think, vision, and context suffixes. Both hosts expose `Low`, `Medium`,
+`NoThink`, `Vision`, and `256K` direct presets. Every node-4/node-6 route, including
 semantic pools, advertises image support and a 262,144-token context:
 229,376 input tokens plus 32,768 output tokens. The presets use Strata's
 chat-template thinking controls; the previous llama-specific `reasoning_budget`
