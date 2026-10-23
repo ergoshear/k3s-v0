@@ -104,16 +104,19 @@ class LiteLLMTests(unittest.TestCase):
                 self.assertNotIn("extra_body", params)
                 self.assertNotIn("ssl_verify", params)
                 info = entry["model_info"]
-                self.assertEqual(info["max_input_tokens"], 49152)
-                self.assertEqual(info["max_output_tokens"], 16384)
-                self.assertEqual(info["max_tokens"], 16384)
-                self.assertEqual(info["max_input_tokens"] + info["max_output_tokens"], 65536)
+                node7 = "mlops-node-7." in params["api_base"]
+                self.assertEqual(info["max_input_tokens"], 24576 if node7 else 49152)
+                self.assertEqual(info["max_output_tokens"], 8192 if node7 else 16384)
+                self.assertEqual(info["max_tokens"], 8192 if node7 else 16384)
+                self.assertEqual(info["max_input_tokens"] + info["max_output_tokens"],
+                                 32768 if node7 else 65536)
                 self.assertTrue(info["supports_vision"])
                 self.assertTrue(info["supports_reasoning"])
         direct = [e["model_name"] for e in deepseek if e["model_name"].startswith("mlops-node-")]
         self.assertEqual(
             set(direct),
-            {f"mlops-node-{node}/DeepSeek-4.1-Flash-1017-64K" for node in (7, 9)},
+            {"mlops-node-7/DeepSeek-4.1-Flash-1017-32K",
+             "mlops-node-9/DeepSeek-4.1-Flash-1017-64K"},
         )
 
     def test_strata_replaces_all_node4_and_node6_routes(self):

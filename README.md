@@ -287,11 +287,12 @@ with a configured 65,536-token context budget and text/image input:
 
 | Direct model | HTTPS API base |
 |---|---|
-| `mlops-node-7/DeepSeek-4.1-Flash-1017-64K` | `https://mlops-node-7.tailb11f97.ts.net/v1` |
+| `mlops-node-7/DeepSeek-4.1-Flash-1017-32K` | `https://mlops-node-7.tailb11f97.ts.net/v1` |
 | `mlops-node-9/DeepSeek-4.1-Flash-1017-64K` | `https://mlops-node-9.tailb11f97.ts.net/v1` |
 
 The retired node-7 Ornith and node-9 Ornith/Qwen-512K deployments are removed.
-DeepSeek deployments reserve 16,384 tokens for output, leaving 49,152 input
+Node-7 deployments allow 24,576 input tokens and 8,192 output tokens (32K
+total), including shared pools. Node 9 retains 16,384 output and 49,152 input
 tokens. This gateway budget does not reconfigure the inference servers'
 allocated context. They use the server's default reasoning behavior rather than the old
 Qwen/Ornith chat-template overrides.
@@ -304,7 +305,7 @@ except the DeepSeek-only pool:
 | `fast` | Node 4 and node 6 no-think presets |
 | `coder` | Node 4, node 6, and both DeepSeek hosts |
 | `architect`, `vision` | Node 6 and both DeepSeek hosts |
-| `long-context` | Node 4 and both DeepSeek hosts (64K budget); node 6 128K secondary |
+| `long-context` | Node 4, DeepSeek node 7 (32K) and node 9 (64K); node 6 128K secondary |
 | `deepseek` | Only nodes 7 and 9, with two parallel requests per deployment |
 | `Qwen3.8-Flash-Next-256K` | Strata node 4 only, medium reasoning, three parallel requests |
 

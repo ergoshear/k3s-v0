@@ -229,17 +229,17 @@ proxy_config:
         supports_function_calling: true
         supports_reasoning: true
 
-    # DeepSeek 4.1 Flash 1017: two resident 64K hosts, server-default reasoning.
-    - model_name: mlops-node-7/DeepSeek-4.1-Flash-1017-64K
+    # DeepSeek 4.1 Flash 1017: node 7 at 32K, node 9 at 64K, server-default reasoning.
+    - model_name: mlops-node-7/DeepSeek-4.1-Flash-1017-32K
       litellm_params:
         model: openai/deepseek-v4.1-flash
         api_base: https://mlops-node-7.tailb11f97.ts.net/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
       model_info:
-        id: node7-deepseek41-flash-1017-64k
-        max_tokens: 16384
-        max_input_tokens: 49152
-        max_output_tokens: 16384
+        id: node7-deepseek41-flash-1017-32k
+        max_tokens: 8192
+        max_input_tokens: 24576
+        max_output_tokens: 8192
         supports_vision: true
         supports_function_calling: true
         supports_reasoning: true
@@ -344,9 +344,9 @@ proxy_config:
         order: 1
         max_parallel_requests: 2
       model_info:
-        max_tokens: 16384
-        max_input_tokens: 49152
-        max_output_tokens: 16384
+        max_tokens: 8192
+        max_input_tokens: 24576
+        max_output_tokens: 8192
         supports_vision: true
         supports_function_calling: true
         supports_reasoning: true
@@ -393,9 +393,9 @@ proxy_config:
         order: 1
         max_parallel_requests: 2
       model_info:
-        max_tokens: 16384
-        max_input_tokens: 49152
-        max_output_tokens: 16384
+        max_tokens: 8192
+        max_input_tokens: 24576
+        max_output_tokens: 8192
         supports_vision: true
         supports_function_calling: true
         supports_reasoning: true
@@ -442,9 +442,9 @@ proxy_config:
         order: 1
         max_parallel_requests: 2
       model_info:
-        max_tokens: 16384
-        max_input_tokens: 49152
-        max_output_tokens: 16384
+        max_tokens: 8192
+        max_input_tokens: 24576
+        max_output_tokens: 8192
         supports_vision: true
         supports_function_calling: true
         supports_reasoning: true
@@ -509,9 +509,9 @@ proxy_config:
         order: 1
         max_parallel_requests: 2
       model_info:
-        max_tokens: 16384
-        max_input_tokens: 49152
-        max_output_tokens: 16384
+        max_tokens: 8192
+        max_input_tokens: 24576
+        max_output_tokens: 8192
         supports_vision: true
         supports_function_calling: true
         supports_reasoning: true
@@ -559,9 +559,9 @@ proxy_config:
         order: 1
         max_parallel_requests: 2
       model_info:
-        max_tokens: 16384
-        max_input_tokens: 49152
-        max_output_tokens: 16384
+        max_tokens: 8192
+        max_input_tokens: 24576
+        max_output_tokens: 8192
         supports_vision: true
         supports_function_calling: true
         supports_reasoning: true
