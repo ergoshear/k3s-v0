@@ -107,6 +107,31 @@ class LiteLLMTests(unittest.TestCase):
             {f"mlops-node-{node}/DeepSeek-4.1-Flash-1017-64K" for node in (7, 9)},
         )
 
+    def test_strata_replaces_all_node4_and_node6_routes(self):
+        routes = [
+            entry for entry in self.values["proxy_config"]["model_list"]
+            if any(f"mlops-node-{node}." in entry["litellm_params"].get("api_base", "")
+                   for node in (4, 6))
+        ]
+        self.assertEqual(len(routes), 15)
+        for entry in routes:
+            with self.subTest(model=entry["model_name"]):
+                params = entry["litellm_params"]
+                self.assertEqual(params["model"], "openai/qwen3.8-flash-next-iq3_s")
+                self.assertEqual(params["api_key"], "os.environ/STRATA_API_KEY")
+                self.assertIn(params["api_base"], {
+                    f"https://mlops-node-{node}.tailb11f97.ts.net/v1"
+                    for node in (4, 6)
+                })
+                self.assertNotIn("reasoning_budget", params.get("extra_body", {}))
+                info = entry["model_info"]
+                self.assertEqual(info["max_input_tokens"], 229376)
+                self.assertEqual(info["max_output_tokens"], 32768)
+                self.assertEqual(info["max_tokens"], 32768)
+                self.assertTrue(info["supports_vision"])
+                if entry["model_name"].startswith("mlops-node-"):
+                    self.assertIn("/Strata-Qwen3.8-Flash-Next-IQ3_S-", entry["model_name"])
+
     def test_deepseek_pool_and_aliases_never_fall_back_to_other_families(self):
         config = self.values["proxy_config"]
         pool = [e for e in config["model_list"] if e["model_name"] == "deepseek"]

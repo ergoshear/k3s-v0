@@ -262,7 +262,23 @@ do not delete this Secret or rotate it without a recovery/migration plan.
 
 LiteLLM registers concrete server-prefixed models in
 [the Helm values](apps/litellm/values.yaml). Nodes 4 and 6 retain their Qwen
-presets and port-8080 Tailscale egress Services. Nodes 7 and 9 now each serve
+presets. Nodes 4 and 6 are configured
+for Strata's `qwen3.8-flash-next-iq3_s`, using the direct-name prefix
+`mlops-node-N/Strata-Qwen3.8-Flash-Next-IQ3_S-` with their existing effort,
+no-think, vision, and context suffixes. Every node-4/node-6 route, including
+semantic pools, advertises image support and a 262,144-token context:
+229,376 input tokens plus 32,768 output tokens. The presets use Strata's
+chat-template thinking controls; the previous llama-specific `reasoning_budget`
+override is removed. These routes use `os.environ/STRATA_API_KEY`, supplied
+privately in the `litellm` namespace's existing `inference-backend` Secret.
+Their API bases are `https://mlops-node-4.tailb11f97.ts.net/v1` and
+`https://mlops-node-6.tailb11f97.ts.net/v1`, with normal TLS verification.
+The two restored Strata servers initially share the backed-up credential.
+Provision this key before syncing the configuration and restart LiteLLM after
+changing Secret values; no credential belongs in the values file. Backend
+readiness remains an operational prerequisite, not implied by these routes.
+
+Nodes 7 and 9 now each serve
 **DeepSeek 4.1 Flash 1017**, advertised upstream as `deepseek-v4.1-flash`,
 with a configured 65,536-token context budget and text/image input:
 
@@ -306,8 +322,9 @@ The router enables pre-call checks, two retries, 300-second timeouts,
 dropping/modification is enabled for compatibility; unsupported options may be
 removed rather than rejected. Model metadata declares output budgets explicitly
 with `max_output_tokens`, alongside the supplied `max_tokens` and input limits.
-All upstreams retain `INFERENCE_BACKEND_KEY`, and the existing master key is
-unchanged. No TLS verification bypasses are configured.
+DeepSeek upstreams retain `INFERENCE_BACKEND_KEY`; Strata upstreams use the
+separate `STRATA_API_KEY`. The existing master key is unchanged.
+No TLS verification bypasses are configured.
 
 For the HTTPS hosts, [Tailscale egress](apps/tailscale-egress/) exposes port
 443 in addition to the existing 8080 ports. A pinned operator `DNSConfig`
@@ -315,7 +332,7 @@ nameserver uses reserved Service IP `10.43.0.54`. The k3s `coredns-custom`
 ConfigMap forwards only `tailb11f97.ts.net` queries to it. The nameserver maps
 tailnet FQDNs to HA egress Services, preserving the HTTPS hostname for SNI and
 certificate verification. Ensure tailnet grants allow `tag:k8s` access to
-nodes 7 and 9 on TCP 443 as well as any retained port-8080 access. If the
+nodes 4, 6, 7, and 9 on TCP 443 as well as any retained port-8080 access. If the
 cluster Service CIDR changes, update both the DNSConfig IP and CoreDNS forward
 target together. After first installation, verify DNS from the LiteLLM pod;
 restart the CoreDNS Deployment if the new custom server block has not loaded.
@@ -457,8 +474,9 @@ copying an empty ClusterIP Service status. Explicit ExternalDNS target
 annotations retain private management DNS and public LiteLLM DNS.
 
 The two authorized inference clients use `inference-backend` Secrets with
-`INFERENCE_BACKEND_KEY` in their respective namespaces. LiteLLM model keys
-reference that environment variable. Hermes migrates its existing private
+`INFERENCE_BACKEND_KEY` in their respective namespaces. LiteLLM's Secret also
+contains `STRATA_API_KEY` for nodes 4 and 6; DeepSeek model keys still reference
+`INFERENCE_BACKEND_KEY`. Hermes migrates its existing private
 configuration during initialization; it does not change unrelated providers.
 GPU hosts require the same key file and a persistent dual-stack nftables
 boundary managed by Salt. The egress-proxy ingress NetworkPolicy allows only

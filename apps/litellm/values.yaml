@@ -48,134 +48,132 @@ proxy_config:
   model_list:
     # ==========================================================================
     # 1. Direct Node Presets: mlops-node-4 (Radeon AI PRO R9700 32GB GDDR6)
-    #    Single Resident 256K Preset serves Low & NoThink at ~113 tok/s (0s Swap!)
+    #    Strata Flash-Next IQ3_S: resident 256K context, MTP, and vision.
     # ==========================================================================
-    - model_name: mlops-node-4/Qwen3.6-35B-A3B-DFlash-Low
+    - model_name: mlops-node-4/Strata-Qwen3.8-Flash-Next-IQ3_S-Low
       litellm_params:
-        model: openai/Qwen3.6-35B-A3B-DFlash
-        api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: os.environ/INFERENCE_BACKEND_KEY
+        model: openai/qwen3.8-flash-next-iq3_s
+        api_base: https://mlops-node-4.tailb11f97.ts.net/v1
+        api_key: os.environ/STRATA_API_KEY
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
       model_info:
-        id: node4-qwen36-dflash-low
+        id: node4-strata-qwen38-flash-next-iq3-s-low
         max_tokens: 32768
         max_input_tokens: 229376
-        max_output_tokens: 32768
-        supports_vision: false
-        supports_function_calling: true
-        supports_reasoning: true
-
-    - model_name: mlops-node-4/Qwen3.6-35B-A3B-DFlash-NoThink
-      litellm_params:
-        model: openai/Qwen3.6-35B-A3B-DFlash
-        api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: os.environ/INFERENCE_BACKEND_KEY
-        temperature: 0.6
-        top_p: 0.8
-        extra_body:
-          reasoning_budget: 0
-          chat_template_kwargs:
-            enable_thinking: false
-            reasoning_effort: none
-      model_info:
-        id: node4-qwen36-dflash-nothink
-        max_tokens: 32768
-        max_input_tokens: 229376
-        max_output_tokens: 32768
-        supports_vision: false
-        supports_function_calling: true
-
-    # ==========================================================================
-    # 2. Direct Node Presets: mlops-node-6 (RTX 4090 24GB - Qwen3.8-27B-GSQ-RCO + MTP)
-    #    Single Resident 128K Preset serves Low, Medium, NoThink & Vision (0s Swap!)
-    # ==========================================================================
-    - model_name: mlops-node-6/Qwen3.8-27B-GSQ-RCO-Low
-      litellm_params:
-        model: openai/Qwen3.8-27B-GSQ-RCO-IQ3_S-128K
-        api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: os.environ/INFERENCE_BACKEND_KEY
-        extra_body:
-          chat_template_kwargs:
-            reasoning_effort: low
-      model_info:
-        id: node6-qwen38-27b-gsq-rco-low
-        max_tokens: 32768
-        max_input_tokens: 98304
         max_output_tokens: 32768
         supports_vision: true
         supports_function_calling: true
         supports_reasoning: true
 
-    - model_name: mlops-node-6/Qwen3.8-27B-GSQ-RCO-Medium
+    - model_name: mlops-node-4/Strata-Qwen3.8-Flash-Next-IQ3_S-NoThink
       litellm_params:
-        model: openai/Qwen3.8-27B-GSQ-RCO-IQ3_S-128K
-        api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: os.environ/INFERENCE_BACKEND_KEY
+        model: openai/qwen3.8-flash-next-iq3_s
+        api_base: https://mlops-node-4.tailb11f97.ts.net/v1
+        api_key: os.environ/STRATA_API_KEY
+        temperature: 0.6
+        top_p: 0.8
+        extra_body:
+          chat_template_kwargs:
+            enable_thinking: false
+            reasoning_effort: none
+      model_info:
+        id: node4-strata-qwen38-flash-next-iq3-s-nothink
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_vision: true
+        supports_function_calling: true
+
+    # ==========================================================================
+    # 2. Direct Node Presets: mlops-node-6 (RTX 4090 24GB - Strata-Qwen3.8-Flash-Next-IQ3_S + MTP)
+    #    Strata Flash-Next IQ3_S: resident 256K context, MTP, and vision.
+    # ==========================================================================
+    - model_name: mlops-node-6/Strata-Qwen3.8-Flash-Next-IQ3_S-Low
+      litellm_params:
+        model: openai/qwen3.8-flash-next-iq3_s
+        api_base: https://mlops-node-6.tailb11f97.ts.net/v1
+        api_key: os.environ/STRATA_API_KEY
+        extra_body:
+          chat_template_kwargs:
+            reasoning_effort: low
+      model_info:
+        id: node6-strata-qwen38-flash-next-iq3-s-low
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_vision: true
+        supports_function_calling: true
+        supports_reasoning: true
+
+    - model_name: mlops-node-6/Strata-Qwen3.8-Flash-Next-IQ3_S-Medium
+      litellm_params:
+        model: openai/qwen3.8-flash-next-iq3_s
+        api_base: https://mlops-node-6.tailb11f97.ts.net/v1
+        api_key: os.environ/STRATA_API_KEY
         extra_body:
           chat_template_kwargs:
             reasoning_effort: medium
       model_info:
-        id: node6-qwen38-27b-gsq-rco-medium
+        id: node6-strata-qwen38-flash-next-iq3-s-medium
         max_tokens: 32768
-        max_input_tokens: 98304
+        max_input_tokens: 229376
         max_output_tokens: 32768
         supports_vision: true
         supports_function_calling: true
         supports_reasoning: true
 
-    - model_name: mlops-node-6/Qwen3.8-27B-GSQ-RCO-NoThink
+    - model_name: mlops-node-6/Strata-Qwen3.8-Flash-Next-IQ3_S-NoThink
       litellm_params:
-        model: openai/Qwen3.8-27B-GSQ-RCO-IQ3_S-128K
-        api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: os.environ/INFERENCE_BACKEND_KEY
+        model: openai/qwen3.8-flash-next-iq3_s
+        api_base: https://mlops-node-6.tailb11f97.ts.net/v1
+        api_key: os.environ/STRATA_API_KEY
         temperature: 0.7
         top_p: 0.8
         extra_body:
-          reasoning_budget: 0
           chat_template_kwargs:
             enable_thinking: false
             reasoning_effort: none
       model_info:
-        id: node6-qwen38-27b-gsq-rco-nothink
+        id: node6-strata-qwen38-flash-next-iq3-s-nothink
         max_tokens: 32768
-        max_input_tokens: 98304
+        max_input_tokens: 229376
         max_output_tokens: 32768
         supports_vision: true
         supports_function_calling: true
 
-    - model_name: mlops-node-6/Qwen3.8-27B-GSQ-RCO-Vision
+    - model_name: mlops-node-6/Strata-Qwen3.8-Flash-Next-IQ3_S-Vision
       litellm_params:
-        model: openai/Qwen3.8-27B-GSQ-RCO-IQ3_S-128K
-        api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: os.environ/INFERENCE_BACKEND_KEY
+        model: openai/qwen3.8-flash-next-iq3_s
+        api_base: https://mlops-node-6.tailb11f97.ts.net/v1
+        api_key: os.environ/STRATA_API_KEY
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
       model_info:
-        id: node6-qwen38-27b-gsq-rco-vision
+        id: node6-strata-qwen38-flash-next-iq3-s-vision
         max_tokens: 32768
-        max_input_tokens: 98304
+        max_input_tokens: 229376
         max_output_tokens: 32768
         supports_vision: true
         supports_function_calling: true
         supports_reasoning: true
 
-    - model_name: mlops-node-6/Qwen3.8-27B-GSQ-RCO-256K
+    - model_name: mlops-node-6/Strata-Qwen3.8-Flash-Next-IQ3_S-256K
       litellm_params:
-        model: openai/Qwen3.8-27B-GSQ-RCO-IQ3_S-256K
-        api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: os.environ/INFERENCE_BACKEND_KEY
+        model: openai/qwen3.8-flash-next-iq3_s
+        api_base: https://mlops-node-6.tailb11f97.ts.net/v1
+        api_key: os.environ/STRATA_API_KEY
         extra_body:
           chat_template_kwargs:
             reasoning_effort: low
       model_info:
-        id: node6-qwen38-27b-gsq-rco-256k
+        id: node6-strata-qwen38-flash-next-iq3-s-256k
         max_tokens: 32768
         max_input_tokens: 229376
         max_output_tokens: 32768
-        supports_vision: false
+        supports_vision: true
         supports_function_calling: true
         supports_reasoning: true
 
@@ -211,36 +209,14 @@ proxy_config:
     # fast: least-busy across eligible resident deployments.
     - model_name: fast
       litellm_params:
-        model: openai/Qwen3.8-27B-GSQ-RCO-IQ3_S-128K
-        api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: os.environ/INFERENCE_BACKEND_KEY
+        model: openai/qwen3.8-flash-next-iq3_s
+        api_base: https://mlops-node-6.tailb11f97.ts.net/v1
+        api_key: os.environ/STRATA_API_KEY
         order: 1
         max_parallel_requests: 2
         temperature: 0.7
         top_p: 0.8
         extra_body:
-          reasoning_budget: 0
-          chat_template_kwargs:
-            enable_thinking: false
-            reasoning_effort: none
-      model_info:
-        max_tokens: 32768
-        max_input_tokens: 98304
-        max_output_tokens: 32768
-        supports_vision: true
-        supports_function_calling: true
-
-    - model_name: fast
-      litellm_params:
-        model: openai/Qwen3.6-35B-A3B-DFlash
-        api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: os.environ/INFERENCE_BACKEND_KEY
-        order: 1
-        max_parallel_requests: 2
-        temperature: 0.6
-        top_p: 0.8
-        extra_body:
-          reasoning_budget: 0
           chat_template_kwargs:
             enable_thinking: false
             reasoning_effort: none
@@ -248,15 +224,35 @@ proxy_config:
         max_tokens: 32768
         max_input_tokens: 229376
         max_output_tokens: 32768
-        supports_vision: false
+        supports_vision: true
+        supports_function_calling: true
+
+    - model_name: fast
+      litellm_params:
+        model: openai/qwen3.8-flash-next-iq3_s
+        api_base: https://mlops-node-4.tailb11f97.ts.net/v1
+        api_key: os.environ/STRATA_API_KEY
+        order: 1
+        max_parallel_requests: 2
+        temperature: 0.6
+        top_p: 0.8
+        extra_body:
+          chat_template_kwargs:
+            enable_thinking: false
+            reasoning_effort: none
+      model_info:
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_vision: true
         supports_function_calling: true
 
     # coder: least-busy across eligible resident deployments.
     - model_name: coder
       litellm_params:
-        model: openai/Qwen3.8-27B-GSQ-RCO-IQ3_S-128K
-        api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: os.environ/INFERENCE_BACKEND_KEY
+        model: openai/qwen3.8-flash-next-iq3_s
+        api_base: https://mlops-node-6.tailb11f97.ts.net/v1
+        api_key: os.environ/STRATA_API_KEY
         order: 1
         max_parallel_requests: 2
         extra_body:
@@ -264,7 +260,7 @@ proxy_config:
             reasoning_effort: low
       model_info:
         max_tokens: 32768
-        max_input_tokens: 98304
+        max_input_tokens: 229376
         max_output_tokens: 32768
         supports_vision: true
         supports_function_calling: true
@@ -272,9 +268,9 @@ proxy_config:
 
     - model_name: coder
       litellm_params:
-        model: openai/Qwen3.6-35B-A3B-DFlash
-        api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: os.environ/INFERENCE_BACKEND_KEY
+        model: openai/qwen3.8-flash-next-iq3_s
+        api_base: https://mlops-node-4.tailb11f97.ts.net/v1
+        api_key: os.environ/STRATA_API_KEY
         order: 1
         max_parallel_requests: 2
         extra_body:
@@ -284,7 +280,7 @@ proxy_config:
         max_tokens: 32768
         max_input_tokens: 229376
         max_output_tokens: 32768
-        supports_vision: false
+        supports_vision: true
         supports_function_calling: true
         supports_reasoning: true
 
@@ -321,9 +317,9 @@ proxy_config:
     # architect: least-busy across eligible resident deployments.
     - model_name: architect
       litellm_params:
-        model: openai/Qwen3.8-27B-GSQ-RCO-IQ3_S-128K
-        api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: os.environ/INFERENCE_BACKEND_KEY
+        model: openai/qwen3.8-flash-next-iq3_s
+        api_base: https://mlops-node-6.tailb11f97.ts.net/v1
+        api_key: os.environ/STRATA_API_KEY
         order: 1
         max_parallel_requests: 2
         extra_body:
@@ -331,7 +327,7 @@ proxy_config:
             reasoning_effort: medium
       model_info:
         max_tokens: 32768
-        max_input_tokens: 98304
+        max_input_tokens: 229376
         max_output_tokens: 32768
         supports_vision: true
         supports_function_calling: true
@@ -370,9 +366,9 @@ proxy_config:
     # vision: least-busy across eligible resident deployments.
     - model_name: vision
       litellm_params:
-        model: openai/Qwen3.8-27B-GSQ-RCO-IQ3_S-128K
-        api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: os.environ/INFERENCE_BACKEND_KEY
+        model: openai/qwen3.8-flash-next-iq3_s
+        api_base: https://mlops-node-6.tailb11f97.ts.net/v1
+        api_key: os.environ/STRATA_API_KEY
         order: 1
         max_parallel_requests: 2
         extra_body:
@@ -380,7 +376,7 @@ proxy_config:
             reasoning_effort: low
       model_info:
         max_tokens: 32768
-        max_input_tokens: 98304
+        max_input_tokens: 229376
         max_output_tokens: 32768
         supports_vision: true
         supports_function_calling: true
@@ -419,9 +415,9 @@ proxy_config:
     # long-context: least-busy across eligible resident deployments.
     - model_name: long-context
       litellm_params:
-        model: openai/Qwen3.6-35B-A3B-DFlash
-        api_base: http://mlops-node-4.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: os.environ/INFERENCE_BACKEND_KEY
+        model: openai/qwen3.8-flash-next-iq3_s
+        api_base: https://mlops-node-4.tailb11f97.ts.net/v1
+        api_key: os.environ/STRATA_API_KEY
         order: 1
         max_parallel_requests: 2
         extra_body:
@@ -431,15 +427,15 @@ proxy_config:
         max_tokens: 32768
         max_input_tokens: 229376
         max_output_tokens: 32768
-        supports_vision: false
+        supports_vision: true
         supports_function_calling: true
         supports_reasoning: true
 
     - model_name: long-context
       litellm_params:
-        model: openai/Qwen3.8-27B-GSQ-RCO-IQ3_S-256K
-        api_base: http://mlops-node-6.hermes-workspace.svc.cluster.local:8080/v1
-        api_key: os.environ/INFERENCE_BACKEND_KEY
+        model: openai/qwen3.8-flash-next-iq3_s
+        api_base: https://mlops-node-6.tailb11f97.ts.net/v1
+        api_key: os.environ/STRATA_API_KEY
         order: 2
         max_parallel_requests: 2
         extra_body:
@@ -449,7 +445,7 @@ proxy_config:
         max_tokens: 32768
         max_input_tokens: 229376
         max_output_tokens: 32768
-        supports_vision: false
+        supports_vision: true
         supports_function_calling: true
         supports_reasoning: true
 
