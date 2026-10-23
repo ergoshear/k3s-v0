@@ -122,7 +122,7 @@ class LiteLLMTests(unittest.TestCase):
             if any(f"mlops-node-{node}." in entry["litellm_params"].get("api_base", "")
                    for node in (4, 6))
         ]
-        self.assertEqual(len(routes), 18)
+        self.assertEqual(len(routes), 20)
         for entry in routes:
             with self.subTest(model=entry["model_name"]):
                 params = entry["litellm_params"]
@@ -170,17 +170,41 @@ class LiteLLMTests(unittest.TestCase):
             self.assertEqual(entry["litellm_params"]["max_parallel_requests"], 2)
         router = config["router_settings"]
         self.assertEqual(router["routing_strategy"], "least-busy")
-        self.assertEqual(
-            router["routing_groups"],
-            [{
+        self.assertIn(
+            {
                 "group_name": "deepseek-balanced",
                 "models": ["deepseek"],
                 "routing_strategy": "simple-shuffle",
-            }],
+            },
+            router["routing_groups"],
         )
         for alias in ("high-performance", "deepseek-flash"):
             self.assertEqual(router["model_group_alias"][alias], "deepseek")
         self.assertFalse(any("deepseek" in fallback for fallback in router["fallbacks"]))
+
+    def test_qwen_agentic_pool_balances_only_strata_hosts(self):
+        config = self.values["proxy_config"]
+        name = "Qwen3.8-Flash-Next-256K"
+        pool = [entry for entry in config["model_list"] if entry["model_name"] == name]
+        self.assertEqual(len(pool), 2)
+        self.assertEqual(
+            {entry["litellm_params"]["api_base"] for entry in pool},
+            {f"https://mlops-node-{node}.tailb11f97.ts.net/v1" for node in (4, 6)},
+        )
+        for entry in pool:
+            params = entry["litellm_params"]
+            self.assertEqual(params["order"], 1)
+            self.assertEqual(params["max_parallel_requests"], 3)
+            self.assertEqual(params["extra_body"]["chat_template_kwargs"]["reasoning_effort"],
+                             "medium")
+            self.assertTrue(entry["model_info"]["supports_function_calling"])
+        self.assertIn({
+            "group_name": "qwen38-flash-next-balanced",
+            "models": [name],
+            "routing_strategy": "simple-shuffle",
+        }, config["router_settings"]["routing_groups"])
+        self.assertFalse(any(name in fallback
+                             for fallback in config["router_settings"]["fallbacks"]))
 
     def test_auto_router_tiers_and_all_references_exist(self):
         config = self.values["proxy_config"]

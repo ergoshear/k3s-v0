@@ -304,6 +304,14 @@ except the DeepSeek-only pool:
 | `architect`, `vision` | Node 6 and both DeepSeek hosts |
 | `long-context` | Node 4 and both DeepSeek hosts (64K budget); node 6 256K secondary |
 | `deepseek` | Only nodes 7 and 9, with two parallel requests per deployment |
+| `Qwen3.8-Flash-Next-256K` | Only Strata nodes 4 and 6, medium reasoning, three parallel requests per deployment |
+
+For agentic coding, select `Qwen3.8-Flash-Next-256K`. This dedicated pool
+uses equal-priority `simple-shuffle` routing between nodes 4 and 6 only,
+with function calling, vision, and a 256K total context budget (229,376 input
+plus 32,768 output tokens). It has no classifier overhead and no cross-family
+fallback; retries remain within the two Strata hosts. Load balancing is
+statistical, not strict round-robin. Existing `auto` router tiers are unchanged.
 
 `high-performance` and `deepseek-flash` are aliases for the `deepseek` pool.
 Its dedicated `deepseek-balanced` routing group uses `simple-shuffle` with

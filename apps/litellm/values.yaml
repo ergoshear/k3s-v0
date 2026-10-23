@@ -531,6 +531,43 @@ proxy_config:
         supports_function_calling: true
         supports_reasoning: true
 
+    # Agentic coding: only the two Strata hosts, medium reasoning, 256K context.
+    - model_name: Qwen3.8-Flash-Next-256K
+      litellm_params:
+        model: openai/qwen3.8-flash-next-iq3_s
+        api_base: https://mlops-node-4.tailb11f97.ts.net/v1
+        api_key: os.environ/STRATA_API_KEY
+        order: 1
+        max_parallel_requests: 3
+        extra_body:
+          chat_template_kwargs:
+            reasoning_effort: medium
+      model_info:
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_vision: true
+        supports_function_calling: true
+        supports_reasoning: true
+
+    - model_name: Qwen3.8-Flash-Next-256K
+      litellm_params:
+        model: openai/qwen3.8-flash-next-iq3_s
+        api_base: https://mlops-node-6.tailb11f97.ts.net/v1
+        api_key: os.environ/STRATA_API_KEY
+        order: 1
+        max_parallel_requests: 3
+        extra_body:
+          chat_template_kwargs:
+            reasoning_effort: medium
+      model_info:
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
+        supports_vision: true
+        supports_function_calling: true
+        supports_reasoning: true
+
     # DeepSeek-only pool: equal-probability routing without idle tie bias.
     - model_name: deepseek
       litellm_params:
@@ -616,6 +653,10 @@ proxy_config:
   router_settings:
     routing_strategy: least-busy
     routing_groups:
+      - group_name: qwen38-flash-next-balanced
+        models:
+          - Qwen3.8-Flash-Next-256K
+        routing_strategy: simple-shuffle
       - group_name: deepseek-balanced
         models:
           - deepseek
