@@ -122,7 +122,12 @@ class SecurityBoundaryTests(unittest.TestCase):
         ]
         self.assertTrue(backend_models)
         for model in backend_models:
-            expected_key = "os.environ/INFERENCE_BACKEND_KEY"
+            expected_key = (
+                "os.environ/STRATA_API_KEY"
+                if model["litellm_params"]["model"]
+                == "openai/qwen3.8-flash-next-iq3_s"
+                else "os.environ/INFERENCE_BACKEND_KEY"
+            )
             self.assertEqual(model["litellm_params"]["api_key"], expected_key)
 
     def test_only_named_clients_can_enter_shared_egress_proxies(self):
