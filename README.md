@@ -266,9 +266,11 @@ presets. Nodes 4 and 6 are configured
 for Strata's `qwen3.8-flash-next-iq3_s`, using the direct-name prefix
 `mlops-node-N/Strata-Qwen3.8-Flash-Next-IQ3_S-` with their existing effort,
 no-think, vision, and context suffixes. Both hosts expose `Low`, `Medium`,
-`NoThink`, `Vision`, and `256K` direct presets. Every node-4/node-6 route, including
-semantic pools, advertises image support and a 262,144-token context:
-229,376 input tokens plus 32,768 output tokens. The presets use Strata's
+`NoThink`, and `Vision` direct presets. Node 4 also exposes `256K`; node 6
+exposes `128K` instead. All node-4 routes have 229,376 input tokens plus 32,768
+output tokens (256K total). All node-6 routes have 98,304 input tokens plus
+32,768 output tokens (128K total), including semantic pools. Both support
+image input. The presets use Strata's
 chat-template thinking controls; the previous llama-specific `reasoning_budget`
 override is removed. These routes use `os.environ/STRATA_API_KEY`, supplied
 privately in the `litellm` namespace's existing `inference-backend` Secret.
@@ -302,16 +304,17 @@ except the DeepSeek-only pool:
 | `fast` | Node 4 and node 6 no-think presets |
 | `coder` | Node 4, node 6, and both DeepSeek hosts |
 | `architect`, `vision` | Node 6 and both DeepSeek hosts |
-| `long-context` | Node 4 and both DeepSeek hosts (64K budget); node 6 256K secondary |
+| `long-context` | Node 4 and both DeepSeek hosts (64K budget); node 6 128K secondary |
 | `deepseek` | Only nodes 7 and 9, with two parallel requests per deployment |
-| `Qwen3.8-Flash-Next-256K` | Only Strata nodes 4 and 6, medium reasoning, three parallel requests per deployment |
+| `Qwen3.8-Flash-Next-256K` | Strata node 4 only, medium reasoning, three parallel requests |
 
 For agentic coding, select `Qwen3.8-Flash-Next-256K`. This dedicated pool
-uses equal-priority `simple-shuffle` routing between nodes 4 and 6 only,
+retains its `simple-shuffle` routing group but now targets node 4 only,
 with function calling, vision, and a 256K total context budget (229,376 input
 plus 32,768 output tokens). It has no classifier overhead and no cross-family
-fallback; retries remain within the two Strata hosts. Load balancing is
-statistical, not strict round-robin. Existing `auto` router tiers are unchanged.
+fallback. Node 6 was removed because its resident context is now 128K;
+this pool no longer balances across hosts. Existing `auto` router tiers
+are unchanged.
 
 `high-performance` and `deepseek-flash` are aliases for the `deepseek` pool.
 Its dedicated `deepseek-balanced` routing group uses `simple-shuffle` with
