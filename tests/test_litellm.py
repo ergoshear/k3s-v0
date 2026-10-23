@@ -74,6 +74,10 @@ class LiteLLMTests(unittest.TestCase):
             "api_base": "https://mlops-node-3.tailb11f97.ts.net/v1",
             "api_key": "os.environ/INFERENCE_BACKEND_KEY",
         })
+        self.assertEqual(models[0]["model_info"], {
+            "mode": "audio_speech",
+            "health_check_voice": "af_alloy",
+        })
 
     def test_application_manifests_render_as_valid_yaml(self):
         rendered = subprocess.check_output(

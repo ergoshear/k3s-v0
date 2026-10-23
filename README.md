@@ -348,6 +348,8 @@ Kokoro `/v1/audio/speech` endpoint on node 3. The ROCm container stays bound to
 loopback; Tailscale Serve exposes it to tailnet clients over HTTPS, and the
 egress proxy provides the node-3 tailnet route. Clients call LiteLLM's
 `/v1/audio/speech` endpoint with `model: "kokoro"`; this is not a chat model.
+Its health check uses LiteLLM's `audio_speech` mode and the supported
+`af_alloy` voice rather than probing chat completions.
 
 For the HTTPS hosts (nodes 3, 4, 6, 7, and 9),
 [Tailscale egress](apps/tailscale-egress/) exposes port 443 in addition to
