@@ -35,6 +35,7 @@ environmentSecrets:
   - inference-backend
 
 envVars:
+  AUTO_REDIRECT_UI_LOGIN_TO_SSO: "true"
   DOCS_URL: /docs
   ROOT_REDIRECT_URL: /ui/
   STORE_MODEL_IN_DB: "True"
@@ -626,4 +627,5 @@ proxy_config:
     request_timeout: 300
 
   general_settings:
+    disable_env_credential_login: true
     master_key: os.environ/PROXY_MASTER_KEY

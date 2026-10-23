@@ -54,6 +54,15 @@ class LiteLLMTests(unittest.TestCase):
                 if "model_info" in entry:
                     self.assertIsInstance(entry["model_info"], dict)
 
+    def test_ui_login_redirects_to_sso_and_disables_environment_credentials(self):
+        self.assertEqual(
+            self.values["envVars"]["AUTO_REDIRECT_UI_LOGIN_TO_SSO"], "true",
+        )
+        self.assertIs(
+            self.values["proxy_config"]["general_settings"]["disable_env_credential_login"],
+            True,
+        )
+
     def test_application_manifests_render_as_valid_yaml(self):
         rendered = subprocess.check_output(
             ["kubectl", "kustomize", str(ROOT / "argocd/applications")],

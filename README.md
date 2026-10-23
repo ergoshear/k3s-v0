@@ -325,6 +325,10 @@ with `max_output_tokens`, alongside the supplied `max_tokens` and input limits.
 DeepSeek upstreams retain `INFERENCE_BACKEND_KEY`; Strata upstreams use the
 separate `STRATA_API_KEY`. The existing master key is unchanged.
 No TLS verification bypasses are configured.
+LiteLLM's UI automatically redirects login to SSO
+(`AUTO_REDIRECT_UI_LOGIN_TO_SSO=true`), and
+`general_settings.disable_env_credential_login=true` disables environment-based
+UI credential login. The API master key remains configured separately.
 
 For the HTTPS hosts, [Tailscale egress](apps/tailscale-egress/) exposes port
 443 in addition to the existing 8080 ports. A pinned operator `DNSConfig`
