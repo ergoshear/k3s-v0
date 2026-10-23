@@ -48,8 +48,7 @@ envVars:
 proxy_config:
   model_list:
     # ==========================================================================
-    # 1. Direct Node Presets: mlops-node-4 (Radeon AI PRO R9700 32GB GDDR6)
-    #    Strata Flash-Next IQ3_S: resident 256K context, MTP, and vision.
+    # 1. Direct Node Presets: mlops-node-4 (Radeon AI PRO R9700 32GB - 256K + Vision)
     # ==========================================================================
     - model_name: mlops-node-4/Strata-Qwen3.8-Flash-Next-IQ3_S-Low
       litellm_params:
@@ -85,40 +84,6 @@ proxy_config:
         supports_function_calling: true
         supports_reasoning: true
 
-    - model_name: mlops-node-4/Strata-Qwen3.8-Flash-Next-IQ3_S-Vision
-      litellm_params:
-        model: openai/qwen3.8-flash-next-iq3_s
-        api_base: https://mlops-node-4.tailb11f97.ts.net/v1
-        api_key: os.environ/STRATA_API_KEY
-        extra_body:
-          chat_template_kwargs:
-            reasoning_effort: low
-      model_info:
-        id: node4-strata-qwen38-flash-next-iq3-s-vision
-        max_tokens: 32768
-        max_input_tokens: 229376
-        max_output_tokens: 32768
-        supports_vision: true
-        supports_function_calling: true
-        supports_reasoning: true
-
-    - model_name: mlops-node-4/Strata-Qwen3.8-Flash-Next-IQ3_S-256K
-      litellm_params:
-        model: openai/qwen3.8-flash-next-iq3_s
-        api_base: https://mlops-node-4.tailb11f97.ts.net/v1
-        api_key: os.environ/STRATA_API_KEY
-        extra_body:
-          chat_template_kwargs:
-            reasoning_effort: low
-      model_info:
-        id: node4-strata-qwen38-flash-next-iq3-s-256k
-        max_tokens: 32768
-        max_input_tokens: 229376
-        max_output_tokens: 32768
-        supports_vision: true
-        supports_function_calling: true
-        supports_reasoning: true
-
     - model_name: mlops-node-4/Strata-Qwen3.8-Flash-Next-IQ3_S-NoThink
       litellm_params:
         model: openai/qwen3.8-flash-next-iq3_s
@@ -127,6 +92,7 @@ proxy_config:
         temperature: 0.6
         top_p: 0.8
         extra_body:
+          reasoning_budget: 0
           chat_template_kwargs:
             enable_thinking: false
             reasoning_effort: none
@@ -139,8 +105,7 @@ proxy_config:
         supports_function_calling: true
 
     # ==========================================================================
-    # 2. Direct Node Presets: mlops-node-6 (RTX 4090 24GB - Strata-Qwen3.8-Flash-Next-IQ3_S + MTP)
-    #    Strata Flash-Next IQ3_S: resident 128K context, MTP, and vision.
+    # 2. Direct Node Presets: mlops-node-6 (RTX 4090 24GB - 128K + Vision)
     # ==========================================================================
     - model_name: mlops-node-6/Strata-Qwen3.8-Flash-Next-IQ3_S-Low
       litellm_params:
@@ -184,6 +149,7 @@ proxy_config:
         temperature: 0.7
         top_p: 0.8
         extra_body:
+          reasoning_budget: 0
           chat_template_kwargs:
             enable_thinking: false
             reasoning_effort: none
@@ -195,41 +161,9 @@ proxy_config:
         supports_vision: true
         supports_function_calling: true
 
-    - model_name: mlops-node-6/Strata-Qwen3.8-Flash-Next-IQ3_S-Vision
-      litellm_params:
-        model: openai/qwen3.8-flash-next-iq3_s
-        api_base: https://mlops-node-6.tailb11f97.ts.net/v1
-        api_key: os.environ/STRATA_API_KEY
-        extra_body:
-          chat_template_kwargs:
-            reasoning_effort: low
-      model_info:
-        id: node6-strata-qwen38-flash-next-iq3-s-vision
-        max_tokens: 32768
-        max_input_tokens: 98304
-        max_output_tokens: 32768
-        supports_vision: true
-        supports_function_calling: true
-        supports_reasoning: true
-
-    - model_name: mlops-node-6/Strata-Qwen3.8-Flash-Next-IQ3_S-128K
-      litellm_params:
-        model: openai/qwen3.8-flash-next-iq3_s
-        api_base: https://mlops-node-6.tailb11f97.ts.net/v1
-        api_key: os.environ/STRATA_API_KEY
-        extra_body:
-          chat_template_kwargs:
-            reasoning_effort: low
-      model_info:
-        id: node6-strata-qwen38-flash-next-iq3-s-128k
-        max_tokens: 32768
-        max_input_tokens: 98304
-        max_output_tokens: 32768
-        supports_vision: true
-        supports_function_calling: true
-        supports_reasoning: true
-
-    # DeepSeek 4.1 Flash 1017: node 7 at 32K, node 9 at 64K, server-default reasoning.
+    # ==========================================================================
+    # 3. Direct Node Presets: Strix Halo DeepSeek-4.1-Flash-1017 (node-7 & node-9)
+    # ==========================================================================
     - model_name: mlops-node-7/DeepSeek-4.1-Flash-1017-32K
       litellm_params:
         model: openai/deepseek-v4.1-flash
@@ -258,7 +192,10 @@ proxy_config:
         supports_function_calling: true
         supports_reasoning: true
 
-    # fast: least-busy across eligible resident deployments.
+    # ==========================================================================
+    # 4. Core Virtual Model Groups (5 Groups: fast, coder, architect, deepseek, long-context)
+    # ==========================================================================
+    # --- fast: Instant 0-Think Edits & Autocomplete (83-98 tok/s) ---
     - model_name: fast
       litellm_params:
         model: openai/qwen3.8-flash-next-iq3_s
@@ -269,6 +206,7 @@ proxy_config:
         temperature: 0.7
         top_p: 0.8
         extra_body:
+          reasoning_budget: 0
           chat_template_kwargs:
             enable_thinking: false
             reasoning_effort: none
@@ -289,6 +227,7 @@ proxy_config:
         temperature: 0.6
         top_p: 0.8
         extra_body:
+          reasoning_budget: 0
           chat_template_kwargs:
             enable_thinking: false
             reasoning_effort: none
@@ -299,7 +238,7 @@ proxy_config:
         supports_vision: true
         supports_function_calling: true
 
-    # coder: least-busy across eligible resident deployments.
+    # --- coder: High-Speed Agentic Coding & Vision (node-4 & node-6 primary, node-9 overflow) ---
     - model_name: coder
       litellm_params:
         model: openai/qwen3.8-flash-next-iq3_s
@@ -339,24 +278,9 @@ proxy_config:
     - model_name: coder
       litellm_params:
         model: openai/deepseek-v4.1-flash
-        api_base: https://mlops-node-7.tailb11f97.ts.net/v1
-        api_key: os.environ/INFERENCE_BACKEND_KEY
-        order: 1
-        max_parallel_requests: 2
-      model_info:
-        max_tokens: 8192
-        max_input_tokens: 24576
-        max_output_tokens: 8192
-        supports_vision: true
-        supports_function_calling: true
-        supports_reasoning: true
-
-    - model_name: coder
-      litellm_params:
-        model: openai/deepseek-v4.1-flash
         api_base: https://mlops-node-9.tailb11f97.ts.net/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
-        order: 1
+        order: 2
         max_parallel_requests: 2
       model_info:
         max_tokens: 16384
@@ -366,7 +290,7 @@ proxy_config:
         supports_function_calling: true
         supports_reasoning: true
 
-    # architect: least-busy across eligible resident deployments.
+    # --- architect: Medium-Reasoning Architecture & Debugging (node-4 & node-6 primary, node-9 secondary) ---
     - model_name: architect
       litellm_params:
         model: openai/qwen3.8-flash-next-iq3_s
@@ -387,15 +311,18 @@ proxy_config:
 
     - model_name: architect
       litellm_params:
-        model: openai/deepseek-v4.1-flash
-        api_base: https://mlops-node-7.tailb11f97.ts.net/v1
-        api_key: os.environ/INFERENCE_BACKEND_KEY
+        model: openai/qwen3.8-flash-next-iq3_s
+        api_base: https://mlops-node-4.tailb11f97.ts.net/v1
+        api_key: os.environ/STRATA_API_KEY
         order: 1
         max_parallel_requests: 2
+        extra_body:
+          chat_template_kwargs:
+            reasoning_effort: medium
       model_info:
-        max_tokens: 8192
-        max_input_tokens: 24576
-        max_output_tokens: 8192
+        max_tokens: 32768
+        max_input_tokens: 229376
+        max_output_tokens: 32768
         supports_vision: true
         supports_function_calling: true
         supports_reasoning: true
@@ -405,7 +332,7 @@ proxy_config:
         model: openai/deepseek-v4.1-flash
         api_base: https://mlops-node-9.tailb11f97.ts.net/v1
         api_key: os.environ/INFERENCE_BACKEND_KEY
-        order: 1
+        order: 2
         max_parallel_requests: 2
       model_info:
         max_tokens: 16384
@@ -415,41 +342,8 @@ proxy_config:
         supports_function_calling: true
         supports_reasoning: true
 
-    # vision: least-busy across eligible resident deployments.
-    - model_name: vision
-      litellm_params:
-        model: openai/qwen3.8-flash-next-iq3_s
-        api_base: https://mlops-node-6.tailb11f97.ts.net/v1
-        api_key: os.environ/STRATA_API_KEY
-        order: 1
-        max_parallel_requests: 2
-        extra_body:
-          chat_template_kwargs:
-            reasoning_effort: low
-      model_info:
-        max_tokens: 32768
-        max_input_tokens: 98304
-        max_output_tokens: 32768
-        supports_vision: true
-        supports_function_calling: true
-        supports_reasoning: true
-
-    - model_name: vision
-      litellm_params:
-        model: openai/deepseek-v4.1-flash
-        api_base: https://mlops-node-7.tailb11f97.ts.net/v1
-        api_key: os.environ/INFERENCE_BACKEND_KEY
-        order: 1
-        max_parallel_requests: 2
-      model_info:
-        max_tokens: 8192
-        max_input_tokens: 24576
-        max_output_tokens: 8192
-        supports_vision: true
-        supports_function_calling: true
-        supports_reasoning: true
-
-    - model_name: vision
+    # --- deepseek: Dedicated DeepSeek-4.1-Flash Pool (node-9 @ 27.7 tok/s primary, node-7 @ 11.6 tok/s overflow) ---
+    - model_name: deepseek
       litellm_params:
         model: openai/deepseek-v4.1-flash
         api_base: https://mlops-node-9.tailb11f97.ts.net/v1
@@ -464,7 +358,22 @@ proxy_config:
         supports_function_calling: true
         supports_reasoning: true
 
-    # long-context: least-busy across eligible resident deployments.
+    - model_name: deepseek
+      litellm_params:
+        model: openai/deepseek-v4.1-flash
+        api_base: https://mlops-node-7.tailb11f97.ts.net/v1
+        api_key: os.environ/INFERENCE_BACKEND_KEY
+        order: 2
+        max_parallel_requests: 2
+      model_info:
+        max_tokens: 8192
+        max_input_tokens: 24576
+        max_output_tokens: 8192
+        supports_vision: true
+        supports_function_calling: true
+        supports_reasoning: true
+
+    # --- long-context: True 128K-256K Context Pool (node-4 256K primary, node-6 128K secondary) ---
     - model_name: long-context
       litellm_params:
         model: openai/qwen3.8-flash-next-iq3_s
@@ -501,90 +410,9 @@ proxy_config:
         supports_function_calling: true
         supports_reasoning: true
 
-    - model_name: long-context
-      litellm_params:
-        model: openai/deepseek-v4.1-flash
-        api_base: https://mlops-node-7.tailb11f97.ts.net/v1
-        api_key: os.environ/INFERENCE_BACKEND_KEY
-        order: 1
-        max_parallel_requests: 2
-      model_info:
-        max_tokens: 8192
-        max_input_tokens: 24576
-        max_output_tokens: 8192
-        supports_vision: true
-        supports_function_calling: true
-        supports_reasoning: true
-
-    - model_name: long-context
-      litellm_params:
-        model: openai/deepseek-v4.1-flash
-        api_base: https://mlops-node-9.tailb11f97.ts.net/v1
-        api_key: os.environ/INFERENCE_BACKEND_KEY
-        order: 1
-        max_parallel_requests: 2
-      model_info:
-        max_tokens: 16384
-        max_input_tokens: 49152
-        max_output_tokens: 16384
-        supports_vision: true
-        supports_function_calling: true
-        supports_reasoning: true
-
-    # Agentic coding: node 4 only; node 6 now has a 128K resident context.
-    - model_name: Qwen3.8-Flash-Next-256K
-      litellm_params:
-        model: openai/qwen3.8-flash-next-iq3_s
-        api_base: https://mlops-node-4.tailb11f97.ts.net/v1
-        api_key: os.environ/STRATA_API_KEY
-        order: 1
-        max_parallel_requests: 3
-        extra_body:
-          chat_template_kwargs:
-            reasoning_effort: medium
-      model_info:
-        max_tokens: 32768
-        max_input_tokens: 229376
-        max_output_tokens: 32768
-        supports_vision: true
-        supports_function_calling: true
-        supports_reasoning: true
-
-    # DeepSeek-only pool: equal-probability routing without idle tie bias.
-    - model_name: deepseek
-      litellm_params:
-        model: openai/deepseek-v4.1-flash
-        api_base: https://mlops-node-7.tailb11f97.ts.net/v1
-        api_key: os.environ/INFERENCE_BACKEND_KEY
-        order: 1
-        max_parallel_requests: 2
-      model_info:
-        max_tokens: 8192
-        max_input_tokens: 24576
-        max_output_tokens: 8192
-        supports_vision: true
-        supports_function_calling: true
-        supports_reasoning: true
-
-    - model_name: deepseek
-      litellm_params:
-        model: openai/deepseek-v4.1-flash
-        api_base: https://mlops-node-9.tailb11f97.ts.net/v1
-        api_key: os.environ/INFERENCE_BACKEND_KEY
-        order: 1
-        max_parallel_requests: 2
-      model_info:
-        max_tokens: 16384
-        max_input_tokens: 49152
-        max_output_tokens: 16384
-        supports_vision: true
-        supports_function_calling: true
-        supports_reasoning: true
-
     # ==========================================================================
-    # 6. Auto Routers (Sit Above Your Deployments & Pick a Tier Per Request)
+    # 5. Auto Router (Single Entrypoint Above All Tiers)
     # ==========================================================================
-    # --- auto: Sub-Millisecond Heuristic Auto Router (Zero Classifier Latency) ---
     - model_name: auto
       litellm_params:
         model: auto_router/complexity_router
@@ -598,7 +426,7 @@ proxy_config:
           tiers:
             SIMPLE: fast
             MEDIUM: coder
-            COMPLEX: deepseek
+            COMPLEX: architect
             REASONING: deepseek
           keyword_tier_rules:
             - keywords: ["hi", "hello", "thanks", "ping", "commit message", "docstring", "rename"]
@@ -606,51 +434,16 @@ proxy_config:
             - keywords: ["architecture", "root cause", "race condition", "deadlock", "design a", "tradeoffs", "step by step"]
               tier: REASONING
 
-    # --- auto-hybrid: Heuristic + Fast Agentic Judge for Boundary Requests ---
-    - model_name: auto-hybrid
-      litellm_params:
-        model: auto_router/complexity_router
-        complexity_router_default_model: coder
-        complexity_router_config:
-          classifier_type: hybrid
-          local_heuristic: heuristic
-          hybrid_boundary_margin: 0.05
-          enable_context_window_escalation: true
-          context_window_escalation_buffer: 0.95
-          modality_routing: true
-          classification_mode: user_turn
-          classifier_llm_config:
-            model: fast
-            timeout_ms: 2500
-            classification_rubric: agentic
-            classifier_fallback: heuristic
-            classifier_context_window_size: 3
-            classifier_context_budget_chars: 8000
-          tiers:
-            SIMPLE: fast
-            MEDIUM: coder
-            COMPLEX: deepseek
-            REASONING: deepseek
-
   router_settings:
     routing_strategy: least-busy
-    routing_groups:
-      - group_name: qwen38-flash-next-balanced
-        models:
-          - Qwen3.8-Flash-Next-256K
-        routing_strategy: simple-shuffle
-      - group_name: deepseek-balanced
-        models:
-          - deepseek
-        routing_strategy: simple-shuffle
     enable_pre_call_checks: true
     num_retries: 2
     timeout: 300
     cooldown_time: 15
     model_group_alias:
-      default: auto
-      high-performance: deepseek
-      deepseek-flash: deepseek
+      default:
+        model: auto
+        hidden: true
       gpt-4o:
         model: auto
         hidden: true
@@ -658,7 +451,7 @@ proxy_config:
         model: fast
         hidden: true
       o3-mini:
-        model: architect
+        model: deepseek
         hidden: true
       claude-3-7-sonnet-latest:
         model: auto
@@ -667,17 +460,18 @@ proxy_config:
       - auto:
           - coder
           - fast
-      - auto-hybrid:
-          - auto
-          - coder
       - fast:
           - coder
       - coder:
           - architect
           - fast
       - architect:
+          - deepseek
           - coder
-      - vision:
+      - deepseek:
+          - architect
+          - coder
+      - long-context:
           - coder
 
   litellm_settings:
