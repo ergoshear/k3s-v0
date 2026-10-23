@@ -10,6 +10,9 @@ spec:
   type: ExternalName
   externalName: placeholder
   ports:
+    - name: https
+      port: 443
+      protocol: TCP
     - name: http
       port: 8080
       protocol: TCP

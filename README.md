@@ -330,8 +330,9 @@ LiteLLM's UI automatically redirects login to SSO
 `general_settings.disable_env_credential_login=true` disables environment-based
 UI credential login. The API master key remains configured separately.
 
-For the HTTPS hosts, [Tailscale egress](apps/tailscale-egress/) exposes port
-443 in addition to the existing 8080 ports. A pinned operator `DNSConfig`
+For all four HTTPS hosts (nodes 4, 6, 7, and 9),
+[Tailscale egress](apps/tailscale-egress/) exposes port 443 in addition to
+the existing 8080 ports. A pinned operator `DNSConfig`
 nameserver uses reserved Service IP `10.43.0.54`. The k3s `coredns-custom`
 ConfigMap forwards only `tailb11f97.ts.net` queries to it. The nameserver maps
 tailnet FQDNs to HA egress Services, preserving the HTTPS hostname for SNI and
