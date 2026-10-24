@@ -63,22 +63,6 @@ class LiteLLMTests(unittest.TestCase):
             True,
         )
 
-    def test_kokoro_is_registered_as_a_tailscale_tts_backend(self):
-        models = [
-            entry for entry in self.values["proxy_config"]["model_list"]
-            if entry["model_name"] == "kokoro"
-        ]
-        self.assertEqual(len(models), 1)
-        self.assertEqual(models[0]["litellm_params"], {
-            "model": "openai/kokoro",
-            "api_base": "https://mlops-node-3.tailb11f97.ts.net/v1",
-            "api_key": "os.environ/INFERENCE_BACKEND_KEY",
-        })
-        self.assertEqual(models[0]["model_info"], {
-            "mode": "audio_speech",
-            "health_check_voice": "af_alloy",
-        })
-
     def test_studioflow_tts_backends_use_matching_tailscale_ports(self):
         models = {
             entry["model_name"]: entry

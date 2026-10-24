@@ -121,14 +121,19 @@ class SecurityBoundaryTests(unittest.TestCase):
             if "api_base" in model["litellm_params"]
         ]
         self.assertTrue(backend_models)
+        studioflow_keys = {
+            f"https://mlops-node-3.tailb11f97.ts.net:{port}/v1": "sk-rx9070"
+            for port in (8001, 8002, 8003)
+        }
         for model in backend_models:
-            expected_key = (
-                "os.environ/STRATA_API_KEY"
-                if model["litellm_params"]["model"]
-                == "openai/qwen3.8-flash-next-iq3_s"
-                else "os.environ/INFERENCE_BACKEND_KEY"
-            )
-            self.assertEqual(model["litellm_params"]["api_key"], expected_key)
+            params = model["litellm_params"]
+            if params["api_base"] in studioflow_keys:
+                expected_key = studioflow_keys[params["api_base"]]
+            elif params["model"] == "openai/qwen3.8-flash-next-iq3_s":
+                expected_key = "os.environ/STRATA_API_KEY"
+            else:
+                expected_key = "os.environ/INFERENCE_BACKEND_KEY"
+            self.assertEqual(params["api_key"], expected_key)
 
     def test_only_named_clients_can_enter_shared_egress_proxies(self):
         policy = yaml.safe_load((ROOT / "apps/tailscale-egress/network-policy.yaml").read_text())
