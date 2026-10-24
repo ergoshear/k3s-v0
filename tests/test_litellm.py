@@ -79,6 +79,33 @@ class LiteLLMTests(unittest.TestCase):
             "health_check_voice": "af_alloy",
         })
 
+    def test_studioflow_tts_backends_use_matching_tailscale_ports(self):
+        models = {
+            entry["model_name"]: entry
+            for entry in self.values["proxy_config"]["model_list"]
+            if entry["model_name"] in {
+                "tts-christopher-fish", "tts-1-hd", "whisper-large-v3",
+            }
+        }
+        expected = {
+            "tts-christopher-fish": ("openai/fish-speech-1.5", 8001),
+            "tts-1-hd": ("openai/zonos-v0.1-transformer", 8002),
+            "whisper-large-v3": ("openai/whisper-large-v3", 8003),
+        }
+        self.assertEqual(set(models), set(expected))
+        for model_name, (model, port) in expected.items():
+            with self.subTest(model=model_name):
+                entry = models[model_name]
+                self.assertEqual(entry["litellm_params"], {
+                    "model": model,
+                    "api_base": f"https://mlops-node-3.tailb11f97.ts.net:{port}/v1",
+                    "api_key": "sk-rx9070",
+                })
+                self.assertEqual(entry["model_info"], {
+                    "mode": "audio_speech",
+                    "health_check_voice": "af_alloy",
+                })
+
     def test_application_manifests_render_as_valid_yaml(self):
         rendered = subprocess.check_output(
             ["kubectl", "kustomize", str(ROOT / "argocd/applications")],

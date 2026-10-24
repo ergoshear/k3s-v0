@@ -58,32 +58,32 @@ proxy_config:
     #   model_info:
     #     mode: audio_speech
     #     health_check_voice: af_alloy
-      - model_name: tts-christopher-fish
-        litellm_params:
-          model: openai/fish-speech-1.5
-          api_base: https://mlops-node-3.tailb11f97.ts.net:8001/v1
-          api_key: sk-rx9070
-        model_info:
-          mode: audio_speech
-          health_check_voice: af_alloy
-      # Container 2 (Port 8002): Zonos v0.1 Transformer (Default for `tts-1-hd`)
-      - model_name: tts-1-hd
-        litellm_params:
-          model: openai/zonos-v0.1-transformer
-          api_base: https://mlops-node-3.tailb11f97.ts.net:8002/v1
-          api_key: sk-rx9070
-        model_info:
-          mode: audio_speech
-          health_check_voice: af_alloy
-      # Container 3 (Port 8003): Whisper Large-v3 Word Timestamp Aligner
-      - model_name: whisper-large-v3
-        litellm_params:
-          model: openai/whisper-large-v3
-          api_base: https://mlops-node-3.tailb11f97.ts.net:8003/v1
-          api_key: sk-rx9070
-        model_info:
-          mode: audio_speech
-          health_check_voice: af_alloy
+    - model_name: tts-christopher-fish
+      litellm_params:
+        model: openai/fish-speech-1.5
+        api_base: https://mlops-node-3.tailb11f97.ts.net:8001/v1
+        api_key: sk-rx9070
+      model_info:
+        mode: audio_speech
+        health_check_voice: af_alloy
+    # Container 2 (Port 8002): Zonos v0.1 Transformer (Default for `tts-1-hd`)
+    - model_name: tts-1-hd
+      litellm_params:
+        model: openai/zonos-v0.1-transformer
+        api_base: https://mlops-node-3.tailb11f97.ts.net:8002/v1
+        api_key: sk-rx9070
+      model_info:
+        mode: audio_speech
+        health_check_voice: af_alloy
+    # Container 3 (Port 8003): Whisper Large-v3 Word Timestamp Aligner
+    - model_name: whisper-large-v3
+      litellm_params:
+        model: openai/whisper-large-v3
+        api_base: https://mlops-node-3.tailb11f97.ts.net:8003/v1
+        api_key: sk-rx9070
+      model_info:
+        mode: audio_speech
+        health_check_voice: af_alloy
 
     # ==========================================================================
     # 1. Direct Node Presets: mlops-node-4 (Radeon AI PRO R9700 32GB - 256K + Vision)
