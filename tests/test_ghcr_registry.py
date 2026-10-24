@@ -94,9 +94,10 @@ class GhcrRegistryTests(unittest.TestCase):
         self.assertEqual(
             apps["ghcr-registry"]["spec"]["source"]["path"], "apps/ghcr-registry"
         )
-        self.assertIn(
+        self.assertEqual(
+            apps["kyverno"]["metadata"]["annotations"]
+            ["argocd.argoproj.io/compare-options"],
             "ServerSideDiff=true",
-            apps["kyverno"]["spec"]["syncPolicy"]["syncOptions"],
         )
 
     def test_both_controllers_can_read_secrets_and_background_can_synchronize(self):
