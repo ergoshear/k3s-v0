@@ -72,12 +72,12 @@ class LiteLLMTests(unittest.TestCase):
             }
         }
         expected = {
-            "tts-christopher-fish": ("openai/fish-speech-1.5", 8001),
-            "tts-1-hd": ("openai/zonos-v0.1-transformer", 8002),
-            "whisper-large-v3": ("openai/whisper-large-v3", 8003),
+            "tts-christopher-fish": ("openai/fish-speech-1.5", 8001, "audio_speech"),
+            "tts-1-hd": ("openai/zonos-v0.1-transformer", 8002, "audio_speech"),
+            "whisper-large-v3": ("openai/whisper-large-v3", 8003, "audio_transcription"),
         }
         self.assertEqual(set(models), set(expected))
-        for model_name, (model, port) in expected.items():
+        for model_name, (model, port, mode) in expected.items():
             with self.subTest(model=model_name):
                 entry = models[model_name]
                 self.assertEqual(entry["litellm_params"], {
@@ -85,10 +85,10 @@ class LiteLLMTests(unittest.TestCase):
                     "api_base": f"https://mlops-node-3.tailb11f97.ts.net:{port}/v1",
                     "api_key": "sk-rx9070",
                 })
-                self.assertEqual(entry["model_info"], {
-                    "mode": "audio_speech",
-                    "health_check_voice": "af_alloy",
-                })
+                expected_model_info = {"mode": mode}
+                if mode == "audio_speech":
+                    expected_model_info["health_check_voice"] = "af_alloy"
+                self.assertEqual(entry["model_info"], expected_model_info)
 
     def test_application_manifests_render_as_valid_yaml(self):
         rendered = subprocess.check_output(
