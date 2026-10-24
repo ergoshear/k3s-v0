@@ -40,12 +40,37 @@ jobs:
     runs-on: [self-hosted, k3s-control-plane-01]
     timeout-minutes: 45
     env:
-      KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+      K3S_KUBECONFIG_SOURCE: /etc/rancher/k3s/k3s.yaml
+      K3S_API_SERVER: https://k3s-control-plane-01.tailb11f97.ts.net:6443
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
         with:
           persist-credentials: false
+
+      - name: Configure kubeconfig for Tailscale API endpoint
+        run: |
+          kubeconfig="$RUNNER_TEMP/k3s-kubeconfig"
+          sudo -n cp "$K3S_KUBECONFIG_SOURCE" "$kubeconfig"
+          sudo -n chmod 600 "$kubeconfig"
+
+          cluster="$(sudo -n kubectl --kubeconfig="$kubeconfig" \
+            config view -o jsonpath='{.clusters[0].name}')"
+          if [ -z "$cluster" ]; then
+            echo "No Kubernetes cluster found in $K3S_KUBECONFIG_SOURCE" >&2
+            exit 1
+          fi
+
+          sudo -n kubectl --kubeconfig="$kubeconfig" config set-cluster "$cluster" \
+            --server="$K3S_API_SERVER"
+          server="$(sudo -n kubectl --kubeconfig="$kubeconfig" \
+            config view --minify -o jsonpath='{.clusters[0].cluster.server}')"
+          if [ "$server" != "$K3S_API_SERVER" ]; then
+            echo "Kubeconfig API server is $server, expected $K3S_API_SERVER" >&2
+            exit 1
+          fi
+
+          echo "KUBECONFIG=$kubeconfig" >> "$GITHUB_ENV"
 
       - name: Ensure Argo CD is available
         run: |
