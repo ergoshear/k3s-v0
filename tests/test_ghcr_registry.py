@@ -58,6 +58,16 @@ class GhcrRegistryTests(unittest.TestCase):
             {"spec": {"imagePullSecrets": [{"name": "ghcr-registry-credentials"}]}},
         )
 
+    def test_policies_declare_kyverno_defaulted_fields(self):
+        for name, policy in self.policies.items():
+            with self.subTest(policy=name):
+                spec = policy["spec"]
+                self.assertTrue(spec["admission"])
+                self.assertFalse(spec["emitWarning"])
+                self.assertEqual(spec["validationFailureAction"], "Audit")
+                for rule in spec["rules"]:
+                    self.assertTrue(rule["skipBackgroundRequests"])
+
     def test_system_namespaces_are_not_excluded(self):
         values = yaml.safe_load((ROOT / "apps/kyverno/values.yaml").read_text())
         self.assertFalse(values["config"]["excludeKyvernoNamespace"])
@@ -83,6 +93,10 @@ class GhcrRegistryTests(unittest.TestCase):
         self.assertEqual(apps["kyverno"]["spec"]["sources"][0]["targetRevision"], "3.9.2")
         self.assertEqual(
             apps["ghcr-registry"]["spec"]["source"]["path"], "apps/ghcr-registry"
+        )
+        self.assertIn(
+            "ServerSideDiff=true",
+            apps["kyverno"]["spec"]["syncPolicy"]["syncOptions"],
         )
 
     def test_both_controllers_can_read_secrets_and_background_can_synchronize(self):

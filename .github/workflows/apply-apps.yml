@@ -94,32 +94,50 @@ jobs:
           apps="$(awk '/^  - /{print $2}' argocd/applications/kustomization.yaml | sed 's/\.yaml$//')"
           for app in $apps; do
             # Wait for the Application object to exist (bounded to ~60s).
+            found=false
             for _ in $(seq 1 12); do
               if sudo -n kubectl --kubeconfig="$KUBECONFIG" -n argocd \
                 get application "$app" >/dev/null 2>&1; then
+                found=true
                 break
               fi
               sleep 5
             done
+            if [ "$found" != "true" ]; then
+              echo "$app Application was not created within 60 seconds" >&2
+              exit 1
+            fi
+
             # Poll the Application status until it is Synced and Healthy.
             # Argo CD's automated sync drives the actual deployment.
-            for _ in $(seq 1 90); do
+            echo "Waiting for $app to become Synced and Healthy"
+            for attempt in $(seq 1 90); do
               status="$(sudo -n kubectl --kubeconfig="$KUBECONFIG" -n argocd \
-                get application "$app" -o jsonpath='{.status.sync.status}/{.status.health.status}' 2>/dev/null)"
-              if [ "$status" = "Synced/Healthy" ]; then
+                get application "$app" \
+                -o jsonpath='{.status.sync.status}{" "}{.status.health.status}{" "}{.status.operationState.phase}' \
+                2>/dev/null || true)"
+              read -r sync_status health_status operation_phase <<< "$status"
+              if [ "$sync_status/$health_status" = "Synced/Healthy" ]; then
                 echo "$app is Synced/Healthy"
                 break
               fi
+
               # Fail fast if the app reports an error state.
-              if [ "$status" = "*/Error" ] || [ "$status" = "*/Degraded" ]; then
-                echo "$app reached $status" >&2
+              if [ "$sync_status" = "Error" ] \
+                || [ "$health_status" = "Degraded" ] \
+                || [ "$operation_phase" = "Failed" ]; then
+                echo "$app reached sync=$sync_status health=$health_status operation=$operation_phase" >&2
                 exit 1
+              fi
+
+              if [ $((attempt % 6)) -eq 0 ]; then
+                echo "Still waiting for $app: sync=${sync_status:-unknown} health=${health_status:-unknown} operation=${operation_phase:-none} ($attempt/90)"
               fi
               sleep 10
             done
             # If we exhausted the loop without Synced/Healthy, fail.
-            if [ "$status" != "Synced/Healthy" ]; then
-              echo "$app did not reach Synced/Healthy (last: $status)" >&2
+            if [ "$sync_status/$health_status" != "Synced/Healthy" ]; then
+              echo "$app did not reach Synced/Healthy (last: sync=${sync_status:-unknown} health=${health_status:-unknown} operation=${operation_phase:-none})" >&2
               exit 1
             fi
           done
