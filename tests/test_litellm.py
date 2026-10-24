@@ -105,7 +105,7 @@ class LiteLLMTests(unittest.TestCase):
                 for node in (7, 9)
             )
         ]
-        self.assertEqual(len(deepseek), 12)
+        self.assertEqual(len(deepseek), 6)
         for entry in deepseek:
             with self.subTest(model=entry["model_name"]):
                 params = entry["litellm_params"]
@@ -141,7 +141,7 @@ class LiteLLMTests(unittest.TestCase):
             if any(f"mlops-node-{node}." in entry["litellm_params"].get("api_base", "")
                    for node in (4, 6))
         ]
-        self.assertEqual(len(routes), 19)
+        self.assertEqual(len(routes), 14)
         for entry in routes:
             with self.subTest(model=entry["model_name"]):
                 params = entry["litellm_params"]
@@ -151,7 +151,12 @@ class LiteLLMTests(unittest.TestCase):
                     f"https://mlops-node-{node}.tailb11f97.ts.net/v1"
                     for node in (4, 6)
                 })
-                self.assertNotIn("reasoning_budget", params.get("extra_body", {}))
+                extra_body = params.get("extra_body", {})
+                if "reasoning_budget" in extra_body:
+                    self.assertEqual(extra_body["reasoning_budget"], 0)
+                    self.assertFalse(
+                        extra_body["chat_template_kwargs"]["enable_thinking"]
+                    )
                 info = entry["model_info"]
                 self.assertEqual(info["max_input_tokens"],
                                  98304 if "mlops-node-6." in params["api_base"] else 229376)
@@ -161,26 +166,28 @@ class LiteLLMTests(unittest.TestCase):
                 if entry["model_name"].startswith("mlops-node-"):
                     self.assertIn("/Strata-Qwen3.8-Flash-Next-IQ3_S-", entry["model_name"])
 
-    def test_node4_has_medium_vision_and_256k_presets_matching_node6(self):
+    def test_nodes4_and6_have_current_strata_presets(self):
         models = {entry["model_name"]: entry
                   for entry in self.values["proxy_config"]["model_list"]}
-        for suffix in ("Medium", "Vision", "256K"):
-            with self.subTest(preset=suffix):
-                node4 = models[f"mlops-node-4/Strata-Qwen3.8-Flash-Next-IQ3_S-{suffix}"]
-                node6_suffix = "128K" if suffix == "256K" else suffix
-                node6 = models[f"mlops-node-6/Strata-Qwen3.8-Flash-Next-IQ3_S-{node6_suffix}"]
+        suffixes = {"Low", "Medium", "NoThink"}
+        for node, max_input_tokens in ((4, 229376), (6, 98304)):
+            prefix = f"mlops-node-{node}/Strata-Qwen3.8-Flash-Next-IQ3_S-"
+            with self.subTest(node=node):
                 self.assertEqual(
-                    node4["litellm_params"]["extra_body"],
-                    node6["litellm_params"]["extra_body"],
+                    {name.removeprefix(prefix) for name in models if name.startswith(prefix)},
+                    suffixes,
                 )
-                self.assertEqual(
-                    {k: v for k, v in node4["model_info"].items()
-                     if k not in ("id", "max_input_tokens")},
-                    {k: v for k, v in node6["model_info"].items()
-                     if k not in ("id", "max_input_tokens")},
-                )
+                for suffix in suffixes:
+                    entry = models[f"{prefix}{suffix}"]
+                    info = entry["model_info"]
+                    self.assertEqual(info["max_input_tokens"], max_input_tokens)
+                    self.assertEqual(info["max_output_tokens"], 32768)
+                    self.assertTrue(info["supports_vision"])
+                no_think = models[f"{prefix}NoThink"]["litellm_params"]["extra_body"]
+                self.assertFalse(no_think["chat_template_kwargs"]["enable_thinking"])
+                self.assertEqual(no_think["reasoning_budget"], 0)
 
-    def test_deepseek_pool_and_aliases_never_fall_back_to_other_families(self):
+    def test_deepseek_pool_priority_and_aliases_are_explicit(self):
         config = self.values["proxy_config"]
         pool = [e for e in config["model_list"] if e["model_name"] == "deepseek"]
         self.assertEqual(len(pool), 2)
@@ -189,45 +196,41 @@ class LiteLLMTests(unittest.TestCase):
             {f"https://mlops-node-{node}.tailb11f97.ts.net/v1" for node in (7, 9)},
         )
         for entry in pool:
-            self.assertEqual(entry["litellm_params"]["order"], 1)
+            expected_order = 1 if "mlops-node-9." in entry["litellm_params"]["api_base"] else 2
+            self.assertEqual(entry["litellm_params"]["order"], expected_order)
             self.assertEqual(entry["litellm_params"]["max_parallel_requests"], 2)
         router = config["router_settings"]
         self.assertEqual(router["routing_strategy"], "least-busy")
-        self.assertIn(
-            {
-                "group_name": "deepseek-balanced",
-                "models": ["deepseek"],
-                "routing_strategy": "simple-shuffle",
-            },
-            router["routing_groups"],
+        self.assertEqual(
+            router["model_group_alias"]["o3-mini"]["model"],
+            "deepseek",
         )
-        for alias in ("high-performance", "deepseek-flash"):
-            self.assertEqual(router["model_group_alias"][alias], "deepseek")
-        self.assertFalse(any("deepseek" in fallback for fallback in router["fallbacks"]))
+        self.assertIn({"deepseek": ["architect", "coder"]}, router["fallbacks"])
 
-    def test_qwen_agentic_pool_balances_only_strata_hosts(self):
+    def test_long_context_pool_uses_only_strata_hosts(self):
         config = self.values["proxy_config"]
-        name = "Qwen3.8-Flash-Next-256K"
+        name = "long-context"
         pool = [entry for entry in config["model_list"] if entry["model_name"] == name]
-        self.assertEqual(len(pool), 1)
+        self.assertEqual(len(pool), 2)
         self.assertEqual(
             {entry["litellm_params"]["api_base"] for entry in pool},
-            {"https://mlops-node-4.tailb11f97.ts.net/v1"},
+            {
+                f"https://mlops-node-{node}.tailb11f97.ts.net/v1"
+                for node in (4, 6)
+            },
         )
         for entry in pool:
             params = entry["litellm_params"]
-            self.assertEqual(params["order"], 1)
-            self.assertEqual(params["max_parallel_requests"], 3)
+            expected_order = 1 if "mlops-node-4." in params["api_base"] else 2
+            self.assertEqual(params["order"], expected_order)
+            self.assertEqual(params["max_parallel_requests"], 2)
             self.assertEqual(params["extra_body"]["chat_template_kwargs"]["reasoning_effort"],
-                             "medium")
+                             "low")
             self.assertTrue(entry["model_info"]["supports_function_calling"])
-        self.assertIn({
-            "group_name": "qwen38-flash-next-balanced",
-            "models": [name],
-            "routing_strategy": "simple-shuffle",
-        }, config["router_settings"]["routing_groups"])
-        self.assertFalse(any(name in fallback
-                             for fallback in config["router_settings"]["fallbacks"]))
+        self.assertIn(
+            {name: ["coder"]},
+            config["router_settings"]["fallbacks"],
+        )
 
     def test_auto_router_tiers_and_all_references_exist(self):
         config = self.values["proxy_config"]
@@ -237,7 +240,7 @@ class LiteLLMTests(unittest.TestCase):
             if params["model"] != "auto_router/complexity_router":
                 continue
             tiers = params["complexity_router_config"]["tiers"]
-            self.assertEqual(tiers["COMPLEX"], "deepseek")
+            self.assertEqual(tiers["COMPLEX"], "architect")
             self.assertEqual(tiers["REASONING"], "deepseek")
             self.assertTrue(set(tiers.values()) <= names)
             self.assertIn(params["complexity_router_default_model"], names)
