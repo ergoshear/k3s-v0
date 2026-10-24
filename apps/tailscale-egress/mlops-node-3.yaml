@@ -13,3 +13,12 @@ spec:
     - name: https
       port: 443
       protocol: TCP
+    - name: fish-speech
+      port: 8001
+      protocol: TCP
+    - name: zonos
+      port: 8002
+      protocol: TCP
+    - name: whisper
+      port: 8003
+      protocol: TCP

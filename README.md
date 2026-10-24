@@ -193,8 +193,9 @@ ProxyGroup and model endpoint Services. Before syncing these applications:
    `tag:k8s`.
 2. Create an OAuth client with write access to `General/Services`,
    `Devices/Core`, and `Keys/Auth Keys`, scoped to `tag:k8s-operator`.
-3. Allow `tag:k8s` to reach `mlops-node-4`, `mlops-node-6`, `mlops-node-7`,
-   and `mlops-node-9` on TCP port 8080 in the tailnet access policy.
+3. Allow `tag:k8s` to reach `mlops-node-3` on TCP ports 8001, 8002, and 8003,
+   and `mlops-node-4`, `mlops-node-6`, `mlops-node-7`, and `mlops-node-9` on
+   TCP port 8080 in the tailnet access policy.
 4. Run `uv run python scripts/create_tailscale_operator_secret.py` to securely
    prompt for the OAuth client ID and secret and store them in the
    `tailscale/operator-oauth` Kubernetes Secret. The script creates the
@@ -354,16 +355,17 @@ StudioFlow Fish Speech and Zonos use `audio_speech` health checks; Whisper uses
 `audio_transcription` to match its `/v1/audio/transcriptions` endpoint.
 
 For the HTTPS hosts (nodes 3, 4, 6, 7, and 9),
-[Tailscale egress](apps/tailscale-egress/) exposes port 443 in addition to
-the existing 8080 ports for nodes 4, 6, 7, and 9. A pinned operator `DNSConfig`
-nameserver uses reserved Service IP `10.43.0.54`. The k3s `coredns-custom`
-ConfigMap forwards only `tailb11f97.ts.net` queries to it. The nameserver maps
-tailnet FQDNs to HA egress Services, preserving the HTTPS hostname for SNI and
-certificate verification. Ensure tailnet grants allow `tag:k8s` access to
-nodes 3, 4, 6, 7, and 9 on TCP 443 as well as any retained port-8080 access. If the
-cluster Service CIDR changes, update both the DNSConfig IP and CoreDNS forward
-target together. After first installation, verify DNS from the LiteLLM pod;
-restart the CoreDNS Deployment if the new custom server block has not loaded.
+[Tailscale egress](apps/tailscale-egress/) exposes port 443, plus the
+StudioFlow model ports 8001–8003 on node 3 and the existing 8080 ports on nodes
+4, 6, 7, and 9. A pinned operator `DNSConfig` nameserver uses reserved Service
+IP `10.43.0.54`. The k3s `coredns-custom` ConfigMap forwards only
+`tailb11f97.ts.net` queries to it. The nameserver maps tailnet FQDNs to HA egress
+Services, preserving the HTTPS hostname for SNI and certificate verification.
+Ensure tailnet grants allow `tag:k8s` access to nodes 3, 4, 6, 7, and 9 on TCP
+443, node 3 on 8001–8003, and nodes 4, 6, 7, and 9 on 8080. If the cluster
+Service CIDR changes, update both the DNSConfig IP and CoreDNS forward target
+together. After first installation, verify DNS from the LiteLLM pod; restart
+the CoreDNS Deployment if the new custom server block has not loaded.
 
 The workspace image is pinned to upstream commit `c631425` and the agent to
 `v0.22.2`. The Deployment uses `Recreate` to avoid attaching local-path claims

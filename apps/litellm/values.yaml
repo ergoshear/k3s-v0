@@ -58,6 +58,7 @@ proxy_config:
     #   model_info:
     #     mode: audio_speech
     #     health_check_voice: af_alloy
+    # StudioFlow's separate Tailscale Serve ports are forwarded by node-3 egress.
     - model_name: tts-christopher-fish
       litellm_params:
         model: openai/fish-speech-1.5

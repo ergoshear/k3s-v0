@@ -57,7 +57,11 @@ class TailscaleOperatorTests(unittest.TestCase):
                     "tailscale.com/proxy-group": "egress-proxies",
                 },
             )
-            expected_ports = {443} if node == "mlops-node-3" else {443, 8080}
+            expected_ports = (
+                {443, 8001, 8002, 8003}
+                if node == "mlops-node-3"
+                else {443, 8080}
+            )
             self.assertEqual(
                 {port["port"] for port in service["spec"]["ports"]}, expected_ports
             )
