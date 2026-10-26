@@ -10,6 +10,13 @@ resources:
   - certificate.yaml
   - ingress.yaml
   - network-policy.yaml
+  - client-policy.yaml
+
+configMapGenerator:
+  - name: hf-mirror-nginx
+    namespace: hf-mirror
+    files:
+      - nginx.conf
 
 images:
   - name: ghcr.io/ergoshear/hf-mirror

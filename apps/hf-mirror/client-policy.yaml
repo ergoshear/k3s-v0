@@ -1,0 +1,64 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: inject-hf-mirror
+  annotations:
+    pod-policies.kyverno.io/autogen-controllers: none
+spec:
+  admission: true
+  background: false
+  emitWarning: false
+  validationFailureAction: Audit
+  webhookConfiguration:
+    failurePolicy: Ignore
+  rules:
+    - name: configure-model-downloads
+      skipBackgroundRequests: true
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              operations:
+                - CREATE
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - argocd
+                - cert-manager
+                - ghcr-registry
+                - hf-mirror
+                - kube-system
+                - kube-public
+                - kube-node-lease
+                - kyverno
+                - monitoring
+                - tailscale
+                - trivy-system
+      mutate:
+        foreach:
+          - list: request.object.spec.containers
+            patchStrategicMerge:
+              spec:
+                containers:
+                  - name: "{{ element.name }}"
+                    env:
+                      - name: HF_ENDPOINT
+                        value: http://hf-mirror.hf-mirror.svc.cluster.local:8080
+                        valueFrom: null
+                      - name: HF_HUB_DISABLE_XET
+                        value: "1"
+                        valueFrom: null
+          - list: request.object.spec.initContainers || `[]`
+            patchStrategicMerge:
+              spec:
+                initContainers:
+                  - name: "{{ element.name }}"
+                    env:
+                      - name: HF_ENDPOINT
+                        value: http://hf-mirror.hf-mirror.svc.cluster.local:8080
+                        valueFrom: null
+                      - name: HF_HUB_DISABLE_XET
+                        value: "1"
+                        valueFrom: null

@@ -102,6 +102,53 @@ Back up the Sealed Secrets controller's private-key Secret as part of the
 cluster backup; losing that key prevents decrypting existing SealedSecrets.
 Revoke any previously exposed GHCR tokens.
 
+## Hugging Face mirror clients
+
+The `hf-mirror` application manages a Kyverno Pod CREATE policy that sets
+`HF_ENDPOINT=http://hf-mirror.hf-mirror.svc.cluster.local:8080` and
+`HF_HUB_DISABLE_XET=1` in every application container and init container.
+Explicit values and `valueFrom` references for these two variables are replaced;
+other environment variables and Secret references are preserved. Disabling Xet
+keeps standard Hub weight transfers on the HTTP mirror path.
+
+System/platform namespaces and `hf-mirror` itself are excluded; see the list in
+[`apps/hf-mirror/client-policy.yaml`](apps/hf-mirror/client-policy.yaml).
+New application namespaces are included automatically. Only Pods are mutated,
+not Deployment/Job templates, so Argo CD does not undo the injection.
+Existing pods retain their environment until recreated. Restart an application
+Deployment during an appropriate maintenance window:
+
+```sh
+kubectl --kubeconfig ~/.kube/k3s.yaml rollout restart deployment/NAME -n NAMESPACE
+kubectl --kubeconfig ~/.kube/k3s.yaml rollout status deployment/NAME -n NAMESPACE
+```
+
+Injection fails open if Kyverno is unavailable, preserving cluster recovery;
+recreate any pods admitted during that outage after recovery. Egress is
+intentionally unchanged: this configures compatible clients, not an enforcement
+boundary for hardcoded URLs, Git/LFS, Xet-enabled overrides, node processes or
+external hosts. For external hosts, export `HF_ENDPOINT=https://hf.ergoshear.dev`
+and `HF_HUB_DISABLE_XET=1` before launching Python or a model server.
+
+The mirror accepts in-cluster pod traffic on TCP 8080 in addition to the existing
+TLS ingress path. Its runtime Nginx configuration is a hash-suffixed ConfigMap;
+configuration changes trigger a rollout. The vendored
+[`nginx.conf`](apps/hf-mirror/nginx.conf) must match `hf-mirror/deploy/nginx.conf`
+in the image repository. It follows relative/absolute Hub redirects, preserves
+HEAD metadata, exposes `X-Cache-Status`, bypasses shared caching for authenticated
+requests/cookies, and caches full objects rather than partial responses.
+
+Verify two independent client caches, actual weight bytes, cache hits, ranged
+downloads and the upstream checksum with:
+
+```sh
+uv run scripts/check_hf_mirror.py
+```
+
+The test downloads a small public model from both the mirror and upstream.
+To test from an application pod, use the same script with its injected
+environment and a Python/uv-capable image.
+
 ## Frontend Website
 
 The frontend website uses the cluster-wide GHCR pull Secret described above.

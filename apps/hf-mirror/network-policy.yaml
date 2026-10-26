@@ -21,6 +21,11 @@ spec:
     - Ingress
   ingress:
     - from:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 8080
+    - from:
         # Flannel is the source for cross-node traffic from host-networked Traefik.
         - ipBlock:
             cidr: 100.126.105.69/32

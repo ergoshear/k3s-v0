@@ -65,6 +65,90 @@ class HfMirrorTests(unittest.TestCase):
         certificate = self.resources[("Certificate", "hf-mirror-tls")]
         self.assertEqual(certificate["spec"]["dnsNames"], ["hf.ergoshear.dev"])
 
+    def test_runtime_configuration_survives_gitops_and_read_only_root(self):
+        spec = self.resources[("Deployment", "hf-mirror")]["spec"]["template"]["spec"]
+        container = spec["containers"][0]
+        self.assertEqual(container["command"], ["nginx"])
+        self.assertEqual(container["args"], ["-g", "daemon off;"])
+        self.assertTrue(container["securityContext"]["readOnlyRootFilesystem"])
+        volumes = {volume["name"]: volume for volume in spec["volumes"]}
+        mounts = {mount["name"]: mount for mount in container["volumeMounts"]}
+        self.assertEqual(volumes["tmp"]["emptyDir"], {})
+        self.assertEqual(mounts["tmp"]["mountPath"], "/tmp")
+        config = self.resources[("ConfigMap", volumes["nginx-config"]["configMap"]["name"])]
+        self.assertEqual(mounts["nginx-config"]["mountPath"], "/etc/nginx/nginx.conf")
+        self.assertIn("pid /tmp/nginx.pid;", config["data"]["nginx.conf"])
+        init = spec["initContainers"][0]
+        self.assertEqual(init["name"], "prepare-cache")
+        self.assertIn("chown -R 101:101 /cache", init["command"][-1])
+        self.assertEqual(init["volumeMounts"][0]["name"], "cache")
+
+    def test_clients_can_reach_mirror_without_changing_egress(self):
+        ingress = self.resources[("NetworkPolicy", "mirror-ingress")]["spec"]
+        self.assertIn(
+            {
+                "from": [{"namespaceSelector": {}}],
+                "ports": [{"protocol": "TCP", "port": 8080}],
+            },
+            ingress["ingress"],
+        )
+        for (kind, _), resource in self.resources.items():
+            if kind == "NetworkPolicy":
+                self.assertEqual(resource["spec"]["policyTypes"], ["Ingress"])
+                self.assertNotIn("egress", resource["spec"])
+
+    def test_client_policy_only_mutates_new_application_pods(self):
+        policy = self.resources[("ClusterPolicy", "inject-hf-mirror")]
+        self.assertEqual(
+            policy["metadata"]["annotations"]["pod-policies.kyverno.io/autogen-controllers"],
+            "none",
+        )
+        self.assertFalse(policy["spec"]["background"])
+        self.assertEqual(policy["spec"]["webhookConfiguration"]["failurePolicy"], "Ignore")
+        rule = policy["spec"]["rules"][0]
+        self.assertEqual(
+            rule["match"]["any"][0]["resources"],
+            {"kinds": ["Pod"], "operations": ["CREATE"]},
+        )
+        excluded = rule["exclude"]["any"][0]["resources"]["namespaces"]
+        self.assertTrue(
+            {"hf-mirror", "kube-system", "argocd", "kyverno", "monitoring",
+             "tailscale", "cert-manager", "trivy-system"}.issubset(excluded)
+        )
+        self.assertTrue({"default", "hermes-workspace", "litellm"}.isdisjoint(excluded))
+        mutations = rule["mutate"]["foreach"]
+        self.assertEqual(len(mutations), 2)
+        for mutation, field in zip(mutations, ("containers", "initContainers")):
+            self.assertIn(f"request.object.spec.{field}", mutation["list"])
+            entry = mutation["patchStrategicMerge"]["spec"][field][0]
+            self.assertEqual(entry["name"], "{{ element.name }}")
+            env = {variable["name"]: variable for variable in entry["env"]}
+            self.assertEqual(
+                env["HF_ENDPOINT"]["value"],
+                "http://hf-mirror.hf-mirror.svc.cluster.local:8080",
+            )
+            self.assertEqual(env["HF_HUB_DISABLE_XET"]["value"], "1")
+            for variable in env.values():
+                self.assertIn("valueFrom", variable)
+                self.assertIsNone(variable["valueFrom"])
+
+    def test_cache_preserves_metadata_and_does_not_share_authenticated_responses(self):
+        config = (ROOT / "apps/hf-mirror/nginx.conf").read_text()
+        self.assertIn("set $download_url $redirect_target;", config)
+        self.assertIn("~^/ https://huggingface.co$upstream_http_location;", config)
+        self.assertIn("proxy_set_header Host $proxy_host;", config)
+        self.assertIn("add_header X-Repo-Commit $repo_commit always;", config)
+        self.assertIn(
+            "proxy_no_cache $authenticated_request $has_cookie $metadata_request;",
+            config,
+        )
+        self.assertIn(
+            "proxy_cache_bypass $authenticated_request $has_cookie $metadata_request;",
+            config,
+        )
+        self.assertNotIn("proxy_cache_valid 200 206", config)
+        self.assertIn('proxy_set_header Range "";', config)
+
 
 if __name__ == "__main__":
     unittest.main()
