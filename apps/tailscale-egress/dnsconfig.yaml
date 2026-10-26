@@ -6,6 +6,6 @@ spec:
   nameserver:
     image:
       repo: tailscale/k8s-nameserver
-      tag: v1.104.1
+      tag: v1.104.2
     service:
       clusterIP: 10.43.0.54

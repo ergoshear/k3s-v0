@@ -30,7 +30,7 @@ class TailscaleOperatorTests(unittest.TestCase):
             app["sources"][0]["repoURL"], "https://pkgs.tailscale.com/helmcharts"
         )
         self.assertEqual(app["sources"][0]["chart"], "tailscale-operator")
-        self.assertEqual(app["sources"][0]["targetRevision"], "1.104.1")
+        self.assertEqual(app["sources"][0]["targetRevision"], "1.104.2")
         self.assertEqual(app["destination"]["namespace"], "tailscale")
         self.assertIn("CreateNamespace=true", app["syncPolicy"]["syncOptions"])
         self.assertIn("ServerSideApply=true", app["syncPolicy"]["syncOptions"])
@@ -79,7 +79,7 @@ class TailscaleOperatorTests(unittest.TestCase):
     def test_magicdns_forwards_tailnet_queries_to_pinned_nameserver(self):
         dns = self.egress[("DNSConfig", "ts-dns")]["spec"]["nameserver"]
         self.assertEqual(
-            dns["image"], {"repo": "tailscale/k8s-nameserver", "tag": "v1.104.1"}
+            dns["image"], {"repo": "tailscale/k8s-nameserver", "tag": "v1.104.2"}
         )
         config = self.egress[("ConfigMap", "coredns-custom")]
         self.assertEqual(config["metadata"]["namespace"], "kube-system")
