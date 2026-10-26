@@ -146,7 +146,8 @@ class HfMirrorTests(unittest.TestCase):
         self.assertIn("set $download_url $redirect_target;", config)
         self.assertIn("~^/ https://huggingface.co$upstream_http_location;", config)
         self.assertIn("proxy_set_header Host $proxy_host;", config)
-        self.assertIn("add_header X-Repo-Commit $repo_commit always;", config)
+        self.assertIn("proxy_hide_header X-Repo-Commit;", config)
+        self.assertIn("add_header X-Repo-Commit $response_repo_commit always;", config)
         self.assertIn(
             "proxy_no_cache $authenticated_request $has_cookie $metadata_request;",
             config,

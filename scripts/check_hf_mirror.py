@@ -9,6 +9,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import tempfile
 from urllib.request import Request, urlopen
@@ -18,7 +19,7 @@ os.environ.setdefault("HF_ENDPOINT", "https://hf.ergoshear.dev")
 os.environ["HF_HUB_DISABLE_XET"] = "1"
 os.environ["HF_HUB_DISABLE_IMPLICIT_TOKEN"] = "1"
 
-from huggingface_hub import hf_hub_download
+from huggingface_hub import get_hf_file_metadata, hf_hub_download
 
 
 REPO = "hf-internal-testing/tiny-random-gpt2"
@@ -110,6 +111,11 @@ def main():
                 raise RuntimeError(f"{filename}: clean clients received different files")
 
             url = f"{endpoint}/{REPO}/resolve/main/{filename}"
+            metadata = get_hf_file_metadata(url, token=False)
+            if not re.fullmatch(r"[0-9a-f]{40}", metadata.commit_hash or ""):
+                raise RuntimeError(f"{filename}: invalid or duplicated revision metadata")
+            if metadata.size != len(results[0]):
+                raise RuntimeError(f"{filename}: metadata size differs from download")
             with urlopen(url, timeout=60) as response:
                 if response.headers.get("X-Cache-Status") != "HIT":
                     raise RuntimeError(f"{filename}: expected a server-side cache HIT")
