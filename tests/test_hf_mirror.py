@@ -80,7 +80,10 @@ class HfMirrorTests(unittest.TestCase):
         self.assertIn("pid /tmp/nginx.pid;", config["data"]["nginx.conf"])
         init = spec["initContainers"][0]
         self.assertEqual(init["name"], "prepare-cache")
-        self.assertIn("chown -R 101:101 /cache", init["command"][-1])
+        self.assertEqual(
+            init["command"][-1],
+            "mkdir -p /cache/hf && chown 101:101 /cache /cache/hf",
+        )
         self.assertEqual(init["volumeMounts"][0]["name"], "cache")
 
     def test_clients_can_reach_mirror_without_changing_egress(self):

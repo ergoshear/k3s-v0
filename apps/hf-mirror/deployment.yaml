@@ -33,7 +33,7 @@ spec:
           command:
             - sh
             - -c
-            - mkdir -p /cache/hf && chown -R 101:101 /cache
+            - mkdir -p /cache/hf && chown 101:101 /cache /cache/hf
           securityContext:
             runAsUser: 0
             runAsGroup: 0
