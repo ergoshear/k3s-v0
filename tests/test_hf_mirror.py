@@ -40,9 +40,9 @@ class HfMirrorTests(unittest.TestCase):
         )
         self.assertEqual(
             pod_spec["volumes"][0]["persistentVolumeClaim"]["claimName"],
-            "hf-mirror-cache",
+            "hf-mirror-cache-3ti",
         )
-        volume = self.resources[("PersistentVolume", "hf-mirror-cache")]
+        volume = self.resources[("PersistentVolume", "hf-mirror-cache-3ti")]
         self.assertEqual(volume["spec"]["hostPath"]["path"], "/srv/storage/hf-mirror-cache")
         self.assertEqual(
             volume["spec"]["nodeAffinity"]["required"]["nodeSelectorTerms"][0][
@@ -54,9 +54,21 @@ class HfMirrorTests(unittest.TestCase):
                 "values": ["mlops-node-5"],
             },
         )
-        pvc = self.resources[("PersistentVolumeClaim", "hf-mirror-cache")]
-        self.assertEqual(pvc["spec"]["volumeName"], "hf-mirror-cache")
+        pvc = self.resources[("PersistentVolumeClaim", "hf-mirror-cache-3ti")]
+        self.assertEqual(pvc["spec"]["volumeName"], "hf-mirror-cache-3ti")
         self.assertEqual(pvc["spec"]["storageClassName"], "hf-mirror-local")
+        self.assertEqual(pvc["spec"]["resources"]["requests"]["storage"], "3Ti")
+        self.assertEqual(volume["spec"]["capacity"]["storage"], "3Ti")
+        nginx_config_name = next(
+            item["configMap"]["name"]
+            for item in pod_spec["volumes"]
+            if item["name"] == "nginx-config"
+        )
+        self.assertEqual(
+            self.resources[("ConfigMap", nginx_config_name)]
+            ["data"]["nginx.conf"].split("max_size=", 1)[1].splitlines()[0],
+            "2800g",
+        )
 
     def test_ingress_uses_tls_for_hf_domain(self):
         ingress = self.resources[("Ingress", "hf-mirror")]

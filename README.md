@@ -104,6 +104,13 @@ Revoke any previously exposed GHCR tokens.
 
 ## Hugging Face mirror clients
 
+The mirror cache uses a static 3Ti hostPath-backed PV on `mlops-node-5`.
+The claim is named `hf-mirror-cache-3ti` because statically bound claims cannot
+be resized in place; it mounts the existing `/srv/storage/hf-mirror-cache`
+directory, so cached data is retained. Nginx's cache limit is 2800GB to retain
+space on the host filesystem; the PV capacity declaration is not an enforced
+hostPath quota.
+
 The `hf-mirror` application manages a Kyverno Pod CREATE policy that sets
 `HF_ENDPOINT=http://hf-mirror.hf-mirror.svc.cluster.local:8080` and
 `HF_HUB_DISABLE_XET=1` in every application container and init container.

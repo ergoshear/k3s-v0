@@ -96,7 +96,7 @@ spec:
       volumes:
         - name: cache
           persistentVolumeClaim:
-            claimName: hf-mirror-cache
+            claimName: hf-mirror-cache-3ti
         - name: tmp
           emptyDir: {}
         - name: nginx-config
