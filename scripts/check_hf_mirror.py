@@ -3,9 +3,13 @@
 # dependencies = ["huggingface-hub>=0.36,<2"]
 # ///
 
+import argparse
+import copy
 import hashlib
+import json
 import os
 from pathlib import Path
+import subprocess
 import tempfile
 from urllib.request import Request, urlopen
 
@@ -21,7 +25,75 @@ REPO = "hf-internal-testing/tiny-random-gpt2"
 FILES = ("config.json", "model.safetensors")
 
 
+def check_admission(kubeconfig):
+    kubectl = ["kubectl", "--kubeconfig", str(kubeconfig)]
+    expected = {
+        "HF_ENDPOINT": "http://hf-mirror.hf-mirror.svc.cluster.local:8080",
+        "HF_HUB_DISABLE_XET": "1",
+    }
+    base = {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "metadata": {"generateName": "hf-admission-check-", "namespace": "default"},
+        "spec": {
+            "restartPolicy": "Never",
+            "containers": [
+                {"name": "client", "image": "busybox:1.36"},
+                {"name": "sidecar", "image": "busybox:1.36"},
+            ],
+            "initContainers": [{"name": "download", "image": "busybox:1.36"}],
+        },
+    }
+
+    def admit(pod):
+        output = subprocess.check_output(
+            kubectl + ["create", "--dry-run=server", "-f", "-", "-o", "json"],
+            input=json.dumps(pod),
+            text=True,
+        )
+        return json.loads(output)["spec"]
+
+    for mode in ("missing", "explicit", "valueFrom", "no-init"):
+        pod = copy.deepcopy(base)
+        for container in pod["spec"]["containers"] + pod["spec"]["initContainers"]:
+            env = container.setdefault("env", [])
+            for name in expected:
+                if mode == "explicit":
+                    env.append({"name": name, "value": "old"})
+                elif mode == "valueFrom":
+                    env.append({
+                        "name": name,
+                        "valueFrom": {"configMapKeyRef": {"name": "unused", "key": "old"}},
+                    })
+            env.append({"name": "UNRELATED", "value": "preserved"})
+        if mode == "no-init":
+            del pod["spec"]["initContainers"]
+        spec = admit(pod)
+        for container in spec["containers"] + spec.get("initContainers", []):
+            env = {entry["name"]: entry for entry in container["env"]}
+            for name, value in expected.items():
+                if env.get(name) != {"name": name, "value": value}:
+                    raise RuntimeError(f"admission {mode}: incorrect {name}")
+            if env["UNRELATED"]["value"] != "preserved":
+                raise RuntimeError(f"admission {mode}: unrelated variable changed")
+        print(f"PASS admission {mode}: containers and init containers configured")
+    for namespace in ("hf-mirror", "kube-system", "kyverno"):
+        pod = copy.deepcopy(base)
+        pod["metadata"]["namespace"] = namespace
+        spec = admit(pod)
+        for container in spec["containers"] + spec.get("initContainers", []):
+            if expected.keys() & {entry["name"] for entry in container.get("env", [])}:
+                raise RuntimeError(f"admission: {namespace} was not excluded")
+        print(f"PASS admission exclusion: {namespace}")
+
+
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--check-admission", action="store_true")
+    parser.add_argument("--kubeconfig", type=Path, default=Path.home() / ".kube/k3s.yaml")
+    args = parser.parse_args()
+    if args.check_admission:
+        check_admission(args.kubeconfig)
     endpoint = os.environ["HF_ENDPOINT"].rstrip("/")
     with tempfile.TemporaryDirectory(prefix="hf-mirror-check-") as directory:
         for filename in FILES:

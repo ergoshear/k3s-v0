@@ -123,17 +123,23 @@ class HfMirrorTests(unittest.TestCase):
         self.assertEqual(len(mutations), 2)
         for mutation, field in zip(mutations, ("containers", "initContainers")):
             self.assertIn(f"request.object.spec.{field}", mutation["list"])
-            entry = mutation["patchStrategicMerge"]["spec"][field][0]
-            self.assertEqual(entry["name"], "{{ element.name }}")
-            env = {variable["name"]: variable for variable in entry["env"]}
+            patch = mutation["patchesJson6902"]
+            expression = "{{ element.env[?name != 'HF_ENDPOINT' && name != 'HF_HUB_DISABLE_XET'] || `[]` }}"
+            self.assertIn(expression, patch)
+            operations = yaml.safe_load(patch.replace(expression, "[]"))
+            self.assertEqual(operations[0]["op"], "add")
+            self.assertEqual(
+                operations[0]["path"], f"/spec/{field}/{{{{ elementIndex }}}}/env"
+            )
+            env = {operation["value"]["name"]: operation["value"]
+                   for operation in operations[1:]}
             self.assertEqual(
                 env["HF_ENDPOINT"]["value"],
                 "http://hf-mirror.hf-mirror.svc.cluster.local:8080",
             )
             self.assertEqual(env["HF_HUB_DISABLE_XET"]["value"], "1")
             for variable in env.values():
-                self.assertIn("valueFrom", variable)
-                self.assertIsNone(variable["valueFrom"])
+                self.assertNotIn("valueFrom", variable)
 
     def test_cache_preserves_metadata_and_does_not_share_authenticated_responses(self):
         config = (ROOT / "apps/hf-mirror/nginx.conf").read_text()

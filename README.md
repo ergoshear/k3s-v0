@@ -143,6 +143,9 @@ downloads and the upstream checksum with:
 
 ```sh
 uv run scripts/check_hf_mirror.py
+# Also exercise live admission with missing env, overrides, ConfigMap references,
+# multiple containers, init containers, and system/mirror namespace exclusions:
+uv run scripts/check_hf_mirror.py --check-admission
 ```
 
 The test downloads a small public model from both the mirror and upstream.
