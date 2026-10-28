@@ -5,7 +5,6 @@ resources:
   - argocd-image-updater.yaml
   - frontend-website.yaml
   - ghcr-registry.yaml
-  - hf-mirror.yaml
   - hermes-workspace.yaml
   - kube-prometheus-stack.yaml
   - kyverno.yaml
